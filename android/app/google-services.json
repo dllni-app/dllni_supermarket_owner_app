@@ -1,13 +1,32 @@
 {
   "project_info": {
-    "project_number": "667936515994",
-    "project_id": "dllni-supermarket-owner",
-    "storage_bucket": "dllni-supermarket-owner.firebasestorage.app"
+    "project_number": "212739916006",
+    "project_id": "dllni-96b5a",
+    "storage_bucket": "dllni-96b5a.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:667936515994:android:29938a580d799296c5bc23",
+        "mobilesdk_app_id": "1:212739916006:android:b99535e7fea56cb721fb27",
+        "android_client_info": {
+          "package_name": "com.dllni.clOwner"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAqKgNz1HcrWEXDt5YCk9F-4dK2wLTi_VU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:212739916006:android:22f453918797fcd621fb27",
         "android_client_info": {
           "package_name": "com.dllni.smOwner"
         }
@@ -15,7 +34,26 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyB_sh6L21MPdKxwxZpt7sjBztjlsLFnDLg"
+          "current_key": "AIzaSyAqKgNz1HcrWEXDt5YCk9F-4dK2wLTi_VU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:212739916006:android:6e5240151937eb6321fb27",
+        "android_client_info": {
+          "package_name": "com.dllni.userapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAqKgNz1HcrWEXDt5YCk9F-4dK2wLTi_VU"
         }
       ],
       "services": {
