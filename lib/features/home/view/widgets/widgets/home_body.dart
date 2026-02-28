@@ -18,7 +18,6 @@ class HomeBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final storeId = 1;
     final dateLabel = todayLabel();
     return BlocConsumer<HomeBloc, HomeState>(
       listener: (context, state) {
