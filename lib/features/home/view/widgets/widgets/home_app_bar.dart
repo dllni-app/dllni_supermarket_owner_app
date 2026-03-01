@@ -6,7 +6,13 @@ import 'package:flutter/material.dart';
 import '../../../../../core/themes/app_colors.dart';
 
 class HomeAppBar extends StatelessWidget {
-  const HomeAppBar({super.key});
+  final String shopName;
+  final String shopAddress;
+  const HomeAppBar({
+    super.key,
+    required this.shopName,
+    required this.shopAddress,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -34,33 +40,39 @@ class HomeAppBar extends StatelessWidget {
           ],
         ),
         child: Row(
-          mainAxisSize: MainAxisSize.min,
           children: [
             ProfileImage(),
-            SizedBox(width: 16),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  "مطعم البيت الحلبي",
-                  style: textTheme.titleLarge!.copyWith(
-                    color: AppColors.accent,
-                    fontSize: 18,
+            SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    shopName,
+                    textAlign: TextAlign.center,
+                    style: textTheme.titleLarge!.copyWith(
+                      color: AppColors.accent,
+                      fontSize: 18,
+                    ),
                   ),
-                ),
-                Text(
-                  "الفرع الرئيسي - العزيزية",
-                  style: textTheme.labelMedium!.copyWith(
-                    color: Color(0xFF6B7280),
-                    fontSize: 12,
+                  Text(
+                    shopAddress,
+                    textAlign: TextAlign.center,
+                    style: textTheme.labelMedium!.copyWith(
+                      color: Color(0xFF6B7280),
+                      fontSize: 12,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-            //  TextStyle(fontSize: 24, color: AppColors.primary, fontWeight: FontWeight.w700)),
-            Spacer(),
-            CircleIconButton(icon: Icons.notifications, onTap: () {}),
+            SizedBox(width: 12),
+            CircleIconButton(
+              icon: Icons.notifications_none_outlined,
+              onTap: () {},
+              showBadge: true,
+            ),
           ],
         ),
       ),
@@ -69,10 +81,16 @@ class HomeAppBar extends StatelessWidget {
 }
 
 class CircleIconButton extends StatelessWidget {
-  const CircleIconButton({super.key, required this.icon, this.onTap});
+  const CircleIconButton({
+    super.key,
+    required this.icon,
+    this.onTap,
+    this.showBadge = false,
+  });
 
   final IconData icon;
   final VoidCallback? onTap;
+  final bool showBadge;
 
   @override
   Widget build(BuildContext context) {
@@ -93,7 +111,26 @@ class CircleIconButton extends StatelessWidget {
             ),
           ],
         ),
-        child: Icon(icon, color: const Color(0xFF6B7280), size: 20),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Icon(icon, color: const Color(0xFF6B7280), size: 20),
+            if (showBadge)
+              Positioned(
+                top: 10,
+                right: 12,
+                child: Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEF4444),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: AppColors.white, width: 1.5),
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

@@ -1,0 +1,13 @@
+{
+  "user": {
+    "id": 3,
+    "name": "راما أحمد",
+    "email": "cleaning.worker@example.com",
+    "phone": "+962790000001",
+    "moduleType": "cleaning_worker",
+    "emailVerifiedAt": "2026-02-27T17:43:10.000000Z",
+    "createdAt": "2026-02-27 17:43:10",
+    "updatedAt": "2026-02-27 17:43:12"
+  },
+  "token": "5|3BTX4Dl0QXQ6LT2GhR1ZVfnP7nEq336YYm8lv5ppb0345063"
+}

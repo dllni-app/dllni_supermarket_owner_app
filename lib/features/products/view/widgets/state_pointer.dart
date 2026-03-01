@@ -3,9 +3,15 @@ import 'package:flutter/material.dart';
 import '../../../../core/themes/app_colors.dart';
 
 class StatePointer extends StatelessWidget {
-  const StatePointer({super.key, required this.title, required this.value});
+  const StatePointer({
+    super.key,
+    required this.title,
+    required this.value,
+    this.isCritical = false,
+  });
   final String title;
   final num value;
+  final bool isCritical;
 
   @override
   Widget build(BuildContext context) {
@@ -43,13 +49,15 @@ class StatePointer extends StatelessWidget {
               Text(
                 value.toString(),
                 style: TextStyle(
-                  color: value < 10 ? Color(0xFFFF4C51) : AppColors.primary,
+                  color: isCritical && value > 0
+                      ? Color(0xFFFF4C51)
+                      : AppColors.primary,
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
                   height: 1.333,
                 ),
               ),
-              if (value < 10)
+              if (isCritical && value > 0)
                 Container(
                   padding: EdgeInsets.all(6),
                   decoration: BoxDecoration(

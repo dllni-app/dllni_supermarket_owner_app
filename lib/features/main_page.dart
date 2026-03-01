@@ -14,16 +14,30 @@ class MainPage extends StatefulWidget {
   State<MainPage> createState() => _MainPageState();
 }
 
-class _MainPageState extends State<MainPage> {
+class _MainPageState extends State<MainPage>
+    with SingleTickerProviderStateMixin {
   int selectedTab = 0;
+  late TabController tabController;
+  @override
+  void initState() {
+    super.initState();
+    tabController = TabController(length: 5, vsync: this);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: selectedTab == 0
-          ? HomeScreen()
-          : selectedTab == 2
-          ? ProductsScreen()
-          : Center(child: Text("قيد التطوير")),
+      body: TabBarView(
+        physics: NeverScrollableScrollPhysics(),
+        controller: tabController,
+        children: [
+          HomeScreen(),
+          Center(child: Text("قيد التطوير")),
+          ProductsScreen(),
+          Center(child: Text("قيد التطوير")),
+          Center(child: Text("قيد التطوير")),
+        ],
+      ),
       bottomNavigationBar: AppNavBar(
         items: [
           AppNavBarItem(title: "الرئيسية", icon: Icons.home_rounded),
@@ -37,6 +51,7 @@ class _MainPageState extends State<MainPage> {
           if (index != selectedTab) {
             selectedTab = index;
             setState(() {});
+            tabController.animateTo(selectedTab);
           }
         },
       ),

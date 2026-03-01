@@ -76,6 +76,9 @@ class ActivityBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final heightFactor = maxValue == 0 ? 0.0 : value / maxValue;
+    final isPeak = value == maxValue && value > 0;
+    final barColor =
+        isPeak ? const Color(0xFF1E2A78) : const Color(0xFFB7B6FF);
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 4),
       child: Column(
@@ -98,7 +101,7 @@ class ActivityBar extends StatelessWidget {
                 child: Container(
                   width: 18,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF4F46E5),
+                    color: barColor,
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),

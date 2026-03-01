@@ -1,8 +1,11 @@
-import 'package:common_package/helpers/dio_network.dart';
+import 'package:common_package/common_package.dart';
 import 'package:injectable/injectable.dart';
-import 'package:common_package/helpers/api_handler.dart';
-import '../models/get_all_products_model.dart';
-import '../../domain/usecases/get_all_products_use_case.dart';
+import '../models/get_products_model.dart';
+import '../../domain/usecases/get_products_use_case.dart';
+import '../models/get_categories_model.dart';
+import '../../domain/usecases/get_categories_use_case.dart';
+import '../models/get_low_stock_model.dart';
+import '../../domain/usecases/get_low_stock_use_case.dart';
 
 @lazySingleton
 class ProductsRemoteDataSource with HandlingApiManager {
@@ -10,9 +13,36 @@ class ProductsRemoteDataSource with HandlingApiManager {
 
   ProductsRemoteDataSource({required this.dioNetwork});
 
-  Future<GetAllProductsModel> getAllProducts(GetAllProductsParams params) {
+  Future<GetProductsModel> getProducts(GetProductsParams params) {
     return wrapHandlingApi(
-      tryCall: () => dioNetwork.getData(endPoint: '/store-owner/products', params: params.getParams(), data: params.getBody().isEmpty ? null : params.getBody()),
-      jsonConvert: getAllProductsModelFromJson,
+      tryCall: () => dioNetwork.getData(
+        endPoint: '/store-owner/products',
+        params: params.getParams(),
+        data: params.getBody().isEmpty ? null : params.getBody(),
+      ),
+      jsonConvert: getProductsModelFromJson,
     );
-  }}
+  }
+
+  Future<GetCategoriesModel> getCategories(GetCategoriesParams params) {
+    return wrapHandlingApi(
+      tryCall: () => dioNetwork.getData(
+        endPoint: '/sm-categories',
+        params: params.getParams(),
+        data: params.getBody().isEmpty ? null : params.getBody(),
+      ),
+      jsonConvert: getCategoriesModelFromJson,
+    );
+  }
+
+  Future<GetLowStockModel> getLowStock(GetLowStockParams params) {
+    return wrapHandlingApi(
+      tryCall: () => dioNetwork.getData(
+        endPoint: '/store-owner/products/low-stock',
+        params: params.getParams(),
+        data: params.getBody().isEmpty ? null : params.getBody(),
+      ),
+      jsonConvert: getLowStockModelFromJson,
+    );
+  }
+}

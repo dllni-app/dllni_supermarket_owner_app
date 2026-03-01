@@ -5,13 +5,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../home_screen.dart';
 import '../../home_screen_helpers.dart';
 import '../../manager/bloc/home_bloc.dart';
+import '../models/home_models.dart';
+import '../sheets/reject_order_sheet.dart';
 import 'low_stock_alert_card.dart';
-import 'home_app_bar.dart';
 import 'new_orders_section.dart';
+import 'orders_activity_section.dart';
 import 'overview_section.dart';
 import 'preparing_orders_section.dart';
 import 'quick_actions_section.dart';
-import '../sheets/reject_order_sheet.dart';
 
 class HomeBody extends StatelessWidget {
   const HomeBody({super.key});
@@ -19,6 +20,14 @@ class HomeBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dateLabel = todayLabel();
+    final activity = const [
+      ActivityPoint(hour: "10", value: 23),
+      ActivityPoint(hour: "11", value: 11),
+      ActivityPoint(hour: "12", value: 43),
+      ActivityPoint(hour: "13", value: 37),
+      ActivityPoint(hour: "14", value: 16),
+      ActivityPoint(hour: "15", value: 26),
+    ];
     return BlocConsumer<HomeBloc, HomeState>(
       listener: (context, state) {
         if (state.actionStatus == BlocStatus.success &&
@@ -41,13 +50,14 @@ class HomeBody extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(height: 16),
-              if (vm.lowStockProduct != null)
-                LowStockAlertCard(
-                  productName: vm.lowStockProduct!.productName ?? "",
-                  remaining: vm.lowStockProduct!.currentStock ?? 0,
-                )
-              else
-                const NoLowStockCard(),
+              // vm.lowStockProduct != null
+              //     ? LowStockAlertCard(
+              //         refreshAlert: () {},
+              //         productName: vm.lowStockProduct!.productName ?? "",
+              //         remaining: vm.lowStockProduct!.currentStock ?? 0,
+              //       )
+              //     :
+              const NoLowStockCard(),
               SizedBox(height: 20),
               OverviewSection(
                 stats: vm.stats,
@@ -84,7 +94,7 @@ class HomeBody extends StatelessWidget {
               SizedBox(height: 20),
               PreparingOrdersSection(orders: vm.preparingOrders),
               SizedBox(height: 20),
-              // const OrdersActivitySection(activity: _activity),
+              OrdersActivitySection(activity: activity),
               SizedBox(height: 24),
             ],
           ),

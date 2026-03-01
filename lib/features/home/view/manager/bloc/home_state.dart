@@ -8,10 +8,10 @@ class HomeState {
   final BlocStatus actionStatus;
 
   final int? storeId;
-  final DashboardModel? dashboard;
-  final LowStockModel? lowStock;
-  final OrdersListModel? pendingOrders;
-  final OrdersListModel? preparingOrders;
+  // final DashboardModel? dashboard;
+  // final LowStockModel? lowStock;
+  // final OrdersListModel? pendingOrders;
+  // final OrdersListModel? preparingOrders;
   final String errorMessage;
   final String actionMessage;
 
@@ -22,10 +22,10 @@ class HomeState {
     this.preparingOrdersStatus = BlocStatus.init,
     this.actionStatus = BlocStatus.init,
     this.storeId,
-    this.dashboard,
-    this.lowStock,
-    this.pendingOrders,
-    this.preparingOrders,
+    // this.dashboard,
+    // this.lowStock,
+    // this.pendingOrders,
+    // this.preparingOrders,
     this.errorMessage = '',
     this.actionMessage = '',
   });
@@ -37,10 +37,10 @@ class HomeState {
     BlocStatus? preparingOrdersStatus,
     BlocStatus? actionStatus,
     int? storeId,
-    DashboardModel? dashboard,
-    LowStockModel? lowStock,
-    OrdersListModel? pendingOrders,
-    OrdersListModel? preparingOrders,
+    // DashboardModel? dashboard,
+    // LowStockModel? lowStock,
+    // OrdersListModel? pendingOrders,
+    // OrdersListModel? preparingOrders,
     String? errorMessage,
     String? actionMessage,
   }) {
@@ -51,10 +51,10 @@ class HomeState {
       preparingOrdersStatus: preparingOrdersStatus ?? this.preparingOrdersStatus,
       actionStatus: actionStatus ?? this.actionStatus,
       storeId: storeId ?? this.storeId,
-      dashboard: dashboard ?? this.dashboard,
-      lowStock: lowStock ?? this.lowStock,
-      pendingOrders: pendingOrders ?? this.pendingOrders,
-      preparingOrders: preparingOrders ?? this.preparingOrders,
+      // dashboard: dashboard ?? this.dashboard,
+      // lowStock: lowStock ?? this.lowStock,
+      // pendingOrders: pendingOrders ?? this.pendingOrders,
+      // preparingOrders: preparingOrders ?? this.preparingOrders,
       errorMessage: errorMessage ?? this.errorMessage,
       actionMessage: actionMessage ?? this.actionMessage,
     );

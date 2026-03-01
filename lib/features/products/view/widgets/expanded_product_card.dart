@@ -7,7 +7,6 @@ import '../../../../core/utils/app_svgs.dart';
 class ExpandedProductCard extends StatefulWidget {
   const ExpandedProductCard({
     super.key,
-    required this.onTap,
     required this.backgroundColor,
     required this.foregroundColor,
     required this.title,
@@ -15,7 +14,6 @@ class ExpandedProductCard extends StatefulWidget {
     required this.icon,
     required this.expandedWidget,
   });
-  final void Function() onTap;
   final Color backgroundColor;
   final Color foregroundColor;
   final String title, subtitle;
@@ -30,30 +28,29 @@ class _ExpandedProductCardState extends State<ExpandedProductCard> {
   bool isOpen = false;
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () {
-        isOpen = !isOpen;
-        setState(() {});
-      },
-      borderRadius: BorderRadius.all(Radius.circular(16)),
-      child: Container(
-        padding: EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.all(Radius.circular(16)),
-          border: Border.all(color: Color(0xFFF3F4F6)),
-          boxShadow: [
-            BoxShadow(
-              offset: Offset(0, 1),
-              blurRadius: 2,
-              color: Color(0x0D000000),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
+    return Container(
+      padding: EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.all(Radius.circular(16)),
+        border: Border.all(color: Color(0xFFF3F4F6)),
+        boxShadow: [
+          BoxShadow(
+            offset: Offset(0, 1),
+            blurRadius: 2,
+            color: Color(0x0D000000),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          InkWell(
+            onTap: () {
+              isOpen = !isOpen;
+              setState(() {});
+            },
+            child: Row(
               spacing: 16,
               children: [
                 Container(
@@ -103,39 +100,36 @@ class _ExpandedProductCardState extends State<ExpandedProductCard> {
                 ),
                 RotatedBox(
                   quarterTurns: isOpen ? 30 : 0,
-                  child: AppImage.asset(AppSvgs.arrowDownIos, size: 16),
+                  child: AppImage.asset(AppSvgs.arrowDownIos, size: 14),
                 ),
               ],
             ),
-            if (isOpen)
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SizedBox(height: 16),
-                  Container(
-                    padding: EdgeInsets.symmetric(vertical: 4),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [Color(0xFF4ADE80), Color(0xFF60A5FA)],
-                      ),
-                      borderRadius: BorderRadius.all(Radius.circular(32)),
+          ),
+          if (isOpen)
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(height: 16),
+                Container(
+                  padding: EdgeInsets.symmetric(vertical: 4),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Color(0xFF4ADE80), Color(0xFF60A5FA)],
                     ),
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 24,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.white,
-                        borderRadius: BorderRadius.all(Radius.circular(32)),
-                      ),
-                      child: widget.expandedWidget,
-                    ),
+                    borderRadius: BorderRadius.all(Radius.circular(38)),
                   ),
-                ],
-              ),
-          ],
-        ),
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 24),
+                    decoration: BoxDecoration(
+                      color: AppColors.white,
+                      borderRadius: BorderRadius.all(Radius.circular(38)),
+                    ),
+                    child: widget.expandedWidget,
+                  ),
+                ),
+              ],
+            ),
+        ],
       ),
     );
   }

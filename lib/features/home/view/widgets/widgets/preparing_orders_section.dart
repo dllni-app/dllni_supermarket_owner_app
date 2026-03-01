@@ -86,36 +86,45 @@ class PreparingOrderRow extends StatelessWidget {
     final color = data.minutesSince <= 15
         ? const Color(0xFFFF7A00)
         : const Color(0xFF6B7280);
-    return Row(
-      children: [
-        Container(
-          width: 32,
-          height: 32,
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.12),
-            borderRadius: BorderRadius.circular(10),
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF9FAFB),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE5E7EB)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 30,
+            height: 30,
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(Icons.timer, color: color, size: 16),
           ),
-          child: Icon(Icons.timer, color: color, size: 16),
-        ),
-        SizedBox(width: 10),
-        Text(
-          data.id,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF111827),
+          SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              data.id,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF111827),
+              ),
+            ),
           ),
-        ),
-        const Spacer(),
-        Text(
-          "منذ ${data.minutesSince} دقيقة",
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: color,
+          Text(
+            "منذ ${data.minutesSince} دقيقة",
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

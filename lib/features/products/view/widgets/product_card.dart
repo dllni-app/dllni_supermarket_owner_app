@@ -8,11 +8,11 @@ import '../../../../core/themes/app_colors.dart';
 import '../../../../core/utils/app_images.dart';
 import '../../../../core/utils/app_svgs.dart';
 import '../../../../core/widgets/app_switch.dart';
-import '../../data/models/get_all_products_model.dart';
+import '../../data/models/get_products_model.dart';
 
 class ProductCard extends StatefulWidget {
   const ProductCard({super.key, required this.product});
-  final GetAllProductsModelDataItem product;
+  final GetProductsModelDataItem product;
 
   @override
   State<ProductCard> createState() => _ProductCardState();

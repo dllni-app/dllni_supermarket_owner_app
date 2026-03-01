@@ -70,47 +70,47 @@ dynamic _asDynamic(dynamic value) {
   return value.toString();
 }
 
-GetAllProductsModel getAllProductsModelFromJson(str) => GetAllProductsModel.fromJson(str);
+GetCategoriesModel getCategoriesModelFromJson(str) => GetCategoriesModel.fromJson(str);
 
-String getAllProductsModelToJson(GetAllProductsModel data) => json.encode(data.toJson());
-
-
-GetAllProductsModelMeta getAllProductsModelMetaFromJson(str) => GetAllProductsModelMeta.fromJson(str);
-
-String getAllProductsModelMetaToJson(GetAllProductsModelMeta data) => json.encode(data.toJson());
+String getCategoriesModelToJson(GetCategoriesModel data) => json.encode(data.toJson());
 
 
-GetAllProductsModelMetaLinksItem getAllProductsModelMetaLinksItemFromJson(str) => GetAllProductsModelMetaLinksItem.fromJson(str);
+GetCategoriesModelMeta getCategoriesModelMetaFromJson(str) => GetCategoriesModelMeta.fromJson(str);
 
-String getAllProductsModelMetaLinksItemToJson(GetAllProductsModelMetaLinksItem data) => json.encode(data.toJson());
-
-
-GetAllProductsModelLinks getAllProductsModelLinksFromJson(str) => GetAllProductsModelLinks.fromJson(str);
-
-String getAllProductsModelLinksToJson(GetAllProductsModelLinks data) => json.encode(data.toJson());
+String getCategoriesModelMetaToJson(GetCategoriesModelMeta data) => json.encode(data.toJson());
 
 
-GetAllProductsModelDataItem getAllProductsModelDataItemFromJson(str) => GetAllProductsModelDataItem.fromJson(str);
+GetCategoriesModelMetaLinksItem getCategoriesModelMetaLinksItemFromJson(str) => GetCategoriesModelMetaLinksItem.fromJson(str);
 
-String getAllProductsModelDataItemToJson(GetAllProductsModelDataItem data) => json.encode(data.toJson());
+String getCategoriesModelMetaLinksItemToJson(GetCategoriesModelMetaLinksItem data) => json.encode(data.toJson());
 
 
-class GetAllProductsModel {
-  List<GetAllProductsModelDataItem>? data;
-  GetAllProductsModelLinks? links;
-  GetAllProductsModelMeta? meta;
+GetCategoriesModelLinks getCategoriesModelLinksFromJson(str) => GetCategoriesModelLinks.fromJson(str);
 
-  GetAllProductsModel({
+String getCategoriesModelLinksToJson(GetCategoriesModelLinks data) => json.encode(data.toJson());
+
+
+GetCategoriesModelDataItem getCategoriesModelDataItemFromJson(str) => GetCategoriesModelDataItem.fromJson(str);
+
+String getCategoriesModelDataItemToJson(GetCategoriesModelDataItem data) => json.encode(data.toJson());
+
+
+class GetCategoriesModel {
+  List<GetCategoriesModelDataItem>? data;
+  GetCategoriesModelLinks? links;
+  GetCategoriesModelMeta? meta;
+
+  GetCategoriesModel({
     this.data,
     this.links,
     this.meta,
   });
 
-  factory GetAllProductsModel.fromJson(Map<String, dynamic> json) {
-    return GetAllProductsModel(
-      data: json['data'] is List ? (json['data'] as List).whereType<Map>().map((item) => GetAllProductsModelDataItem.fromJson(Map<String, dynamic>.from(item))).toList() : null,
-      links: json['links'] is Map ? GetAllProductsModelLinks.fromJson(Map<String, dynamic>.from(json['links'] as Map)) : null,
-      meta: json['meta'] is Map ? GetAllProductsModelMeta.fromJson(Map<String, dynamic>.from(json['meta'] as Map)) : null,
+  factory GetCategoriesModel.fromJson(Map<String, dynamic> json) {
+    return GetCategoriesModel(
+      data: json['data'] is List ? (json['data'] as List).whereType<Map>().map((item) => GetCategoriesModelDataItem.fromJson(Map<String, dynamic>.from(item))).toList() : null,
+      links: json['links'] is Map ? GetCategoriesModelLinks.fromJson(Map<String, dynamic>.from(json['links'] as Map)) : null,
+      meta: json['meta'] is Map ? GetCategoriesModelMeta.fromJson(Map<String, dynamic>.from(json['meta'] as Map)) : null,
     );
   }
 
@@ -123,17 +123,17 @@ class GetAllProductsModel {
   }
 }
 
-class GetAllProductsModelMeta {
+class GetCategoriesModelMeta {
   int? currentPage;
   int? from;
   int? lastPage;
-  List<GetAllProductsModelMetaLinksItem>? links;
+  List<GetCategoriesModelMetaLinksItem>? links;
   String? path;
   int? perPage;
   int? to;
   int? total;
 
-  GetAllProductsModelMeta({
+  GetCategoriesModelMeta({
     this.currentPage,
     this.from,
     this.lastPage,
@@ -144,12 +144,12 @@ class GetAllProductsModelMeta {
     this.total,
   });
 
-  factory GetAllProductsModelMeta.fromJson(Map<String, dynamic> json) {
-    return GetAllProductsModelMeta(
+  factory GetCategoriesModelMeta.fromJson(Map<String, dynamic> json) {
+    return GetCategoriesModelMeta(
       currentPage: _asInt(json['current_page']),
       from: _asInt(json['from']),
       lastPage: _asInt(json['last_page']),
-      links: json['links'] is List ? (json['links'] as List).whereType<Map>().map((item) => GetAllProductsModelMetaLinksItem.fromJson(Map<String, dynamic>.from(item))).toList() : null,
+      links: json['links'] is List ? (json['links'] as List).whereType<Map>().map((item) => GetCategoriesModelMetaLinksItem.fromJson(Map<String, dynamic>.from(item))).toList() : null,
       path: _asString(json['path']),
       perPage: _asInt(json['per_page']),
       to: _asInt(json['to']),
@@ -171,21 +171,21 @@ class GetAllProductsModelMeta {
   }
 }
 
-class GetAllProductsModelMetaLinksItem {
+class GetCategoriesModelMetaLinksItem {
   String? url;
   String? label;
   int? page;
   bool? active;
 
-  GetAllProductsModelMetaLinksItem({
+  GetCategoriesModelMetaLinksItem({
     this.url,
     this.label,
     this.page,
     this.active,
   });
 
-  factory GetAllProductsModelMetaLinksItem.fromJson(Map<String, dynamic> json) {
-    return GetAllProductsModelMetaLinksItem(
+  factory GetCategoriesModelMetaLinksItem.fromJson(Map<String, dynamic> json) {
+    return GetCategoriesModelMetaLinksItem(
       url: _asString(json['url']),
       label: _asString(json['label']),
       page: _asInt(json['page']),
@@ -203,21 +203,21 @@ class GetAllProductsModelMetaLinksItem {
   }
 }
 
-class GetAllProductsModelLinks {
+class GetCategoriesModelLinks {
   String? first;
   String? last;
   dynamic prev;
   dynamic next;
 
-  GetAllProductsModelLinks({
+  GetCategoriesModelLinks({
     this.first,
     this.last,
     this.prev,
     this.next,
   });
 
-  factory GetAllProductsModelLinks.fromJson(Map<String, dynamic> json) {
-    return GetAllProductsModelLinks(
+  factory GetCategoriesModelLinks.fromJson(Map<String, dynamic> json) {
+    return GetCategoriesModelLinks(
       first: _asString(json['first']),
       last: _asString(json['last']),
       prev: _asDynamic(json['prev']),
@@ -235,59 +235,41 @@ class GetAllProductsModelLinks {
   }
 }
 
-class GetAllProductsModelDataItem {
+class GetCategoriesModelDataItem {
   int? id;
   int? storeId;
-  int? categoryId;
-  int? masterProductId;
   String? name;
-  dynamic barcode;
-  String? sourceType;
+  String? slug;
   dynamic description;
-  String? price;
-  String? discountedPrice;
-  int? stockQuantity;
-  int? lowStockThreshold;
-  dynamic expiresAt;
-  bool? isAvailable;
+  int? sortOrder;
+  dynamic imagePath;
+  bool? isActive;
   String? createdAt;
   String? updatedAt;
 
-  GetAllProductsModelDataItem({
+  GetCategoriesModelDataItem({
     this.id,
     this.storeId,
-    this.categoryId,
-    this.masterProductId,
     this.name,
-    this.barcode,
-    this.sourceType,
+    this.slug,
     this.description,
-    this.price,
-    this.discountedPrice,
-    this.stockQuantity,
-    this.lowStockThreshold,
-    this.expiresAt,
-    this.isAvailable,
+    this.sortOrder,
+    this.imagePath,
+    this.isActive,
     this.createdAt,
     this.updatedAt,
   });
 
-  factory GetAllProductsModelDataItem.fromJson(Map<String, dynamic> json) {
-    return GetAllProductsModelDataItem(
+  factory GetCategoriesModelDataItem.fromJson(Map<String, dynamic> json) {
+    return GetCategoriesModelDataItem(
       id: _asInt(json['id']),
       storeId: _asInt(json['storeId']),
-      categoryId: _asInt(json['categoryId']),
-      masterProductId: _asInt(json['masterProductId']),
       name: _asString(json['name']),
-      barcode: _asDynamic(json['barcode']),
-      sourceType: _asString(json['sourceType']),
+      slug: _asString(json['slug']),
       description: _asDynamic(json['description']),
-      price: _asString(json['price']),
-      discountedPrice: _asString(json['discountedPrice']),
-      stockQuantity: _asInt(json['stockQuantity']),
-      lowStockThreshold: _asInt(json['lowStockThreshold']),
-      expiresAt: _asDynamic(json['expiresAt']),
-      isAvailable: _asBool(json['isAvailable']),
+      sortOrder: _asInt(json['sortOrder']),
+      imagePath: _asDynamic(json['imagePath']),
+      isActive: _asBool(json['isActive']),
       createdAt: _asString(json['createdAt']),
       updatedAt: _asString(json['updatedAt']),
     );
@@ -297,18 +279,12 @@ class GetAllProductsModelDataItem {
     return {
       'id': id,
       'storeId': storeId,
-      'categoryId': categoryId,
-      'masterProductId': masterProductId,
       'name': name,
-      'barcode': barcode,
-      'sourceType': sourceType,
+      'slug': slug,
       'description': description,
-      'price': price,
-      'discountedPrice': discountedPrice,
-      'stockQuantity': stockQuantity,
-      'lowStockThreshold': lowStockThreshold,
-      'expiresAt': expiresAt,
-      'isAvailable': isAvailable,
+      'sortOrder': sortOrder,
+      'imagePath': imagePath,
+      'isActive': isActive,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
     };

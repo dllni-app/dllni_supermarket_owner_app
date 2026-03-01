@@ -1,5 +1,3 @@
-import 'package:common_package/theme/text_theme.dart';
-import 'package:common_package/widgets/app_text.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../core/themes/app_colors.dart';
@@ -19,51 +17,33 @@ class OverviewSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.sizeOf(context).width;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            AppText(
+            Text(
               "نظرة عامة اليوم",
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
                 color: Color(0xFF111827),
-                height: 1.333,
               ),
             ),
-            Container(
-              padding: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-              decoration: BoxDecoration(
-                color: AppColors.white,
-                borderRadius: BorderRadius.all(Radius.circular(8)),
-                border: Border.all(color: Color(0xFFF3F4F6)),
-                boxShadow: [
-                  BoxShadow(
-                    offset: Offset(0, 1),
-                    blurRadius: 2,
-                    color: Color(0x0D000000),
-                  ),
-                ],
-              ),
-              child: Text(
-                dateLabel,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Color(0xFF9CA3AF),
-                  fontWeight: FontWeight.w500,
-                ),
+            Text(
+              dateLabel,
+              style: TextStyle(
+                fontSize: 12,
+                color: Color(0xFF9CA3AF),
+                fontWeight: FontWeight.w500,
               ),
             ),
           ],
         ),
         SizedBox(height: 12),
         Container(
-          width: width,
-          padding: EdgeInsets.all(20),
+          padding: EdgeInsets.all(18),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
               colors: [Color(0xFF1E2A78), Color(0xFF27359C)],
@@ -71,60 +51,53 @@ class OverviewSection extends StatelessWidget {
               end: Alignment.bottomRight,
             ),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Color(0x33EAB308)),
             boxShadow: [
               BoxShadow(
-                blurRadius: 32,
+                blurRadius: 18,
                 offset: const Offset(0, 8),
-                color: Color(0x33000000),
+                color: Colors.black.withValues(alpha: 0.08),
               ),
             ],
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            spacing: 4,
+          child: Row(
             children: [
-              AppText(
-                "إجمالي المبيعات",
-                style: textTheme.labelLarge!.copyWith(
-                  color: Color(0xFFFFEEFF),
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
-              Row(
-                spacing: 10,
-                children: [
-                  AppText(
-                    (totalSales ?? 0).toStringAsFixed(0),
-                    style: textTheme.displaySmall!.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFFFFFFFF),
-                      letterSpacing: .75,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "إجمالي المبيعات",
+                      style: TextStyle(fontSize: 12, color: Color(0xFFE5E7EB)),
                     ),
-                  ),
-                  AppText(
-                    "ل.س",
-                    style: textTheme.labelLarge!.copyWith(
-                      color: Color(0xFFFACC15),
-                      fontWeight: FontWeight.w500,
+                    SizedBox(height: 6),
+                    Text(
+                      "${(totalSales ?? 0).toStringAsFixed(0)} ل.س",
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              Row(
-                spacing: 8,
-                children: [
-                  Container(
-                    child: AppText(
-                      "",
+                    SizedBox(height: 6),
+                    Text(
+                      "٪15+ مقارنة الشهر الماضي",
                       style: TextStyle(fontSize: 11, color: Color(0xFFBBF7D0)),
                     ),
-                  ),
-                  AppText(
-                    "مقارنة بالأمس",
-                    style: TextStyle(fontSize: 12, color: Color(0xFFFFEEFF)),
-                  ),
-                ],
+                  ],
+                ),
+              ),
+              Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: Icon(
+                  Icons.paid,
+                  color: Colors.white.withValues(alpha: 0.9),
+                  size: 34,
+                ),
               ),
             ],
           ),
@@ -163,7 +136,7 @@ class OverviewStatCard extends StatelessWidget {
           BoxShadow(
             blurRadius: 12,
             offset: const Offset(0, 6),
-            color: Colors.black.withOpacity(0.06),
+            color: Colors.black.withValues(alpha: 0.06),
           ),
         ],
       ),

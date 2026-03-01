@@ -27,7 +27,6 @@ class _ProductsTabBarState extends State<ProductsTabBar> {
 
   @override
   Widget build(BuildContext context) {
-    print("items length: ${widget.items.length}");
     return SizedBox(
       height: 38 + 32,
       width: double.infinity,

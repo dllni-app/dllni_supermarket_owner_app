@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/themes/app_colors.dart';
-
 class LowStockAlertCard extends StatelessWidget {
+  final String productName;
+  final int remaining;
+  final Function() refreshAlert;
   const LowStockAlertCard({
     super.key,
+    required this.refreshAlert,
     required this.productName,
     required this.remaining,
   });
-
-  final String productName;
-  final int remaining;
 
   @override
   Widget build(BuildContext context) {
@@ -20,6 +19,13 @@ class LowStockAlertCard extends StatelessWidget {
         color: const Color(0xFFFFF7ED),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: const Color(0xFFFEE6C6)),
+        boxShadow: [
+          BoxShadow(
+            blurRadius: 14,
+            offset: const Offset(0, 6),
+            color: Colors.black.withValues(alpha: 0.05),
+          ),
+        ],
       ),
       child: Row(
         children: [
@@ -27,12 +33,12 @@ class LowStockAlertCard extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: const Color(0xFFFFEDD5),
-              borderRadius: BorderRadius.circular(12),
+              color: Colors.white,
+              shape: BoxShape.circle,
             ),
             child: Icon(
-              Icons.warning_amber_rounded,
-              color: const Color(0xFFF97316),
+              Icons.warning_rounded,
+              color: const Color(0xFFFF9F43),
               size: 20,
             ),
           ),
@@ -46,7 +52,7 @@ class LowStockAlertCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF111827),
+                    color: Color(0xFFFF9F43),
                   ),
                 ),
                 SizedBox(height: 4),
@@ -58,19 +64,24 @@ class LowStockAlertCard extends StatelessWidget {
             ),
           ),
           SizedBox(width: 12),
-          OutlinedButton(
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.accent,
-              side: const BorderSide(color: Color(0xFFFF7A00)),
-              padding: EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              shape: RoundedRectangleBorder(
+          InkWell(
+            onTap: refreshAlert,
+            child: Container(
+              width: 58,
+              height: 28,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
+                color: Colors.white,
               ),
-            ),
-            onPressed: () {},
-            child: Text(
-              "تحديث",
-              style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
+              child: Text(
+                "تحديث",
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 12,
+                  color: Color(0xff6C63FF),
+                ),
+              ),
             ),
           ),
         ],
@@ -90,6 +101,13 @@ class NoLowStockCard extends StatelessWidget {
         color: const Color(0xFFF8FAFC),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: const Color(0xFFE2E8F0)),
+        boxShadow: [
+          BoxShadow(
+            blurRadius: 14,
+            offset: const Offset(0, 6),
+            color: Colors.black.withValues(alpha: 0.04),
+          ),
+        ],
       ),
       child: Row(
         children: [

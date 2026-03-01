@@ -11,8 +11,8 @@ Future<void> main() async {
     AppBootstrapConfig(
       navigatorKey: navigatorKey,
       app: App(navigatorKey: navigatorKey),
-      configureDependencies: configureDependencies,
-      enableNotifications: false,
+      configureDependencies: configureInjection,
+      enableNotifications: true,
       fallbackLocale: const Locale('ar'),
       supportedLocales: const <Locale>[Locale('en'), Locale('ar')],
       startLocale: Locale("ar"),

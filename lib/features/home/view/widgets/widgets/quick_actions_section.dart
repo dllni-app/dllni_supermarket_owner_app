@@ -22,11 +22,16 @@ class QuickActionsSection extends StatelessWidget {
           ),
         ),
         SizedBox(height: 12),
-        Wrap(
-          spacing: 10,
-          runSpacing: 12,
+        Row(
           children: actions
-              .map((action) => QuickActionChip(data: action))
+              .map(
+                (action) => Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 4),
+                    child: QuickActionChip(data: action),
+                  ),
+                ),
+              )
               .toList(),
         ),
       ],
@@ -41,32 +46,32 @@ class QuickActionChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isPrimary = data.icon == Icons.add;
     return Container(
-      width: 78,
-      padding: EdgeInsets.symmetric(vertical: 10),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            blurRadius: 12,
-            offset: const Offset(0, 6),
-            color: Colors.black.withOpacity(0.05),
-          ),
-        ],
-      ),
+      padding: EdgeInsets.symmetric(vertical: 8),
       child: Column(
         children: [
           Container(
-            width: 34,
-            height: 34,
+            width: 52,
+            height: 52,
             decoration: BoxDecoration(
-              color: data.color.withOpacity(0.15),
-              borderRadius: BorderRadius.circular(12),
+              color: isPrimary ? data.color : AppColors.white,
+              borderRadius: BorderRadius.circular(26),
+              boxShadow: [
+                BoxShadow(
+                  blurRadius: 12,
+                  offset: const Offset(0, 6),
+                  color: Colors.black.withOpacity(0.08),
+                ),
+              ],
             ),
-            child: Icon(data.icon, color: data.color, size: 18),
+            child: Icon(
+              data.icon,
+              color: isPrimary ? Colors.white : data.color,
+              size: 22,
+            ),
           ),
-          SizedBox(height: 6),
+          SizedBox(height: 8),
           Text(
             data.label,
             textAlign: TextAlign.center,
