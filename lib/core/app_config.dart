@@ -3,5 +3,5 @@ class AppConfig {
 
   static const String appName = 'My App';
   static const String orgIdentifier = 'com.dllni.supermarket_owner_app';
-  static const String baseUrl = 'https://dllni.mustafafares.com/api/v1';
+  static const String baseUrl = 'https://dllni.mustafafares.com';
 }

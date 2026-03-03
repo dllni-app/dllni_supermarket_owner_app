@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:common_package/common_package.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -57,7 +59,24 @@ class OrdersHourStatisticsCard extends StatelessWidget {
                     sideTitles: SideTitles(showTitles: false),
                   ),
                   topTitles: AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
+                    sideTitleAlignment: SideTitleAlignment.outside,
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      maxIncluded: false,
+                      getTitlesWidget: (value, meta) {
+                        final index = value.toInt();
+                        return AppText(
+                          values[index].toInt().toString(),
+                          style: TextStyle(
+                            color: const Color(0xE52F2B3D),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: .4,
+                            height: 1.38,
+                          ),
+                        );
+                      },
+                    ),
                   ),
                   bottomTitles: AxisTitles(
                     sideTitles: SideTitles(
@@ -113,9 +132,13 @@ class OrdersHourStatisticsCard extends StatelessWidget {
                     barRods: [
                       BarChartRodData(
                         toY: values[index],
-                        color: hours[index] == 12
-                            ? context.secondary
-                            : context.primary,
+                        color:
+                            values[index] ==
+                                values.reduce(
+                                  (value, element) => max(value, element),
+                                )
+                            ? context.primary
+                            : context.secondary,
                         width: 24,
                         borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(4),

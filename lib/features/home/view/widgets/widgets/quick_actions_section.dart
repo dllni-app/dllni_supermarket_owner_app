@@ -1,6 +1,9 @@
+import 'package:common_package/common_package.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../../../../core/themes/app_colors.dart';
+import '../../../../../core/themes/app_shadows.dart';
 import '../models/home_models.dart';
 
 class QuickActionsSection extends StatelessWidget {
@@ -18,21 +21,46 @@ class QuickActionsSection extends StatelessWidget {
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w700,
+            height: 1.333,
             color: Color(0xFF111827),
           ),
         ),
         SizedBox(height: 12),
         Row(
-          children: actions
-              .map(
-                (action) => Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 4),
-                    child: QuickActionChip(data: action),
-                  ),
-                ),
-              )
-              .toList(),
+          spacing: 12,
+          children: [
+            Expanded(
+              child: QuickActionChip(
+                icon: FontAwesomeIcons.plus,
+                isPrimary: true,
+                label: 'منتج جديد',
+                onTap: () {
+                  context.pushRoute("/products/new_product");
+                },
+              ),
+            ),
+            Expanded(
+              child: QuickActionChip(
+                icon: FontAwesomeIcons.percent,
+                label: 'إنشاء عرض',
+                onTap: () {},
+              ),
+            ),
+            Expanded(
+              child: QuickActionChip(
+                icon: FontAwesomeIcons.boxOpen,
+                label: 'تعديل المخزون',
+                onTap: () {},
+              ),
+            ),
+            Expanded(
+              child: QuickActionChip(
+                icon: FontAwesomeIcons.paperPlane,
+                label: 'التقارير',
+                onTap: () {},
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -40,49 +68,51 @@ class QuickActionsSection extends StatelessWidget {
 }
 
 class QuickActionChip extends StatelessWidget {
-  const QuickActionChip({super.key, required this.data});
-
-  final QuickActionData data;
+  const QuickActionChip({
+    super.key,
+    required this.label,
+    required this.icon,
+    this.isPrimary = false,
+    required this.onTap,
+  });
+  final String label;
+  final IconData icon;
+  final bool isPrimary;
+  final void Function() onTap;
 
   @override
   Widget build(BuildContext context) {
-    final isPrimary = data.icon == Icons.add;
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 8),
-      child: Column(
-        children: [
-          Container(
-            width: 52,
-            height: 52,
+    return Column(
+      spacing: 8,
+      children: [
+        InkWell(
+          onTap: onTap,
+          child: Container(
+            width: 56,
+            height: 56,
             decoration: BoxDecoration(
-              color: isPrimary ? data.color : AppColors.white,
-              borderRadius: BorderRadius.circular(26),
-              boxShadow: [
-                BoxShadow(
-                  blurRadius: 12,
-                  offset: const Offset(0, 6),
-                  color: Colors.black.withOpacity(0.08),
-                ),
-              ],
+              color: isPrimary ? context.primaryContainer : AppColors.white,
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: const Color(0xFFF3F4F6)),
+              boxShadow: [AppShadows.shadow],
             ),
             child: Icon(
-              data.icon,
-              color: isPrimary ? Colors.white : data.color,
-              size: 22,
+              icon,
+              color: isPrimary ? AppColors.white : const Color(0xFF064E3B),
+              size: 18,
             ),
           ),
-          SizedBox(height: 8),
-          Text(
-            data.label,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 11,
-              color: Color(0xFF374151),
-              fontWeight: FontWeight.w600,
-            ),
+        ),
+        AppText(
+          label,
+          style: TextStyle(
+            fontSize: 10,
+            color: Color(0xFF4B5563),
+            height: 1.5,
+            letterSpacing: 0,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

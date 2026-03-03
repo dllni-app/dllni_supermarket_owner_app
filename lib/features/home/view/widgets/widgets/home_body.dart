@@ -1,15 +1,14 @@
-import 'package:common_package/common_package.dart';
+import 'package:dllni_supermarket_owner_app/core/extensions/date_time_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../../core/widgets/warning_alert.dart';
 import '../../home_screen.dart';
-import '../../home_screen_helpers.dart';
 import '../../manager/bloc/home_bloc.dart';
 import '../models/home_models.dart';
 import '../sheets/reject_order_sheet.dart';
-import 'low_stock_alert_card.dart';
 import 'new_orders_section.dart';
-import 'orders_activity_section.dart';
+import 'orders_hour_statistics_card.dart';
 import 'overview_section.dart';
 import 'preparing_orders_section.dart';
 import 'quick_actions_section.dart';
@@ -19,7 +18,6 @@ class HomeBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dateLabel = todayLabel();
     final activity = const [
       ActivityPoint(hour: "10", value: 23),
       ActivityPoint(hour: "11", value: 11),
@@ -28,78 +26,65 @@ class HomeBody extends StatelessWidget {
       ActivityPoint(hour: "14", value: 16),
       ActivityPoint(hour: "15", value: 26),
     ];
-    return BlocConsumer<HomeBloc, HomeState>(
-      listener: (context, state) {
-        if (state.actionStatus == BlocStatus.success &&
-            state.actionMessage.isNotEmpty) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(state.actionMessage)));
-        } else if (state.actionStatus == BlocStatus.failed &&
-            state.actionMessage.isNotEmpty) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(state.actionMessage)));
-        }
-      },
-      builder: (context, state) {
-        final vm = HomeViewModel.fromState(state);
-        return SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: 16),
-              // vm.lowStockProduct != null
-              //     ? LowStockAlertCard(
-              //         refreshAlert: () {},
-              //         productName: vm.lowStockProduct!.productName ?? "",
-              //         remaining: vm.lowStockProduct!.currentStock ?? 0,
-              //       )
-              //     :
-              const NoLowStockCard(),
-              SizedBox(height: 20),
-              OverviewSection(
-                stats: vm.stats,
-                dateLabel: dateLabel,
-                totalSales: vm.totalSales,
-              ),
-              SizedBox(height: 20),
-              const QuickActionsSection(actions: quickActions),
-              SizedBox(height: 20),
-              NewOrdersSection(
-                orders: vm.newOrders,
-                onAccept: (orderId) {
-                  if (orderId == null) return;
-                  context.read<HomeBloc>().add(
-                    HomeAcceptOrderEvent(orderId: orderId),
-                  );
-                },
-                onReject: (orderId) {
-                  if (orderId == null) return;
-                  showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(20),
-                      ),
-                    ),
-                    builder: (_) {
-                      return RejectOrderSheet(orderId: orderId);
-                    },
-                  );
-                },
-              ),
-              SizedBox(height: 20),
-              PreparingOrdersSection(orders: vm.preparingOrders),
-              SizedBox(height: 20),
-              OrdersActivitySection(activity: activity),
-              SizedBox(height: 24),
-            ],
+    return SingleChildScrollView(
+      padding: EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        spacing: 24,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(),
+          WarningAlert(
+            title: "تنبيه مخزون منخفض",
+            description: "مادة \"أرز بسمتي\" قاربت على النفاد (أقل من 5 كجم).",
+            icon: Icons.warning_rounded,
+            labelButton: "تحديث",
+            onTapButton: () {
+              print("refresh");
+            },
           ),
-        );
-      },
+          OverviewSection(
+            stats: const [
+              OverviewStatData(
+                label: "label",
+                value: "value",
+                icon: Icons.home,
+                color: Color(0xFFFF0000),
+                background: Color(0xFFA00000),
+              ),
+              OverviewStatData(
+                label: "label",
+                value: "value",
+                icon: Icons.home,
+                color: Color(0xFFFF0000),
+                background: Color(0xFFA00000),
+              ),
+              OverviewStatData(
+                label: "label",
+                value: "value",
+                icon: Icons.home,
+                color: Color(0xFFFF0000),
+                background: Color(0xFFA00000),
+              ),
+              // OverviewStatData(
+              //   background:
+              // )
+            ],
+            dateLabel: DateTime.now().format,
+            totalSales: 12450,
+          ),
+
+          const QuickActionsSection(actions: quickActions),
+          const NewOrdersSection(),
+          const PreparingOrdersSection(
+            orders: [PreparingOrderData(id: "id", minutesSince: 4)],
+          ),
+          const OrdersHourStatisticsCard(
+            hours: [10, 11, 12, 13, 14, 15],
+            values: [23, 11, 43, 37, 16, 26],
+          ),
+          const SizedBox(),
+        ],
+      ),
     );
   }
 }

@@ -40,12 +40,12 @@ class HomeAppBar extends StatelessWidget {
           ],
         ),
         child: Row(
+          spacing: 12,
           children: [
             ProfileImage(),
-            SizedBox(width: 12),
             Expanded(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
@@ -67,7 +67,6 @@ class HomeAppBar extends StatelessWidget {
                 ],
               ),
             ),
-            SizedBox(width: 12),
             CircleIconButton(
               icon: Icons.notifications_none_outlined,
               onTap: () {},
@@ -150,6 +149,13 @@ class ProfileImage extends StatelessWidget {
             color: Color(0xFFC4C4C4),
             borderRadius: BorderRadius.all(Radius.circular(20)),
             border: Border.all(width: 2, color: AppColors.white),
+            boxShadow: [
+              BoxShadow(
+                offset: Offset(0, 1),
+                blurRadius: 2,
+                color: Color(0x0D000000),
+              ),
+            ],
           ),
         ),
         Positioned(

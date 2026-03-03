@@ -8,4 +8,5 @@ class AppSvgs {
   static const String arrow = "assets/images/svgs/arrow.svg";
   static const String arrowBackIos = "assets/images/svgs/arrow_back_ios.svg";
   static const String arrowDownIos = "assets/images/svgs/arrow_down_ios.svg";
+  static const String up = "assets/images/svgs/up.svg";
 }

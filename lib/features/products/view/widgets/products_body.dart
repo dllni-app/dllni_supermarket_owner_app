@@ -3,11 +3,11 @@ import 'dart:developer';
 import 'package:common_package/common_package.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../../../../core/utils/app_svgs.dart';
 import '../../domain/usecases/get_products_use_case.dart';
 import '../manager/bloc/products_bloc.dart';
 import 'big_button_with_icon.dart';
-import 'loadings/products_tab_bar_loading.dart';
 import 'loadings/state_pointer_loading.dart';
 import 'product_card.dart';
 import 'products_tab_bar.dart';
@@ -65,7 +65,18 @@ class ProductsBody extends StatelessWidget {
             ],
           ),
         ),
-        ProductsTabBarLoading(),
+        ProductsTabBar(
+          items: [
+            ProductsTabBarItem(title: "الكل", count: 154),
+            ProductsTabBarItem(title: "دجاج", count: 34),
+            ProductsTabBarItem(title: "لحم", count: 34),
+            ProductsTabBarItem(title: "المقبلات", count: 50),
+          ],
+          onChanged: (index) {
+            print(index);
+          },
+        ),
+        // ProductsTabBarLoading(),
         // BlocBuilder<ProductsBloc, ProductsState>(
         //   buildWhen: (previous, current) =>
         //       previous.categoriesStatus != current.categoriesStatus,

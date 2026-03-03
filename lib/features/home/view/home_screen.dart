@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../../../core/di/injection.dart';
 import 'manager/bloc/home_bloc.dart';
 import 'widgets/models/home_models.dart';
@@ -17,7 +18,7 @@ class HomeScreen extends StatelessWidget {
         body: Column(
           children: [
             const HomeAppBar(
-              shopName: 'اسم المتجر',
+              shopName: 'مطعم البيت الحلبي',
               shopAddress: "الفرع الرئيسي - العزيزية",
             ),
             Expanded(child: HomeBody()),

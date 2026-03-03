@@ -1,3 +1,5 @@
+import 'package:common_package/helpers/shared_preferences_helper.dart';
+import 'package:dllni_supermarket_owner_app/features/auth/view/screens/login_screen.dart';
 import 'package:dllni_supermarket_owner_app/features/main_page.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +24,11 @@ class App extends StatelessWidget {
       supportedLocales: context.supportedLocales,
       localizationsDelegates: context.localizationDelegates,
       onGenerateRoute: AppRouter.onGenerateRoute,
+      home:
+          SharedPreferencesHelper.getData(key: 'token') != null &&
+              SharedPreferencesHelper.getData(key: 'token') != ""
+          ? MainPage()
+          : LoginScreen(),
     );
   }
 }
