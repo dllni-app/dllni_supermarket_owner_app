@@ -16,7 +16,7 @@ class ProductsRemoteDataSource with HandlingApiManager {
   Future<GetProductsModel> getProducts(GetProductsParams params) {
     return wrapHandlingApi(
       tryCall: () => dioNetwork.getData(
-        endPoint: '/store-owner/products',
+        endPoint: '/api/v1/store-owner/products',
         params: params.getParams(),
         data: params.getBody().isEmpty ? null : params.getBody(),
       ),
@@ -27,7 +27,7 @@ class ProductsRemoteDataSource with HandlingApiManager {
   Future<GetCategoriesModel> getCategories(GetCategoriesParams params) {
     return wrapHandlingApi(
       tryCall: () => dioNetwork.getData(
-        endPoint: '/sm-categories',
+        endPoint: '/api/v1/sm-categories',
         params: params.getParams(),
         data: params.getBody().isEmpty ? null : params.getBody(),
       ),
@@ -38,7 +38,7 @@ class ProductsRemoteDataSource with HandlingApiManager {
   Future<GetLowStockModel> getLowStock(GetLowStockParams params) {
     return wrapHandlingApi(
       tryCall: () => dioNetwork.getData(
-        endPoint: '/store-owner/products/low-stock',
+        endPoint: '/api/v1/store-owner/products/low-stock',
         params: params.getParams(),
         data: params.getBody().isEmpty ? null : params.getBody(),
       ),

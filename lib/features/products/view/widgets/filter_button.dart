@@ -1,7 +1,7 @@
 import 'package:common_package/widgets/app_image.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../core/themes/app_colors.dart';
+import '../../../../core/themes/app_gradients.dart';
 import '../../../../core/utils/app_images.dart';
 
 class FilterButton extends StatelessWidget {
@@ -18,7 +18,8 @@ class FilterButton extends StatelessWidget {
         width: 48,
         height: 48,
         decoration: BoxDecoration(
-          color: AppColors.primary,
+          // color: AppColors.primary,
+          gradient: AppGradients.gradient,
           borderRadius: BorderRadius.all(Radius.circular(24)),
         ),
         child: AppImage.asset(AppImages.filter, width: 16, height: 16),

@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 
 import 'core/routes/app_router.dart';
 import 'core/themes/app_theme.dart';
-import 'features/home/view/home_screen.dart';
+import 'features/home/view/screens/home_screen.dart';
 
 class App extends StatelessWidget {
   const App({super.key, required this.navigatorKey});
@@ -17,18 +17,21 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       navigatorKey: navigatorKey,
-      title: 'Dllni',
+      title: 'Dllni Supermarket',
       theme: AppTheme.light,
       debugShowCheckedModeBanner: false,
       locale: context.locale,
       supportedLocales: context.supportedLocales,
       localizationsDelegates: context.localizationDelegates,
       onGenerateRoute: AppRouter.onGenerateRoute,
-      home:
-          SharedPreferencesHelper.getData(key: 'token') != null &&
+      initialRoute:SharedPreferencesHelper.getData(key: 'token') != null &&
               SharedPreferencesHelper.getData(key: 'token') != ""
-          ? MainPage()
-          : LoginScreen(),
+          ? "/": "/login" ,
+      // home:
+      //     SharedPreferencesHelper.getData(key: 'token') != null &&
+      //         SharedPreferencesHelper.getData(key: 'token') != ""
+      //     ? MainPage()
+      //     : LoginScreen(),
     );
   }
 }

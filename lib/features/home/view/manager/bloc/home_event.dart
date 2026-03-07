@@ -1,29 +1,33 @@
 part of 'home_bloc.dart';
 
-sealed class HomeEvent {}
+abstract class HomeEvent {}
 
-class HomeLoadEvent extends HomeEvent {
-  final int storeId;
-  HomeLoadEvent({required this.storeId});
+class GetDashboardOverviewEvent extends HomeEvent {
+  final GetDashboardOverviewParams params;
+
+  GetDashboardOverviewEvent({required this.params});
 }
 
-class HomeRefreshEvent extends HomeEvent {
-  final int storeId;
-  HomeRefreshEvent({required this.storeId});
+class GetNewOrdersEvent extends HomeEvent with EventWithReload {
+  final GetNewOrdersParams params;
+
+  @override
+  final bool isReload;
+
+  GetNewOrdersEvent({required this.params, this.isReload = false});
 }
 
-class HomeAcceptOrderEvent extends HomeEvent {
-  final int orderId;
-  HomeAcceptOrderEvent({required this.orderId});
+class GetPreparingOrdersEvent extends HomeEvent with EventWithReload {
+  final GetPreparingOrdersParams params;
+
+  @override
+  final bool isReload;
+
+  GetPreparingOrdersEvent({required this.params, this.isReload = false});
 }
 
-class HomeRejectOrderEvent extends HomeEvent {
-  final int orderId;
-  final String reason;
-  final String rejectionType;
-  HomeRejectOrderEvent({
-    required this.orderId,
-    required this.reason,
-    required this.rejectionType,
-  });
+class RejectOrderEvent extends HomeEvent {
+  final RejectOrderParams params;
+
+  RejectOrderEvent({required this.params});
 }

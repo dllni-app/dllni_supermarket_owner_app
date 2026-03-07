@@ -1,19 +1,21 @@
-// import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
-// class OrdersScreen extends StatelessWidget {
-//   const OrdersScreen({super.key});
+import '../widgets/orders_app_bar.dart';
+import '../widgets/orders_body.dart';
 
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//         backgroundColor: const Color(0xffF5F6FA),
-//         body: Column(
-//           children: const [
-//             OrdersHeader(),
-//             SizedBox(height: 16),
-//             Expanded(child: OrdersList()),
-//           ],
-//         ),
-//       );
-//   }
-// }
+class OrdersScreen extends StatelessWidget {
+  const OrdersScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xffF5F6FA),
+      body: Column(
+        children: const [
+          OrdersAppBar(),
+          Expanded(child: OrdersBody()),
+        ],
+      ),
+    );
+  }
+}

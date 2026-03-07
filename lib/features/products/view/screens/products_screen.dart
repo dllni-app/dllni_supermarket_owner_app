@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/di/injection.dart';
-import '../../domain/usecases/get_categories_use_case.dart';
-import '../../domain/usecases/get_low_stock_use_case.dart';
-import '../../domain/usecases/get_products_use_case.dart';
 import '../manager/bloc/products_bloc.dart';
 import '../widgets/products_app_bar.dart';
 import '../widgets/products_body.dart';
@@ -16,10 +13,10 @@ class ProductsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => getIt<ProductsBloc>()
-        ..add(GetProductsEvent(params: GetProductsParams(page: 1)))
-        ..add(GetCategoriesEvent(params: GetCategoriesParams()))
-        ..add(GetLowStockEvent(params: GetLowStockParams(storeId: 1))),
+      create: (context) => getIt<ProductsBloc>(),
+        // ..add(GetProductsEvent(params: GetProductsParams(page: 1)))
+        // ..add(GetCategoriesEvent(params: GetCategoriesParams()))
+        // ..add(GetLowStockEvent(params: GetLowStockParams(storeId: 1))),
       child: Scaffold(
         body: Column(
           children: [

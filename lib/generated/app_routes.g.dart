@@ -5,6 +5,12 @@ import 'package:dllni_supermarket_owner_app/features/auth/view/screens/login_scr
 import 'package:dllni_supermarket_owner_app/features/main_page.dart';
 import 'package:dllni_supermarket_owner_app/features/products/view/screens/add_new_product_screen.dart';
 import 'package:dllni_supermarket_owner_app/features/products/view/screens/add_product_ai_screen.dart';
+import 'package:dllni_supermarket_owner_app/features/products/view/screens/add_product_details_screen.dart';
+import 'package:dllni_supermarket_owner_app/features/products/view/screens/add_product_menu_screen.dart';
+import 'package:dllni_supermarket_owner_app/features/profile/view/screens/coupons_management_screen.dart';
+import 'package:dllni_supermarket_owner_app/features/profile/view/screens/offers_management_screen.dart';
+import 'package:dllni_supermarket_owner_app/features/profile/view/screens/profile_screen.dart';
+import 'package:dllni_supermarket_owner_app/features/profile/view/screens/working_time_screen.dart';
 
 class GeneratedAppRoutes {
   static Route<dynamic>? onGenerateRoute(RouteSettings settings) {
@@ -29,6 +35,36 @@ class GeneratedAppRoutes {
       case '/products/new_product/ai':
         return MaterialPageRoute(
           builder: (_) => AddProductAIScreen(),
+          settings: settings,
+        );
+      case '/products/new_product/details':
+        return MaterialPageRoute(
+          builder: (_) => AddProductDetailsScreen(),
+          settings: settings,
+        );
+      case '/products/new_product/menu':
+        return MaterialPageRoute(
+          builder: (_) => AddProductMenuScreen(),
+          settings: settings,
+        );
+      case '/couponsmanagement':
+        return MaterialPageRoute(
+          builder: (_) => CouponsManagementScreen(),
+          settings: settings,
+        );
+      case '/offersmanagement':
+        return MaterialPageRoute(
+          builder: (_) => OffersManagementScreen(),
+          settings: settings,
+        );
+      case '/profile':
+        return MaterialPageRoute(
+          builder: (_) => ProfileScreen(),
+          settings: settings,
+        );
+      case '/workingtime':
+        return MaterialPageRoute(
+          builder: (_) => WorkingTimeScreen(),
           settings: settings,
         );
 

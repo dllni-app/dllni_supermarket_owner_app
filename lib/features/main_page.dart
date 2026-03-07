@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../core/widgets/app_nav_bar.dart';
-import 'home/view/home_screen.dart';
+import 'home/view/screens/home_screen.dart';
+import 'orders/view/screens/orders_screen.dart';
 import 'products/view/screens/products_screen.dart';
+import 'profile/view/screens/more_screen.dart';
 
 @AutoRoutePage(path: "/")
 class MainPage extends StatefulWidget {
@@ -32,10 +34,15 @@ class _MainPageState extends State<MainPage>
         controller: tabController,
         children: [
           HomeScreen(),
-          Center(child: Text("قيد التطوير")),
+          OrdersScreen(),
           ProductsScreen(),
-          Center(child: Text("قيد التطوير")),
-          Center(child: Text("قيد التطوير")),
+          Center(
+            child: AppText(
+              "قيد التطوير",
+              style: TextStyle(color: Colors.black),
+            ),
+          ),
+          MoreScreen(),
         ],
       ),
       bottomNavigationBar: AppNavBar(

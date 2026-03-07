@@ -19,6 +19,17 @@ import '../../features/auth/data/source/auth_remote_data_source.dart' as _i777;
 import '../../features/auth/domain/repository/auth_repo.dart' as _i976;
 import '../../features/auth/domain/usecases/login_use_case.dart' as _i37;
 import '../../features/auth/view/manager/bloc/auth_bloc.dart' as _i958;
+import '../../features/home/data/repository/home_repo_impl.dart' as _i1013;
+import '../../features/home/data/source/home_remote_data_source.dart' as _i557;
+import '../../features/home/domain/repository/home_repo.dart' as _i396;
+import '../../features/home/domain/usecases/get_dashboard_overview_use_case.dart'
+    as _i393;
+import '../../features/home/domain/usecases/get_new_orders_use_case.dart'
+    as _i856;
+import '../../features/home/domain/usecases/get_preparing_orders_use_case.dart'
+    as _i963;
+import '../../features/home/domain/usecases/reject_order_use_case.dart'
+    as _i501;
 import '../../features/home/view/manager/bloc/home_bloc.dart' as _i648;
 import '../../features/orders/data/repository/orders_repo_impl.dart' as _i849;
 import '../../features/orders/data/source/orders_remote_data_source.dart'
@@ -37,6 +48,11 @@ import '../../features/products/domain/usecases/get_low_stock_use_case.dart'
 import '../../features/products/domain/usecases/get_products_use_case.dart'
     as _i846;
 import '../../features/products/view/manager/bloc/products_bloc.dart' as _i113;
+import '../../features/profile/data/repository/profile_repo_impl.dart' as _i265;
+import '../../features/profile/data/source/profile_remote_data_source.dart'
+    as _i502;
+import '../../features/profile/domain/repository/profile_repo.dart' as _i275;
+import '../../features/profile/view/manager/bloc/profile_bloc.dart' as _i821;
 import 'injection.dart' as _i464;
 
 // initializes the registration of main-scope dependencies inside of GetIt
@@ -47,16 +63,23 @@ _i174.GetIt $initGetIt(
 }) {
   final gh = _i526.GetItHelper(getIt, environment, environmentFilter);
   final injectableModule = _$InjectableModule();
-  gh.factory<_i648.HomeBloc>(() => _i648.HomeBloc());
   gh.factory<_i305.OrdersBloc>(() => _i305.OrdersBloc());
+  gh.factory<_i821.ProfileBloc>(() => _i821.ProfileBloc());
   gh.singleton<_i960.DioNetwork>(() => injectableModule.dio);
   gh.lazySingleton<_i702.OrdersRemoteDataSource>(
     () => _i702.OrdersRemoteDataSource(),
+  );
+  gh.lazySingleton<_i502.ProfileRemoteDataSource>(
+    () => _i502.ProfileRemoteDataSource(),
   );
   gh.lazySingleton<_i132.OrdersRepo>(() => _i849.OrdersRepoImpl());
   gh.lazySingleton<_i777.AuthRemoteDataSource>(
     () => _i777.AuthRemoteDataSource(dioNetwork: gh<_i497.DioNetwork>()),
   );
+  gh.lazySingleton<_i557.HomeRemoteDataSource>(
+    () => _i557.HomeRemoteDataSource(dioNetwork: gh<_i497.DioNetwork>()),
+  );
+  gh.lazySingleton<_i275.ProfileRepo>(() => _i265.ProfileRepoImpl());
   gh.lazySingleton<_i811.ProductsRemoteDataSource>(
     () => _i811.ProductsRemoteDataSource(dioNetwork: gh<_i960.DioNetwork>()),
   );
@@ -82,12 +105,37 @@ _i174.GetIt $initGetIt(
   gh.lazySingleton<_i37.LoginUseCase>(
     () => _i37.LoginUseCase(auth: gh<_i976.AuthRepo>()),
   );
+  gh.lazySingleton<_i396.HomeRepo>(
+    () => _i1013.HomeRepoImpl(
+      homeRemoteDataSource: gh<_i557.HomeRemoteDataSource>(),
+    ),
+  );
   gh.factory<_i958.AuthBloc>(() => _i958.AuthBloc(gh<_i37.LoginUseCase>()));
+  gh.lazySingleton<_i393.GetDashboardOverviewUseCase>(
+    () => _i393.GetDashboardOverviewUseCase(home: gh<_i396.HomeRepo>()),
+  );
+  gh.lazySingleton<_i856.GetNewOrdersUseCase>(
+    () => _i856.GetNewOrdersUseCase(home: gh<_i396.HomeRepo>()),
+  );
+  gh.lazySingleton<_i963.GetPreparingOrdersUseCase>(
+    () => _i963.GetPreparingOrdersUseCase(home: gh<_i396.HomeRepo>()),
+  );
+  gh.lazySingleton<_i501.RejectOrderUseCase>(
+    () => _i501.RejectOrderUseCase(home: gh<_i396.HomeRepo>()),
+  );
   gh.factory<_i113.ProductsBloc>(
     () => _i113.ProductsBloc(
       gh<_i846.GetProductsUseCase>(),
       gh<_i862.GetCategoriesUseCase>(),
       gh<_i348.GetLowStockUseCase>(),
+    ),
+  );
+  gh.factory<_i648.HomeBloc>(
+    () => _i648.HomeBloc(
+      gh<_i393.GetDashboardOverviewUseCase>(),
+      gh<_i856.GetNewOrdersUseCase>(),
+      gh<_i963.GetPreparingOrdersUseCase>(),
+      gh<_i501.RejectOrderUseCase>(),
     ),
   );
   return getIt;

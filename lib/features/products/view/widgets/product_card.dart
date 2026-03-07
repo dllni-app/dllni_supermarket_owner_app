@@ -121,7 +121,7 @@ class _ProductCardState extends State<ProductCard> {
                             Icon(Icons.more_vert, size: 16, color: Colors.grey),
                           ],
                         ),
-                        AvailabilityChip(isAvailable: available),
+                        if (!limited) _AvailabilityChip(isAvailable: available),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -171,8 +171,8 @@ class _ProductCardState extends State<ProductCard> {
   }
 }
 
-class AvailabilityChip extends StatelessWidget {
-  const AvailabilityChip({super.key, required this.isAvailable});
+class _AvailabilityChip extends StatelessWidget {
+  const _AvailabilityChip({required this.isAvailable});
   final bool isAvailable;
   @override
   Widget build(BuildContext context) {
