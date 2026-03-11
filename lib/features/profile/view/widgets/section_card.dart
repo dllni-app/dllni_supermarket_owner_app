@@ -5,7 +5,7 @@ class SectionCard extends StatelessWidget {
   const SectionCard({
     super.key,
     required this.containerColor,
-    required this.imageColor,
+    required this.iconColor,
     required this.icon,
     required this.title,
     required this.subtitle,
@@ -13,7 +13,7 @@ class SectionCard extends StatelessWidget {
   });
 
   final Color containerColor;
-  final Color imageColor;
+  final Color iconColor;
   final IconData icon;
   final String title;
   final String subtitle;
@@ -33,7 +33,7 @@ class SectionCard extends StatelessWidget {
               color: containerColor,
             ),
             padding: EdgeInsetsDirectional.all(13),
-            child: Icon(icon, size: 18, color: imageColor),
+            child: Icon(icon, size: 18, color: iconColor),
           ),
           SizedBox(width: 12),
           Expanded(

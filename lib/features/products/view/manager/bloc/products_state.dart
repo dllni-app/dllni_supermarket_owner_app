@@ -1,6 +1,8 @@
 part of 'products_bloc.dart';
 
 class ProductsState {
+  BlocStatus? totalProducstCountStatus;
+  TotalProducstCountModel? totalProducstCount;
   BlocStatus? productsStatus;
   PaginationStateModel<GetProductsModelDataItem>? products;
   BlocStatus? categoriesStatus;
@@ -17,6 +19,9 @@ class ProductsState {
     this.lowStock,
     this.lowStockStatus,
     this.categoriesStatus,
+    this.totalProducstCount,
+    this.totalProducstCountStatus,
+  
   });
 
   ProductsState copyWith({
@@ -27,6 +32,8 @@ class ProductsState {
     PaginationStateModel<GetCategoriesModelDataItem>? categories,
     BlocStatus? categoriesStatus,
     PaginationStateModel<GetProductsModelDataItem>? products,
+    TotalProducstCountModel? totalProducstCount,
+    BlocStatus? totalProducstCountStatus,
   }) => ProductsState(
     errorMessage: errorMessage ?? this.errorMessage,
     productsStatus: allProductsStatus ?? this.productsStatus,
@@ -35,5 +42,8 @@ class ProductsState {
     categories: categories ?? this.categories,
     categoriesStatus: categoriesStatus ?? this.categoriesStatus,
     products: products ?? this.products,
-  );
+        totalProducstCount: totalProducstCount ?? this.totalProducstCount,
+        totalProducstCountStatus: totalProducstCountStatus ?? this.totalProducstCountStatus,);
+
+
 }

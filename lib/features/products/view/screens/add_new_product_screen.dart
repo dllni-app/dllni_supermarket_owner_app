@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../../../core/themes/app_colors.dart';
-import '../../../../core/widgets/app_simple_app_bar.dart';
+import '../../../../core/widgets/app_app_bars.dart';
 import '../widgets/add_product_way_card.dart';
 
 @AutoRoutePage(path: "/products/new_product")
@@ -47,24 +47,24 @@ class AddNewProductScreen extends StatelessWidget {
                           onTap: () {},
                           backgroundColor: Color(0xFFEFF6FF),
                           foregroundColor: Color(0xFF2563EB),
-                          icon: FontAwesomeIcons.camera,
+                          icon: FontAwesomeIcons.solidCamera,
                           title: "البحث في الكتالوج المركزي",
                           subtitle:
                               "ارفع صورة المنيو ليتم استخراج المنتجات تلقائياً",
                           hint: "موصى بها",
                         ),
                         AddProductWayCard(
+                          onTap: () {},
+                          backgroundColor: Color(0x1FF96CC8),
+                          foregroundColor: Color(0xFFFF15A5),
+                          icon: FontAwesomeIcons.pen,
+                          title: "إضافة منتج يدوياً",
+                          subtitle: "اكتب كامل تفاصيل منتجك يدوياً ",
+                        ),
+                        AddProductWayCard(
                           onTap: () {
                             context.pushRoute("/products/new_product/menu");
                           },
-                          backgroundColor: Color(0xFFF0FDF4),
-                          foregroundColor: Color(0xFF16A34A),
-                          icon: FontAwesomeIcons.listCheck,
-                          title: "اختيار من قائمة جاهزة",
-                          subtitle: "أضف من الوجبات الرائجة مع إمكانية التعديل",
-                        ),
-                        AddProductWayCard(
-                          onTap: () {},
                           backgroundColor: Color(0xFFFFF7ED),
                           foregroundColor: Color(0xFFEA580C),
                           icon: FontAwesomeIcons.solidFileExcel,

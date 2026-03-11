@@ -1,13 +1,16 @@
 import 'package:common_package/common_package.dart';
-import 'package:dllni_supermarket_owner_app/features/home/view/widgets/home_text_field_with_title.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:toastification/toastification.dart';
 
 import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_shadows.dart';
 import '../../../../../core/widgets/app_buttons.dart';
+import '../../../domain/usecases/accept_order_use_case.dart';
+import '../../../domain/usecases/get_new_orders_use_case.dart';
+import '../../manager/bloc/home_bloc.dart';
 import '../home_menu_field.dart';
-import '../home_text_field.dart';
 
 class AcceptOrderBottomSheet extends StatelessWidget {
   const AcceptOrderBottomSheet({
@@ -20,7 +23,7 @@ class AcceptOrderBottomSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(top: 50),
+      margin: EdgeInsets.only(top: 350),
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -90,42 +93,42 @@ class AcceptOrderBottomSheet extends StatelessWidget {
                   child: Column(
                     children: [
                       SizedBox(height: 24),
-                      Row(
-                        children: [
-                          const Icon(
-                            FontAwesomeIcons.clock,
-                            size: 14,
-                            color: Color(0xFF3B82F6),
-                          ),
-                          const SizedBox(width: 8),
-                          AppText(
-                            "وقت التجهيز المتوقع",
-                            style: const TextStyle(
-                              color: Color(0xFF374151),
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                              height: 1.42,
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 12),
-                      TimeChoices(
-                        minutes: [15, 25, 35, 45],
-                        onChanged: (value) {
-                          print(value);
-                        },
-                      ),
-                      SizedBox(height: 12),
-                      HomeTextField(
-                        hintText: "أدخل وقت مخصص (دقيقة)",
-                        prefix: Icon(
-                          FontAwesomeIcons.solidHourglassHalf,
-                          color: Color(0xFF9CA3AF),
-                          size: 16,
-                        ),
-                      ),
-                      SizedBox(height: 24),
+                      // Row(
+                      //   children: [
+                      //     const Icon(
+                      //       FontAwesomeIcons.clock,
+                      //       size: 14,
+                      //       color: Color(0xFF3B82F6),
+                      //     ),
+                      //     const SizedBox(width: 8),
+                      //     AppText(
+                      //       "وقت التجهيز المتوقع",
+                      //       style: const TextStyle(
+                      //         color: Color(0xFF374151),
+                      //         fontSize: 14,
+                      //         fontWeight: FontWeight.w700,
+                      //         height: 1.42,
+                      //       ),
+                      //     ),
+                      //   ],
+                      // ),
+                      // SizedBox(height: 12),
+                      // TimeChoices(
+                      //   minutes: [15, 25, 35, 45],
+                      //   onChanged: (value) {
+                      //     print(value);
+                      //   },
+                      // ),
+                      // SizedBox(height: 12),
+                      // HomeTextField(
+                      //   hintText: "أدخل وقت مخصص (دقيقة)",
+                      //   prefix: Icon(
+                      //     FontAwesomeIcons.solidHourglassHalf,
+                      //     color: Color(0xFF9CA3AF),
+                      //     size: 16,
+                      //   ),
+                      // ),
+                      // SizedBox(height: 24),
                       HomeMenuField(
                         hintText: "اختر موظف...",
                         items: [
@@ -145,13 +148,13 @@ class AcceptOrderBottomSheet extends StatelessWidget {
                         icon: FontAwesomeIcons.userGroup,
                       ),
                       SizedBox(height: 24),
-                      HomeTextFieldWithTitle(
-                        title: "ملاحظات المطبخ",
-                        hintText: "أضف ملاحظات خاصة للتجهيز...",
-                        icon: FontAwesomeIcons.noteSticky,
-                        maxLines: 3,
-                      ),
-                      SizedBox(height: 24),
+                      // HomeTextFieldWithTitle(
+                      //   title: "ملاحظات المطبخ",
+                      //   hintText: "أضف ملاحظات خاصة للتجهيز...",
+                      //   icon: FontAwesomeIcons.noteSticky,
+                      //   maxLines: 3,
+                      // ),
+                      // SizedBox(height: 24),
                       Container(
                         padding: EdgeInsets.all(16),
                         decoration: BoxDecoration(
@@ -293,7 +296,16 @@ class AcceptOrderBottomSheet extends StatelessWidget {
                 spacing: 12,
                 children: [
                   Expanded(
-                    child: AppButton(title: "تأكيد القبول", onTap: () {}),
+                    child: AppButton(
+                      title: "تأكيد القبول",
+                      onTap: () {
+                        context.read<HomeBloc>().add(
+                          AcceptOrderEvent(
+                            params: AcceptOrderParams(orderId: orderId),
+                          ),
+                        );
+                      },
+                    ),
                   ),
                   AppOutlinedButton(
                     title: "إلغاء",
@@ -303,6 +315,47 @@ class AcceptOrderBottomSheet extends StatelessWidget {
                 ],
               ),
             ),
+          ),
+          BlocConsumer<HomeBloc, HomeState>(
+            buildWhen: (previous, current) =>
+                previous.acceptOrderStatus != current.acceptOrderStatus,
+            listenWhen: (previous, current) =>
+                previous.acceptOrderStatus != current.acceptOrderStatus,
+            listener: (context, state) {
+              if (state.acceptOrderStatus == BlocStatus.failed) {
+                print(state.errorMessage);
+                AppToast.showToast(
+                  context: context,
+                  message: state.errorMessage ?? "Unknown Error",
+                  type: ToastificationType.error,
+                );
+              } else if (state.acceptOrderStatus == BlocStatus.success) {
+                AppToast.showToast(
+                  context: context,
+                  message: "تم قبول الطلب بنجاح",
+                  type: ToastificationType.success,
+                );
+                context.pop();
+                context.read<HomeBloc>().add(
+                  GetNewOrdersEvent(params: GetNewOrdersParams()),
+                );
+              }
+            },
+            builder: (context, state) => switch (state.acceptOrderStatus) {
+              BlocStatus.loading => Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0x4D000000),
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(24),
+                    ),
+                  ),
+                  alignment: Alignment.center,
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+              _ => SizedBox(),
+            },
           ),
         ],
       ),

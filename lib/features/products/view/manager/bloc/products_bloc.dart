@@ -9,12 +9,15 @@ import '../../../domain/usecases/get_categories_use_case.dart';
 import '../../../data/models/get_categories_model.dart';
 import '../../../domain/usecases/get_low_stock_use_case.dart';
 import '../../../data/models/get_low_stock_model.dart';
+import '../../../domain/usecases/total_producst_count_use_case.dart';
+import '../../../data/models/total_producst_count_model.dart';
 
 part 'products_event.dart';
 part 'products_state.dart';
 
 @injectable
 class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
+  final TotalProducstCountUseCase totalProducstCountUseCase;
   final GetLowStockUseCase getLowStockUseCase;
   final GetCategoriesUseCase getCategoriesUseCase;
   final GetProductsUseCase getProductsUseCase;
@@ -22,11 +25,12 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
     this.getProductsUseCase,
     this.getCategoriesUseCase,
     this.getLowStockUseCase,
-  ) : super(ProductsState()) {
+    this.totalProducstCountUseCase,) : super(ProductsState()) {
     on<GetProductsEvent>(_getProducts, transformer: droppableProMax());
     on<GetCategoriesEvent>(_getCategories, transformer: droppableProMax());
     on<GetLowStockEvent>(_getLowStock);
-  }
+  
+    on<TotalProducstCountEvent>(_totalProducstCount);}
 
   EventTransformer<T> droppableProMax<T extends EventWithReload>() {
     return (events, mapper) {
@@ -114,4 +118,20 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
       },
     );
   }
-}
+
+
+  FutureOr<void> _totalProducstCount(TotalProducstCountEvent event, Emitter<ProductsState> emit) async {
+    emit(state.copyWith(totalProducstCountStatus: BlocStatus.loading));
+    final res = await totalProducstCountUseCase(event.params);
+    res.fold((l) {
+      emit(state.copyWith(
+        totalProducstCountStatus: BlocStatus.failed,
+        errorMessage: l.message,
+      ));
+    }, (r) {
+      emit(state.copyWith(
+        totalProducstCountStatus: BlocStatus.success,
+        totalProducstCount: r,
+      ));
+    });
+  }}

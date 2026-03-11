@@ -1,5 +1,6 @@
-import 'package:common_package/theme/text_theme.dart';
+import 'package:common_package/common_package.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../../../../core/themes/app_colors.dart';
 
@@ -7,6 +8,68 @@ class HomeAppBar extends StatelessWidget {
   final String shopName;
   final String shopAddress;
   const HomeAppBar({
+    super.key,
+    required this.shopName,
+    required this.shopAddress,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width;
+    return Container(
+      width: width,
+      padding: EdgeInsets.fromLTRB(
+        24,
+        26 + MediaQuery.paddingOf(context).top,
+        24,
+        20,
+      ),
+      // decoration: BoxDecoration(
+      //   color: Colors.white,
+      //   borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
+      //   border: Border(bottom: BorderSide(width: 2, color: AppColors.accent)),
+      //   boxShadow: [
+      //     BoxShadow(
+      //       offset: Offset(0, 1),
+      //       blurRadius: 2,
+      //       color: Color(0x0D000000),
+      //     ),
+      //   ],
+      // ),
+      child: Row(
+        spacing: 12,
+        children: [
+          Icon(FontAwesomeIcons.store, color: AppColors.primary, size: 29),
+          AppText(
+            "سوبر ماركت السلطان",
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              height: 1.0,
+            ),
+          ),
+          Spacer(),
+          GestureDetector(
+            onTap: () {
+              context.pushRoute("/notification_screen");
+            },
+            child: Icon(
+              FontAwesomeIcons.bell,
+              color: AppColors.primary,
+              size: 30,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class HomeAppBarOld extends StatelessWidget {
+  final String shopName;
+  final String shopAddress;
+  const HomeAppBarOld({
     super.key,
     required this.shopName,
     required this.shopAddress,
@@ -63,68 +126,7 @@ class HomeAppBar extends StatelessWidget {
               ],
             ),
           ),
-          CircleIconButton(
-            icon: Icons.notifications_none_outlined,
-            onTap: () {},
-            showBadge: true,
-          ),
         ],
-      ),
-    );
-  }
-}
-
-class CircleIconButton extends StatelessWidget {
-  const CircleIconButton({
-    super.key,
-    required this.icon,
-    this.onTap,
-    this.showBadge = false,
-  });
-
-  final IconData icon;
-  final VoidCallback? onTap;
-  final bool showBadge;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(14),
-      child: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              blurRadius: 12,
-              offset: const Offset(0, 6),
-              color: Colors.black.withValues(alpha: 0.06),
-            ),
-          ],
-        ),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Icon(icon, color: const Color(0xFF6B7280), size: 20),
-            if (showBadge)
-              Positioned(
-                top: 10,
-                right: 12,
-                child: Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFEF4444),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppColors.white, width: 1.5),
-                  ),
-                ),
-              ),
-          ],
-        ),
       ),
     );
   }

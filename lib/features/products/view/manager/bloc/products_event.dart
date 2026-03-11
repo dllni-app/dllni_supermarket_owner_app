@@ -24,3 +24,9 @@ class GetProductsEvent extends ProductsEvent with EventWithReload {
 
   GetProductsEvent({required this.params, this.isReload = false});
 }
+
+class TotalProducstCountEvent extends ProductsEvent {
+  final TotalProducstCountParams params;
+
+  TotalProducstCountEvent({required this.params});
+}

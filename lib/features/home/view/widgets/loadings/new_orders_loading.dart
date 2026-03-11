@@ -14,7 +14,7 @@ class NewOrdersLoading extends StatelessWidget {
       highlightColor: Colors.grey.shade100,
       child: Column(
         children: [
-          NewOrderCard(
+          NewOrderCardOld(
             order: GetNewOrdersModelDataItem.fromJson({
               "id": 1,
               "customerId": 20,
@@ -42,7 +42,7 @@ class NewOrdersLoading extends StatelessWidget {
             }),
           ),
           SizedBox(height: 12),
-          NewOrderCard(
+          NewOrderCardOld(
             order: GetNewOrdersModelDataItem.fromJson({
               "id": 1,
               "customerId": 20,

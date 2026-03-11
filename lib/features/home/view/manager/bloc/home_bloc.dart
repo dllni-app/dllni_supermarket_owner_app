@@ -11,12 +11,18 @@ import '../../../domain/usecases/get_preparing_orders_use_case.dart';
 import '../../../data/models/get_preparing_orders_model.dart';
 import '../../../domain/usecases/reject_order_use_case.dart';
 import '../../../data/models/reject_order_model.dart';
+import '../../../domain/usecases/get_daily_count_use_case.dart';
+import '../../../data/models/get_daily_count_model.dart';
+import '../../../domain/usecases/accept_order_use_case.dart';
+import '../../../data/models/accept_order_model.dart';
 
 part 'home_event.dart';
 part 'home_state.dart';
 
 @injectable
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
+  final AcceptOrderUseCase acceptOrderUseCase;
+  final GetDailyCountUseCase getDailyCountUseCase;
   final RejectOrderUseCase rejectOrderUseCase;
   final GetPreparingOrdersUseCase getPreparingOrdersUseCase;
   final GetNewOrdersUseCase getNewOrdersUseCase;
@@ -25,13 +31,17 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     this.getDashboardOverviewUseCase,
     this.getNewOrdersUseCase,
     this.getPreparingOrdersUseCase,
-    this.rejectOrderUseCase,) : super(HomeState()) {
+    this.rejectOrderUseCase,
+    this.getDailyCountUseCase,
+    this.acceptOrderUseCase,) : super(HomeState()) {
     
   
     on<GetDashboardOverviewEvent>(_getDashboardOverview);
     on<GetNewOrdersEvent>(_getNewOrders, transformer: droppableProMax());
     on<GetPreparingOrdersEvent>(_getPreparingOrders, transformer: droppableProMax());
-    on<RejectOrderEvent>(_rejectOrder);}
+    on<RejectOrderEvent>(_rejectOrder);
+    on<GetDailyCountEvent>(_getDailyCount);
+    on<AcceptOrderEvent>(_acceptOrder);}
 
 
   FutureOr<void> _getDashboardOverview(GetDashboardOverviewEvent event, Emitter<HomeState> emit) async {
@@ -106,6 +116,38 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       emit(state.copyWith(
         rejectOrderStatus: BlocStatus.success,
         rejectOrder: r,
+      ));
+    });
+  }
+
+  FutureOr<void> _getDailyCount(GetDailyCountEvent event, Emitter<HomeState> emit) async {
+    emit(state.copyWith(dailyCountStatus: BlocStatus.loading));
+    final res = await getDailyCountUseCase(event.params);
+    res.fold((l) {
+      emit(state.copyWith(
+        dailyCountStatus: BlocStatus.failed,
+        errorMessage: l.message,
+      ));
+    }, (r) {
+      emit(state.copyWith(
+        dailyCountStatus: BlocStatus.success,
+        dailyCount: r,
+      ));
+    });
+  }
+
+  FutureOr<void> _acceptOrder(AcceptOrderEvent event, Emitter<HomeState> emit) async {
+    emit(state.copyWith(acceptOrderStatus: BlocStatus.loading));
+    final res = await acceptOrderUseCase(event.params);
+    res.fold((l) {
+      emit(state.copyWith(
+        acceptOrderStatus: BlocStatus.failed,
+        errorMessage: l.message,
+      ));
+    }, (r) {
+      emit(state.copyWith(
+        acceptOrderStatus: BlocStatus.success,
+        acceptOrder: r,
       ));
     });
   }}

@@ -9,6 +9,10 @@ import '../models/get_preparing_orders_model.dart';
 import '../../domain/usecases/get_preparing_orders_use_case.dart';
 import '../models/reject_order_model.dart';
 import '../../domain/usecases/reject_order_use_case.dart';
+import '../models/get_daily_count_model.dart';
+import '../../domain/usecases/get_daily_count_use_case.dart';
+import '../models/accept_order_model.dart';
+import '../../domain/usecases/accept_order_use_case.dart';
 
 @lazySingleton
 class HomeRemoteDataSource with HandlingApiManager {
@@ -61,6 +65,28 @@ class HomeRemoteDataSource with HandlingApiManager {
         params: params.getParams(),
       ),
       jsonConvert: rejectOrderModelFromJson,
+    );
+  }
+
+  Future<GetDailyCountModel> getDailyCount(GetDailyCountParams params) {
+    return wrapHandlingApi(
+      tryCall: () => dioNetwork.getData(
+        endPoint: '/api/v1/sm-orders/hourly-count',
+        params: params.getParams(),
+        data: params.getBody().isEmpty ? null : params.getBody(),
+      ),
+      jsonConvert: getDailyCountModelFromJson,
+    );
+  }
+
+  Future<AcceptOrderModel> acceptOrder(AcceptOrderParams params) {
+    return wrapHandlingApi(
+      tryCall: () => dioNetwork.postData(
+        endPoint: '/api/v1/store-owner/orders/${params.orderId}/accept',
+        data: params.getBody(),
+        params: params.getParams(),
+      ),
+      jsonConvert: acceptOrderModelFromJson,
     );
   }
 }

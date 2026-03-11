@@ -7,6 +7,10 @@ import '../usecases/get_preparing_orders_use_case.dart';
 import '../../data/models/get_preparing_orders_model.dart';
 import '../usecases/reject_order_use_case.dart';
 import '../../data/models/reject_order_model.dart';
+import '../usecases/get_daily_count_use_case.dart';
+import '../../data/models/get_daily_count_model.dart';
+import '../usecases/accept_order_use_case.dart';
+import '../../data/models/accept_order_model.dart';
 abstract class HomeRepo {
   DataResponse<GetDashboardOverviewModel> getDashboardOverview(GetDashboardOverviewParams params);
 
@@ -15,4 +19,8 @@ abstract class HomeRepo {
   DataResponse<GetPreparingOrdersModel> getPreparingOrders(GetPreparingOrdersParams params);
 
   DataResponse<RejectOrderModel> rejectOrder(RejectOrderParams params);
+
+  DataResponse<GetDailyCountModel> getDailyCount(GetDailyCountParams params);
+
+  DataResponse<AcceptOrderModel> acceptOrder(AcceptOrderParams params);
 }

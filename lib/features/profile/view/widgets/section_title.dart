@@ -10,12 +10,21 @@ class SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
+        SizedBox(width: 16),
         SizedBox(
           height: 20,
-          child: VerticalDivider(color: Colors.black, thickness: 4, radius: BorderRadius.circular(9999)),
+          child: VerticalDivider(
+            color: Colors.black,
+            thickness: 4,
+            radius: BorderRadius.circular(9999),
+          ),
         ),
         SizedBox(width: 8),
-        AppText.titleMedium(title, fontWeight: FontWeight.bold),
+        AppText.titleMedium(
+          title,
+          fontWeight: FontWeight.bold,
+          style: TextStyle(fontSize: 18 ),
+        ),
       ],
     );
   }

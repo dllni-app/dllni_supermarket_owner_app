@@ -9,7 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../../../core/themes/app_colors.dart';
 import '../../../../core/themes/app_shadows.dart';
 import '../../../../core/utils/app_images.dart';
-import '../../../../core/widgets/app_simple_app_bar.dart';
+import '../../../../core/widgets/app_app_bars.dart';
 import '../widgets/gradient_button.dart';
 import '../widgets/product_text_field.dart';
 

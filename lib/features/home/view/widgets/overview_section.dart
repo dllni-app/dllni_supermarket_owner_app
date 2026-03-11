@@ -9,8 +9,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_gradients.dart';
 import '../../../../../core/themes/app_shadows.dart';
-import '../../../../../core/utils/app_images.dart';
 import '../../../../../core/widgets/failure_widget.dart';
+import '../../../../core/utils/app_images.dart';
 import '../manager/bloc/home_bloc.dart';
 import 'loadings/overview_section_loading.dart';
 import 'overview_state_card.dart';
@@ -23,7 +23,6 @@ class OverviewSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       spacing: 12,
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -134,7 +133,14 @@ class OverviewSection extends StatelessWidget {
                               Row(
                                 spacing: 8,
                                 children: [
-                                  SellingIndicator(percent: 15),
+                                  SellingIndicator(
+                                    percent:
+                                        state
+                                            .dashboardOverview
+                                            ?.data
+                                            ?.salesPercentageChange ??
+                                        0,
+                                  ),
                                   AppText(
                                     "مقارنة بالأمس",
                                     style: TextStyle(
@@ -149,6 +155,11 @@ class OverviewSection extends StatelessWidget {
                           ),
                         ),
                         AppImage.asset(AppImages.databases, size: 60),
+                        // Icon(
+                        //   FontAwesomeIcons.database,
+                        //   color: Color(0xFFC2C8F0),
+                        //   size: 60,
+                        // ),
                       ],
                     ),
                   ),
@@ -168,10 +179,11 @@ class OverviewSection extends StatelessWidget {
                         child: OverviewStatCard(
                           backgroundColor: const Color(0x33F97316),
                           foregroundColor: const Color(0xFFFB923C),
-                          icon: FontAwesomeIcons.fireBurner,
+                          icon: FontAwesomeIcons.bagShopping,
                           label: "قيد التحضير",
                           value:
-                              state.dashboardOverview?.data?.pendingOrders ?? -1,
+                              state.dashboardOverview?.data?.pendingOrders ??
+                              -1,
                         ),
                       ),
                       Expanded(

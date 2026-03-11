@@ -6,6 +6,9 @@ import '../models/get_categories_model.dart';
 import '../../domain/usecases/get_categories_use_case.dart';
 import '../models/get_low_stock_model.dart';
 import '../../domain/usecases/get_low_stock_use_case.dart';
+import 'package:common_package/helpers/api_handler.dart';
+import '../models/total_producst_count_model.dart';
+import '../../domain/usecases/total_producst_count_use_case.dart';
 
 @lazySingleton
 class ProductsRemoteDataSource with HandlingApiManager {
@@ -43,6 +46,19 @@ class ProductsRemoteDataSource with HandlingApiManager {
         data: params.getBody().isEmpty ? null : params.getBody(),
       ),
       jsonConvert: getLowStockModelFromJson,
+    );
+  }
+
+  Future<TotalProducstCountModel> totalProducstCount(
+    TotalProducstCountParams params,
+  ) {
+    return wrapHandlingApi(
+      tryCall: () => dioNetwork.getData(
+        endPoint: '/api/v1/sm-products/available-count',
+        params: params.getParams(),
+        data: params.getBody().isEmpty ? null : params.getBody(),
+      ),
+      jsonConvert: totalProducstCountModelFromJson,
     );
   }
 }

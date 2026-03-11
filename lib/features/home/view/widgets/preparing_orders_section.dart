@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../../../../core/themes/app_colors.dart';
+import '../../../../core/widgets/failure_widget.dart';
 import '../../domain/usecases/get_preparing_orders_use_case.dart';
 import '../manager/bloc/home_bloc.dart';
 import 'loadings/preparing_orders_loading.dart';
@@ -37,41 +38,50 @@ class PreparingOrdersSection extends StatelessWidget {
                   emptyWidget: SizedBox(),
                   successWidget: () => state.preparingOrders!.isEmpty
                       ? SizedBox()
-                      : Container(
-                          padding: EdgeInsets.symmetric(
-                            vertical: 2,
-                            horizontal: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFEF4444),
-                            borderRadius: BorderRadius.all(Radius.circular(20)),
-                          ),
-                          child: AppText(
-                            state.preparingOrders!.length.toString(),
-                            style: TextStyle(
-                              color: AppColors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w700,
-                              height: 1.5,
-                            ),
+                      : Expanded(
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                  vertical: 2,
+                                  horizontal: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFEF4444),
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(20),
+                                  ),
+                                ),
+                                child: AppText(
+                                  state.preparingOrders!.length.toString(),
+                                  style: TextStyle(
+                                    color: AppColors.white,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w700,
+                                    height: 1.5,
+                                  ),
+                                ),
+                              ),
+                              Spacer(),
+                              InkWell(
+                                onTap: () {},
+                                child: AppText(
+                                  "عرض الجدول",
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Color(0xFF9CA3AF),
+                                    fontWeight: FontWeight.w700,
+                                    height: 1.333,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
+
                   failedWidget: SizedBox(),
                 );
               },
-            ),
-            Spacer(),
-            InkWell(
-              onTap: () {},
-              child: AppText(
-                "عرض الجدول",
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Color(0xFF9CA3AF),
-                  fontWeight: FontWeight.w700,
-                  height: 1.333,
-                ),
-              ),
             ),
           ],
         ),
@@ -123,6 +133,14 @@ class PreparingOrdersSection extends StatelessWidget {
                   GetPreparingOrdersEvent(params: GetPreparingOrdersParams()),
                 );
               },
+              failedWidget: FailureWidget(
+                message: state.errorMessage ?? "Error an occurred",
+                onRetry: () {
+                  context.read<HomeBloc>().add(
+                    GetPreparingOrdersEvent(params: GetPreparingOrdersParams()),
+                  );
+                },
+              ),
             );
           },
         ),

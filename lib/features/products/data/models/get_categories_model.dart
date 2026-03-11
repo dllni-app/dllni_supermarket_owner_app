@@ -70,47 +70,66 @@ dynamic _asDynamic(dynamic value) {
   return value.toString();
 }
 
-GetCategoriesModel getCategoriesModelFromJson(str) => GetCategoriesModel.fromJson(str);
+GetCategoriesModel getCategoriesModelFromJson(str) =>
+    GetCategoriesModel.fromJson(str);
 
-String getCategoriesModelToJson(GetCategoriesModel data) => json.encode(data.toJson());
+String getCategoriesModelToJson(GetCategoriesModel data) =>
+    json.encode(data.toJson());
 
+GetCategoriesModelMeta getCategoriesModelMetaFromJson(str) =>
+    GetCategoriesModelMeta.fromJson(str);
 
-GetCategoriesModelMeta getCategoriesModelMetaFromJson(str) => GetCategoriesModelMeta.fromJson(str);
+String getCategoriesModelMetaToJson(GetCategoriesModelMeta data) =>
+    json.encode(data.toJson());
 
-String getCategoriesModelMetaToJson(GetCategoriesModelMeta data) => json.encode(data.toJson());
+GetCategoriesModelMetaLinksItem getCategoriesModelMetaLinksItemFromJson(str) =>
+    GetCategoriesModelMetaLinksItem.fromJson(str);
 
+String getCategoriesModelMetaLinksItemToJson(
+  GetCategoriesModelMetaLinksItem data,
+) => json.encode(data.toJson());
 
-GetCategoriesModelMetaLinksItem getCategoriesModelMetaLinksItemFromJson(str) => GetCategoriesModelMetaLinksItem.fromJson(str);
+GetCategoriesModelLinks getCategoriesModelLinksFromJson(str) =>
+    GetCategoriesModelLinks.fromJson(str);
 
-String getCategoriesModelMetaLinksItemToJson(GetCategoriesModelMetaLinksItem data) => json.encode(data.toJson());
+String getCategoriesModelLinksToJson(GetCategoriesModelLinks data) =>
+    json.encode(data.toJson());
 
+GetCategoriesModelDataItem getCategoriesModelDataItemFromJson(str) =>
+    GetCategoriesModelDataItem.fromJson(str);
 
-GetCategoriesModelLinks getCategoriesModelLinksFromJson(str) => GetCategoriesModelLinks.fromJson(str);
-
-String getCategoriesModelLinksToJson(GetCategoriesModelLinks data) => json.encode(data.toJson());
-
-
-GetCategoriesModelDataItem getCategoriesModelDataItemFromJson(str) => GetCategoriesModelDataItem.fromJson(str);
-
-String getCategoriesModelDataItemToJson(GetCategoriesModelDataItem data) => json.encode(data.toJson());
-
+String getCategoriesModelDataItemToJson(GetCategoriesModelDataItem data) =>
+    json.encode(data.toJson());
 
 class GetCategoriesModel {
   List<GetCategoriesModelDataItem>? data;
   GetCategoriesModelLinks? links;
   GetCategoriesModelMeta? meta;
 
-  GetCategoriesModel({
-    this.data,
-    this.links,
-    this.meta,
-  });
+  GetCategoriesModel({this.data, this.links, this.meta});
 
   factory GetCategoriesModel.fromJson(Map<String, dynamic> json) {
     return GetCategoriesModel(
-      data: json['data'] is List ? (json['data'] as List).whereType<Map>().map((item) => GetCategoriesModelDataItem.fromJson(Map<String, dynamic>.from(item))).toList() : null,
-      links: json['links'] is Map ? GetCategoriesModelLinks.fromJson(Map<String, dynamic>.from(json['links'] as Map)) : null,
-      meta: json['meta'] is Map ? GetCategoriesModelMeta.fromJson(Map<String, dynamic>.from(json['meta'] as Map)) : null,
+      data: json['data'] is List
+          ? (json['data'] as List)
+                .whereType<Map>()
+                .map(
+                  (item) => GetCategoriesModelDataItem.fromJson(
+                    Map<String, dynamic>.from(item),
+                  ),
+                )
+                .toList()
+          : null,
+      links: json['links'] is Map
+          ? GetCategoriesModelLinks.fromJson(
+              Map<String, dynamic>.from(json['links'] as Map),
+            )
+          : null,
+      meta: json['meta'] is Map
+          ? GetCategoriesModelMeta.fromJson(
+              Map<String, dynamic>.from(json['meta'] as Map),
+            )
+          : null,
     );
   }
 
@@ -149,7 +168,16 @@ class GetCategoriesModelMeta {
       currentPage: _asInt(json['current_page']),
       from: _asInt(json['from']),
       lastPage: _asInt(json['last_page']),
-      links: json['links'] is List ? (json['links'] as List).whereType<Map>().map((item) => GetCategoriesModelMetaLinksItem.fromJson(Map<String, dynamic>.from(item))).toList() : null,
+      links: json['links'] is List
+          ? (json['links'] as List)
+                .whereType<Map>()
+                .map(
+                  (item) => GetCategoriesModelMetaLinksItem.fromJson(
+                    Map<String, dynamic>.from(item),
+                  ),
+                )
+                .toList()
+          : null,
       path: _asString(json['path']),
       perPage: _asInt(json['per_page']),
       to: _asInt(json['to']),
@@ -194,12 +222,7 @@ class GetCategoriesModelMetaLinksItem {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'url': url,
-      'label': label,
-      'page': page,
-      'active': active,
-    };
+    return {'url': url, 'label': label, 'page': page, 'active': active};
   }
 }
 
@@ -209,12 +232,7 @@ class GetCategoriesModelLinks {
   dynamic prev;
   dynamic next;
 
-  GetCategoriesModelLinks({
-    this.first,
-    this.last,
-    this.prev,
-    this.next,
-  });
+  GetCategoriesModelLinks({this.first, this.last, this.prev, this.next});
 
   factory GetCategoriesModelLinks.fromJson(Map<String, dynamic> json) {
     return GetCategoriesModelLinks(
@@ -226,12 +244,7 @@ class GetCategoriesModelLinks {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'first': first,
-      'last': last,
-      'prev': prev,
-      'next': next,
-    };
+    return {'first': first, 'last': last, 'prev': prev, 'next': next};
   }
 }
 
@@ -244,6 +257,7 @@ class GetCategoriesModelDataItem {
   int? sortOrder;
   dynamic imagePath;
   bool? isActive;
+  int? productsCount;
   String? createdAt;
   String? updatedAt;
 
@@ -256,6 +270,7 @@ class GetCategoriesModelDataItem {
     this.sortOrder,
     this.imagePath,
     this.isActive,
+    this.productsCount,
     this.createdAt,
     this.updatedAt,
   });
@@ -270,6 +285,7 @@ class GetCategoriesModelDataItem {
       sortOrder: _asInt(json['sortOrder']),
       imagePath: _asDynamic(json['imagePath']),
       isActive: _asBool(json['isActive']),
+      productsCount: _asInt(json['productsCount']),
       createdAt: _asString(json['createdAt']),
       updatedAt: _asString(json['updatedAt']),
     );
@@ -285,6 +301,7 @@ class GetCategoriesModelDataItem {
       'sortOrder': sortOrder,
       'imagePath': imagePath,
       'isActive': isActive,
+      'productsCount': productsCount,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
     };

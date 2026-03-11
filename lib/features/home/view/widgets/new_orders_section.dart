@@ -1,5 +1,5 @@
 import 'package:common_package/common_package.dart';
-import 'package:dllni_supermarket_owner_app/features/home/domain/usecases/get_new_orders_use_case.dart';
+import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -8,7 +8,9 @@ import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/widgets/app_buttons.dart';
 import '../../../../core/widgets/failure_widget.dart';
 import '../../data/models/get_new_orders_model.dart';
+import '../../domain/usecases/get_new_orders_use_case.dart';
 import '../manager/bloc/home_bloc.dart';
+import '../screens/all_new_orders_screen.dart';
 import 'loadings/new_orders_loading.dart';
 import 'sheets/accept_order_bottom_sheet.dart';
 import 'sheets/reject_order_bottom_sheet.dart';
@@ -19,7 +21,6 @@ class NewOrdersSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 12,
       children: [
         Row(
@@ -43,44 +44,56 @@ class NewOrdersSection extends StatelessWidget {
                   emptyWidget: SizedBox(),
                   successWidget: () => state.newOrders!.isEmpty
                       ? SizedBox()
-                      : Row(
-                          children: [
-                            Container(
-                              padding: EdgeInsets.symmetric(
-                                vertical: 2,
-                                horizontal: 6,
-                              ),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFEF4444),
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(20),
+                      : Expanded(
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                  vertical: 2,
+                                  horizontal: 6,
                                 ),
-                              ),
-                              child: AppText(
-                                state.newOrders!.length.toString(),
-                                style: TextStyle(
-                                  color: AppColors.white,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w700,
-                                  height: 1.5,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFEF4444),
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(20),
+                                  ),
                                 ),
-                              ),
-                            ),
-                            Spacer(),
-                            if (state.newOrders!.length > 2)
-                              InkWell(
-                                onTap: () {},
                                 child: AppText(
-                                  "عرض الكل",
+                                  state.newOrders!.length.toString(),
                                   style: TextStyle(
-                                    fontSize: 12,
-                                    color: Color(0xB22F2B3D),
+                                    color: AppColors.white,
+                                    fontSize: 10,
                                     fontWeight: FontWeight.w700,
-                                    height: 1.333,
+                                    height: 1.5,
                                   ),
                                 ),
                               ),
-                          ],
+                              Spacer(),
+                              if (state.newOrders!.length > 2)
+                                InkWell(
+                                  onTap: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (_) => BlocProvider.value(
+                                          value: context.read<HomeBloc>(),
+                                          child: const AllNewOrdersScreen(),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: AppText(
+                                    "عرض الكل",
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Color(0xB22F2B3D),
+                                      fontWeight: FontWeight.w700,
+                                      height: 1.333,
+                                    ),
+                                  ),
+                                ),
+                              SizedBox(width: 26),
+                            ],
+                          ),
                         ),
                   failedWidget: SizedBox(),
                 );
@@ -117,7 +130,7 @@ class NewOrdersSection extends StatelessWidget {
                 );
               },
               failedWidget: FailureWidget(
-                message: "Error an occurred",
+                message: state.errorMessage ?? "Error an occurred",
                 onRetry: () {
                   context.read<HomeBloc>().add(
                     GetNewOrdersEvent(params: GetNewOrdersParams()),
@@ -134,6 +147,214 @@ class NewOrdersSection extends StatelessWidget {
 
 class NewOrderCard extends StatelessWidget {
   const NewOrderCard({super.key, required this.order});
+  final GetNewOrdersModelDataItem order;
+
+  String get delay {
+    final Duration diffDate = DateTime.now().difference(
+      DateTime.parse(order.updatedAt!),
+    );
+    if (diffDate.inDays != 0) return "${diffDate.inDays} يوم";
+    if (diffDate.inHours != 0) return "${diffDate.inHours} ساعة";
+    if (diffDate.inMinutes != 0) return "${diffDate.inMinutes} دقيقة";
+    return "${diffDate.inSeconds} ثانية";
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return DottedBorder(
+      options: RoundedRectDottedBorderOptions(
+        dashPattern: const [10, 10],
+        strokeWidth: 1,
+        color: const Color(0xFF8591E0),
+        radius: const Radius.circular(8),
+      ),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 13, vertical: 16),
+        decoration: BoxDecoration(
+          color: Color(0x1F8591E0),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Column(
+          spacing: 16,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(12)),
+                    color: const Color(0xFF1F2937),
+                  ),
+                  child: Icon(
+                    FontAwesomeIcons.solidUser,
+                    size: 16,
+                    color: const Color(0xFF9CA3AF),
+                  ),
+                ),
+                SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    AppText(
+                      "عبدالله المحمد",
+                      style: TextStyle(
+                        color: Color(0xE52F2B3D),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        height: 1.42,
+                      ),
+                    ),
+                    AppText(
+                      "#${order.orderNumber} • منذ $delay",
+                      textDirection: TextDirection.ltr,
+                      style: TextStyle(
+                        color: Color(0x992F2B3D),
+                        fontSize: 10,
+                        fontWeight: FontWeight.w500,
+                        height: 1.5,
+                      ),
+                    ),
+                  ],
+                ),
+                Spacer(),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 9, vertical: 7),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(4)),
+                    color: AppColors.accent,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      AppText(
+                        "${order.totalAmount} ل.س",
+                        style: TextStyle(
+                          color: AppColors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          height: 1.53,
+                        ),
+                      ),
+                      SizedBox(width: 8),
+                      AppText(
+                        "نقدي",
+                        style: TextStyle(
+                          color: AppColors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          height: 1.53,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            Container(
+              width: context.width,
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                borderRadius: BorderRadius.all(Radius.circular(8)),
+              ),
+              child: Column(
+                spacing: 12,
+                children: [
+                  _RequirementRow(label: "1- سيتي كورن ( نكهة الحار و الحلو )"),
+                  _RequirementRow(label: "2- سطل لبن بقر"),
+                  _RequirementRow(label: "4- علبة كاتشب العجمي (حار) * 2"),
+                  _RequirementRow(label: "3- كيس كريم توم العجمي * 2"),
+                  _RequirementRow(label: "5- كيس مخلل الأزرق * 2"),
+                ],
+              ),
+            ),
+            Row(
+              spacing: 16,
+              children: [
+                Expanded(
+                  child: AppButton(
+                    title: "قبول الطلب",
+                    onTap: () {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (_) => BlocProvider.value(
+                          value: context.read<HomeBloc>(),
+                          child: AcceptOrderBottomSheet(
+                            orderId: order.id!,
+                            orderNumber: order.orderNumber!,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                AppOutlinedButton(
+                  title: "رفض",
+                  color: const Color(0xFFFF4C51),
+                  onTap: () {
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      builder: (_) => BlocProvider.value(
+                        value: context.read<HomeBloc>(),
+                        child: RejectOrderBottomSheet(
+                          orderId: order.id!,
+                          orderNumber: order.orderNumber!,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RequirementRow extends StatelessWidget {
+  const _RequirementRow({required this.label});
+
+  final String label;
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        AppText(
+          label,
+          style: TextStyle(
+            color: Color(0xE52F2B3D),
+            fontSize: 12,
+            height: 1.333,
+          ),
+        ),
+        Spacer(),
+        CircleAvatar(radius: 9.5, backgroundColor: Color(0xFFD9D9D9)),
+        SizedBox(width: 12),
+        GestureDetector(
+          onTap: () {},
+          child: Icon(
+            FontAwesomeIcons.circleQuestion,
+            color: Color(0xFFFFAF66),
+            size: 18,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class NewOrderCardOld extends StatelessWidget {
+  const NewOrderCardOld({super.key, required this.order});
   final GetNewOrdersModelDataItem order;
 
   String get delay {

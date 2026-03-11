@@ -10,6 +10,8 @@ import '../../domain/usecases/get_categories_use_case.dart';
 import '../models/get_categories_model.dart';
 import '../../domain/usecases/get_low_stock_use_case.dart';
 import '../models/get_low_stock_model.dart';
+import '../../domain/usecases/total_producst_count_use_case.dart';
+import '../models/total_producst_count_model.dart';
 
 @LazySingleton(as: ProductsRepo)
 class ProductsRepoImpl with HandlingException implements ProductsRepo {
@@ -35,6 +37,13 @@ class ProductsRepoImpl with HandlingException implements ProductsRepo {
   DataResponse<GetLowStockModel> getLowStock(GetLowStockParams params) {
     return wrapHandlingException(
       tryCall: () => productsRemoteDataSource.getLowStock(params),
+    );
+  }
+
+  @override
+  DataResponse<TotalProducstCountModel> totalProducstCount(TotalProducstCountParams params) {
+    return wrapHandlingException(
+      tryCall: () => productsRemoteDataSource.totalProducstCount(params),
     );
   }}
 

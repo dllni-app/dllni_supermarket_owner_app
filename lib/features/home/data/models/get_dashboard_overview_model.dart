@@ -70,37 +70,38 @@ dynamic _asDynamic(dynamic value) {
   return value.toString();
 }
 
-GetDashboardOverviewModel getDashboardOverviewModelFromJson(str) => GetDashboardOverviewModel.fromJson(str);
+GetDashboardOverviewModel getDashboardOverviewModelFromJson(str) =>
+    GetDashboardOverviewModel.fromJson(str);
 
-String getDashboardOverviewModelToJson(GetDashboardOverviewModel data) => json.encode(data.toJson());
+String getDashboardOverviewModelToJson(GetDashboardOverviewModel data) =>
+    json.encode(data.toJson());
 
+GetDashboardOverviewModelData getDashboardOverviewModelDataFromJson(str) =>
+    GetDashboardOverviewModelData.fromJson(str);
 
-GetDashboardOverviewModelData getDashboardOverviewModelDataFromJson(str) => GetDashboardOverviewModelData.fromJson(str);
-
-String getDashboardOverviewModelDataToJson(GetDashboardOverviewModelData data) => json.encode(data.toJson());
-
+String getDashboardOverviewModelDataToJson(
+  GetDashboardOverviewModelData data,
+) => json.encode(data.toJson());
 
 class GetDashboardOverviewModel {
   String? message;
   GetDashboardOverviewModelData? data;
 
-  GetDashboardOverviewModel({
-    this.message,
-    this.data,
-  });
+  GetDashboardOverviewModel({this.message, this.data});
 
   factory GetDashboardOverviewModel.fromJson(Map<String, dynamic> json) {
     return GetDashboardOverviewModel(
       message: _asString(json['message']),
-      data: json['data'] is Map ? GetDashboardOverviewModelData.fromJson(Map<String, dynamic>.from(json['data'] as Map)) : null,
+      data: json['data'] is Map
+          ? GetDashboardOverviewModelData.fromJson(
+              Map<String, dynamic>.from(json['data'] as Map),
+            )
+          : null,
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'message': message,
-      'data': data?.toJson(),
-    };
+    return {'message': message, 'data': data?.toJson()};
   }
 }
 
@@ -110,6 +111,7 @@ class GetDashboardOverviewModelData {
   int? newOrders;
   int? pendingOrders;
   int? totalSales;
+  int? salesPercentageChange;
 
   GetDashboardOverviewModelData({
     this.totalOrders,
@@ -117,6 +119,7 @@ class GetDashboardOverviewModelData {
     this.newOrders,
     this.pendingOrders,
     this.totalSales,
+    this.salesPercentageChange,
   });
 
   factory GetDashboardOverviewModelData.fromJson(Map<String, dynamic> json) {
@@ -126,6 +129,7 @@ class GetDashboardOverviewModelData {
       newOrders: _asInt(json['newOrders']),
       pendingOrders: _asInt(json['pendingOrders']),
       totalSales: _asInt(json['totalSales']),
+      salesPercentageChange: _asInt(json['salesPercentageChange']),
     );
   }
 
@@ -136,6 +140,7 @@ class GetDashboardOverviewModelData {
       'newOrders': newOrders,
       'pendingOrders': pendingOrders,
       'totalSales': totalSales,
+      'salesPercentageChange': salesPercentageChange,
     };
   }
 }

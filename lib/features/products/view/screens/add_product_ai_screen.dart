@@ -5,7 +5,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../core/themes/app_colors.dart';
 import '../../../../core/utils/app_images.dart';
 import '../../../../core/widgets/app_buttons.dart';
-import '../../../../core/widgets/app_simple_app_bar.dart';
+import '../../../../core/widgets/app_app_bars.dart';
 import '../widgets/expanded_product_card.dart';
 import '../widgets/gradient_button.dart';
 import '../widgets/product_image_field.dart';

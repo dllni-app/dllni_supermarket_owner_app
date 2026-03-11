@@ -22,11 +22,14 @@ class FailureWidget extends StatelessWidget {
           onPressed: onRetry,
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primary,
-            foregroundColor: AppColors.white
+            foregroundColor: AppColors.white,
           ),
           child: AppText.labelMedium(
             "إعادة المحاولة",
-            style: TextStyle(fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: AppColors.white,
+            ),
           ),
         ),
       ],

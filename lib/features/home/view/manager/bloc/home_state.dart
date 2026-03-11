@@ -1,6 +1,10 @@
 part of 'home_bloc.dart';
 
 class HomeState {
+  BlocStatus? acceptOrderStatus;
+  AcceptOrderModel? acceptOrder;
+  BlocStatus? dailyCountStatus;
+  GetDailyCountModel? dailyCount;
   BlocStatus? rejectOrderStatus;
   RejectOrderModel? rejectOrder;
   PaginationStateModel<GetPreparingOrdersModelDataItem>? preparingOrders;
@@ -17,6 +21,10 @@ class HomeState {
     this.preparingOrders = const PaginationStateModel(perPage: 10),
     this.rejectOrder,
     this.rejectOrderStatus,
+    this.dailyCount,
+    this.dailyCountStatus,
+    this.acceptOrder,
+    this.acceptOrderStatus,
   });
 
   HomeState copyWith({
@@ -27,6 +35,10 @@ class HomeState {
     PaginationStateModel<GetPreparingOrdersModelDataItem>? preparingOrders,
     RejectOrderModel? rejectOrder,
     BlocStatus? rejectOrderStatus,
+    GetDailyCountModel? dailyCount,
+    BlocStatus? dailyCountStatus,
+    AcceptOrderModel? acceptOrder,
+    BlocStatus? acceptOrderStatus,
   }) => HomeState(
     errorMessage: errorMessage ?? this.errorMessage,
     dashboardOverview: dashboardOverview ?? this.dashboardOverview,
@@ -36,5 +48,9 @@ class HomeState {
     preparingOrders: preparingOrders ?? this.preparingOrders,
     rejectOrder: rejectOrder ?? this.rejectOrder,
     rejectOrderStatus: rejectOrderStatus ?? this.rejectOrderStatus,
+    dailyCount: dailyCount ?? this.dailyCount,
+    dailyCountStatus: dailyCountStatus ?? this.dailyCountStatus,
+    acceptOrder: acceptOrder ?? this.acceptOrder,
+    acceptOrderStatus: acceptOrderStatus ?? this.acceptOrderStatus,
   );
 }

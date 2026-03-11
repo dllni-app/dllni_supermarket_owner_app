@@ -31,3 +31,15 @@ class RejectOrderEvent extends HomeEvent {
 
   RejectOrderEvent({required this.params});
 }
+
+class GetDailyCountEvent extends HomeEvent {
+  final GetDailyCountParams params;
+
+  GetDailyCountEvent({required this.params});
+}
+
+class AcceptOrderEvent extends HomeEvent {
+  final AcceptOrderParams params;
+
+  AcceptOrderEvent({required this.params});
+}
