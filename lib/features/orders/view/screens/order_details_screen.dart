@@ -470,7 +470,7 @@ class _CustomerCard extends StatelessWidget {
               width: context.width,
               padding: EdgeInsets.symmetric(vertical: 10),
               decoration: BoxDecoration(
-                color: AppColors.primary,
+                color: context.primary,
                 borderRadius: BorderRadius.all(Radius.circular(12)),
               ),
               child: Row(

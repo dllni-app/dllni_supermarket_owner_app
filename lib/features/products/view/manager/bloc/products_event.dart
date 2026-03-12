@@ -28,3 +28,15 @@ class GetCategoriesEvent extends ProductsEvent {
 
   GetCategoriesEvent({required this.params});
 }
+
+class GetProductFromImageEvent extends ProductsEvent {
+  final GetProductFromImageParams params;
+
+  GetProductFromImageEvent({required this.params});
+}
+
+class GetProductFromTextEvent extends ProductsEvent {
+  final GetProductFromTextParams params;
+
+  GetProductFromTextEvent({required this.params});
+}

@@ -13,9 +13,25 @@ class WorkingTimeScreen extends StatefulWidget {
 }
 
 class _WorkingTimeScreenState extends State<WorkingTimeScreen> {
-  static const List<String> arabicDayNames = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+  static const List<String> arabicDayNames = [
+    'الأحد',
+    'الاثنين',
+    'الثلاثاء',
+    'الأربعاء',
+    'الخميس',
+    'الجمعة',
+    'السبت',
+  ];
 
-  static const List<String> englishDayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  static const List<String> englishDayNames = [
+    'Sunday',
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +45,10 @@ class _WorkingTimeScreenState extends State<WorkingTimeScreen> {
             const WorkingTimeAppBar(),
             const SizedBox(height: 16),
             Container(
-              decoration: BoxDecoration(borderRadius: BorderRadius.circular(16), color: context.onPrimary),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                color: context.onPrimary,
+              ),
               padding: EdgeInsetsDirectional.all(16),
               margin: EdgeInsetsDirectional.symmetric(horizontal: 20),
               child: Container(
@@ -42,8 +61,16 @@ class _WorkingTimeScreenState extends State<WorkingTimeScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.door_back_door, color: Color(0xffEF4444), size: 15),
-                    AppText.bodyMedium('إغلاق مؤقت للمتجر', color: Color(0xffEF4444), fontWeight: FontWeight.bold),
+                    Icon(
+                      Icons.door_back_door,
+                      color: Color(0xffEF4444),
+                      size: 15,
+                    ),
+                    AppText.bodyMedium(
+                      'إغلاق مؤقت للمتجر',
+                      color: Color(0xffEF4444),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ],
                 ),
               ),
@@ -81,7 +108,12 @@ class _WorkingTimeScreenState extends State<WorkingTimeScreen> {
                   }*/
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 16),
-                    child: WorkingTimeCard(dayName: arabicDayNames[index], dayNameEn: englishDayNames[index], isToday: isToday, dayIndex: index),
+                    child: WorkingTimeCard(
+                      dayName: arabicDayNames[index],
+                      dayNameEn: englishDayNames[index],
+                      isToday: isToday,
+                      dayIndex: index,
+                    ),
                   );
                 },
               ),
@@ -94,9 +126,19 @@ class _WorkingTimeScreenState extends State<WorkingTimeScreen> {
                   Expanded(
                     flex: 5,
                     child: Container(
-                      decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), color: context.primary),
-                      padding: EdgeInsetsDirectional.symmetric(horizontal: 12, vertical: 16),
-                      child: AppText.labelLarge('حفظ التغييرات', color: context.onPrimary, fontWeight: FontWeight.w500),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        color: context.primary,
+                      ),
+                      padding: EdgeInsetsDirectional.symmetric(
+                        horizontal: 12,
+                        vertical: 16,
+                      ),
+                      child: AppText.labelLarge(
+                        'حفظ التغييرات',
+                        color: context.onPrimary,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
                   SizedBox(width: 8),
@@ -108,8 +150,15 @@ class _WorkingTimeScreenState extends State<WorkingTimeScreen> {
                         color: context.error.withAlpha(50),
                         border: Border.all(color: context.error),
                       ),
-                      padding: EdgeInsetsDirectional.symmetric(horizontal: 6, vertical: 16),
-                      child: AppText.labelLarge('إلغاء', color: context.error, fontWeight: FontWeight.w500),
+                      padding: EdgeInsetsDirectional.symmetric(
+                        horizontal: 6,
+                        vertical: 16,
+                      ),
+                      child: AppText.labelLarge(
+                        'إلغاء',
+                        color: context.error,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
                 ],

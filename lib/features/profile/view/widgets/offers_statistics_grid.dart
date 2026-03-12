@@ -88,7 +88,11 @@ class _OffersStatisticsGridState extends State<OffersStatisticsGrid>
                     borderRadius: BorderRadius.circular(16),
                   ),
                   padding: EdgeInsetsDirectional.all(10),
-                  child: Icon(IconsaxPlusBold.status_up, size: 24, color: context.primary,)
+                  child: Icon(
+                    IconsaxPlusBold.status_up,
+                    size: 24,
+                    color: context.primary,
+                  ),
                 ),
                 SizedBox(width: 12),
                 AppText.bodyMedium(

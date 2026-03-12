@@ -238,7 +238,7 @@ class InventoryScreen extends StatelessWidget {
                               AppText(
                                 "14,980",
                                 style: TextStyle(
-                                  color: AppColors.primary,
+                                  color: context.primary,
                                   fontSize: 24,
                                   fontWeight: FontWeight.w700,
                                   height: 1.333,
@@ -248,7 +248,7 @@ class InventoryScreen extends StatelessWidget {
                               AppText(
                                 "ل.س",
                                 style: TextStyle(
-                                  color: AppColors.primary,
+                                  color: context.primary,
                                   fontSize: 14,
                                 ),
                               ),

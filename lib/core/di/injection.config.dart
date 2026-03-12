@@ -63,6 +63,10 @@ import '../../features/products/domain/usecases/get_categories_use_case.dart'
     as _i862;
 import '../../features/products/domain/usecases/get_low_stock_use_case.dart'
     as _i348;
+import '../../features/products/domain/usecases/get_product_from_image_use_case.dart'
+    as _i989;
+import '../../features/products/domain/usecases/get_product_from_text_use_case.dart'
+    as _i143;
 import '../../features/products/domain/usecases/get_products_use_case.dart'
     as _i846;
 import '../../features/products/domain/usecases/total_producst_count_use_case.dart'
@@ -117,6 +121,12 @@ _i174.GetIt $initGetIt(
   gh.lazySingleton<_i348.GetLowStockUseCase>(
     () => _i348.GetLowStockUseCase(products: gh<_i466.ProductsRepo>()),
   );
+  gh.lazySingleton<_i989.GetProductFromImageUseCase>(
+    () => _i989.GetProductFromImageUseCase(products: gh<_i466.ProductsRepo>()),
+  );
+  gh.lazySingleton<_i143.GetProductFromTextUseCase>(
+    () => _i143.GetProductFromTextUseCase(products: gh<_i466.ProductsRepo>()),
+  );
   gh.lazySingleton<_i846.GetProductsUseCase>(
     () => _i846.GetProductsUseCase(products: gh<_i466.ProductsRepo>()),
   );
@@ -151,6 +161,16 @@ _i174.GetIt $initGetIt(
     () => _i194.RejectOrderUseCase(orders: gh<_i132.OrdersRepo>()),
   );
   gh.factory<_i958.AuthBloc>(() => _i958.AuthBloc(gh<_i37.LoginUseCase>()));
+  gh.factory<_i113.ProductsBloc>(
+    () => _i113.ProductsBloc(
+      gh<_i846.GetProductsUseCase>(),
+      gh<_i348.GetLowStockUseCase>(),
+      gh<_i119.TotalProducstCountUseCase>(),
+      gh<_i862.GetCategoriesUseCase>(),
+      gh<_i989.GetProductFromImageUseCase>(),
+      gh<_i143.GetProductFromTextUseCase>(),
+    ),
+  );
   gh.lazySingleton<_i982.AcceptOrderUseCase>(
     () => _i982.AcceptOrderUseCase(home: gh<_i396.HomeRepo>()),
   );
@@ -174,14 +194,6 @@ _i174.GetIt $initGetIt(
       gh<_i1013.GetOrdersUseCase>(),
       gh<_i420.AcceptOrderUseCase>(),
       gh<_i194.RejectOrderUseCase>(),
-    ),
-  );
-  gh.factory<_i113.ProductsBloc>(
-    () => _i113.ProductsBloc(
-      gh<_i846.GetProductsUseCase>(),
-      gh<_i348.GetLowStockUseCase>(),
-      gh<_i119.TotalProducstCountUseCase>(),
-      gh<_i862.GetCategoriesUseCase>(),
     ),
   );
   gh.factory<_i648.HomeBloc>(

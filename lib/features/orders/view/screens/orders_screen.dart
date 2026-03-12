@@ -63,7 +63,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                     .where((order) => order.status == 'pending')
                                     .length ??
                                 0,
-                            leadingColor: AppColors.primary,
+                            leadingColor: context.primary,
                           ),
                           OrdersTabBarItem(
                             title: "قيد التحضير",

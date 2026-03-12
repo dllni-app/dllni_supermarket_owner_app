@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../../../../core/themes/app_colors.dart';
 import '../../data/models/get_daily_count_model.dart';
 import '../manager/bloc/home_bloc.dart';
 
@@ -89,12 +88,12 @@ class OrdersChartCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.w500,
-                        color: AppColors.primary,
+                        color: context.primary,
                       ),
                     ),
                     AppText(
                       'هذا الأسبوع      ',
-                      style: TextStyle(fontSize: 14, color: AppColors.primary),
+                      style: TextStyle(fontSize: 14, color: context.primary),
                     ),
                   ],
                 ),
@@ -104,7 +103,7 @@ class OrdersChartCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w500,
-                    color: AppColors.primary,
+                    color: context.primary,
                   ),
                 ),
                 const SizedBox(height: 14),

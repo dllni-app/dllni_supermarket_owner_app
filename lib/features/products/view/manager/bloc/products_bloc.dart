@@ -13,12 +13,18 @@ import '../../../domain/usecases/get_products_use_case.dart';
 import '../../../domain/usecases/total_producst_count_use_case.dart';
 import '../../../domain/usecases/get_categories_use_case.dart';
 import '../../../data/models/get_categories_model.dart';
+import '../../../domain/usecases/get_product_from_image_use_case.dart';
+import '../../../data/models/get_product_from_image_model.dart';
+import '../../../domain/usecases/get_product_from_text_use_case.dart';
+import '../../../data/models/get_product_from_text_model.dart';
 
 part 'products_event.dart';
 part 'products_state.dart';
 
 @injectable
 class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
+  final GetProductFromTextUseCase getProductFromTextUseCase;
+  final GetProductFromImageUseCase getProductFromImageUseCase;
   final GetCategoriesUseCase getCategoriesUseCase;
   final TotalProducstCountUseCase totalProducstCountUseCase;
   final GetLowStockUseCase getLowStockUseCase;
@@ -27,11 +33,15 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
     this.getProductsUseCase,
     this.getLowStockUseCase,
     this.totalProducstCountUseCase,
-    this.getCategoriesUseCase,) : super(ProductsState()) {
+    this.getCategoriesUseCase,
+    this.getProductFromImageUseCase,
+    this.getProductFromTextUseCase,) : super(ProductsState()) {
     on<GetProductsEvent>(_getProducts, transformer: droppableProMax());
     on<GetLowStockEvent>(_getLowStock);
     on<TotalProductsCountEvent>(_totalProducstCount);
-    on<GetCategoriesEvent>(_getCategories);}
+    on<GetCategoriesEvent>(_getCategories);
+    on<GetProductFromImageEvent>(_getProductFromImage);
+    on<GetProductFromTextEvent>(_getProductFromText);}
 
   EventTransformer<T> droppableProMax<T extends EventWithReload>() {
     return (events, mapper) {
@@ -128,6 +138,38 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
       emit(state.copyWith(
         categoriesStatus: BlocStatus.success,
         categories: r,
+      ));
+    });
+  }
+
+  FutureOr<void> _getProductFromImage(GetProductFromImageEvent event, Emitter<ProductsState> emit) async {
+    emit(state.copyWith(productFromImageStatus: BlocStatus.loading));
+    final res = await getProductFromImageUseCase(event.params);
+    res.fold((l) {
+      emit(state.copyWith(
+        productFromImageStatus: BlocStatus.failed,
+        errorMessage: l.message,
+      ));
+    }, (r) {
+      emit(state.copyWith(
+        productFromImageStatus: BlocStatus.success,
+        productFromImage: r,
+      ));
+    });
+  }
+
+  FutureOr<void> _getProductFromText(GetProductFromTextEvent event, Emitter<ProductsState> emit) async {
+    emit(state.copyWith(productFromTextStatus: BlocStatus.loading));
+    final res = await getProductFromTextUseCase(event.params);
+    res.fold((l) {
+      emit(state.copyWith(
+        productFromTextStatus: BlocStatus.failed,
+        errorMessage: l.message,
+      ));
+    }, (r) {
+      emit(state.copyWith(
+        productFromTextStatus: BlocStatus.success,
+        productFromText: r,
       ));
     });
   }}

@@ -45,10 +45,13 @@ class GeneratedAppRoutes {
           settings: settings,
         );
       case '/products/new_product/details':
-        return MaterialPageRoute(
-          builder: (_) => AddProductDetailsScreen(),
-          settings: settings,
-        );
+        if (args is AddProductDetailsParams?) {
+          return MaterialPageRoute(
+            builder: (_) => AddProductDetailsScreen(params: args),
+            settings: settings,
+          );
+        }
+        return _errorRoute(settings);
       case '/products/new_product/menu':
         return MaterialPageRoute(
           builder: (_) => AddProductMenuScreen(),

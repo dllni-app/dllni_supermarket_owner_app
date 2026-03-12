@@ -1,6 +1,10 @@
 part of 'products_bloc.dart';
 
 class ProductsState {
+  BlocStatus? productFromTextStatus;
+  GetProductFromTextModel? productFromText;
+  BlocStatus? productFromImageStatus;
+  GetProductFromImageModel? productFromImage;
   BlocStatus? categoriesStatus;
   GetCategoriesModel? categories;
   BlocStatus? totalProductsCountStatus;
@@ -21,6 +25,11 @@ class ProductsState {
     this.totalProductsCountStatus,
     this.categories,
     this.categoriesStatus,
+    this.productFromImage,
+    this.productFromImageStatus,
+
+    this.productFromText,
+    this.productFromTextStatus,
   });
 
   ProductsState copyWith({
@@ -33,6 +42,10 @@ class ProductsState {
     BlocStatus? totalProducstCountStatus,
     GetCategoriesModel? categories,
     BlocStatus? categoriesStatus,
+    GetProductFromImageModel? productFromImage,
+    BlocStatus? productFromImageStatus,
+    GetProductFromTextModel? productFromText,
+    BlocStatus? productFromTextStatus,
   }) => ProductsState(
     errorMessage: errorMessage ?? this.errorMessage,
     productsStatus: allProductsStatus ?? productsStatus,
@@ -44,5 +57,9 @@ class ProductsState {
         totalProducstCountStatus ?? totalProductsCountStatus,
     categories: categories ?? this.categories,
     categoriesStatus: categoriesStatus ?? this.categoriesStatus,
-  );
+    productFromImage: productFromImage ?? this.productFromImage,
+    productFromImageStatus:
+        productFromImageStatus ?? this.productFromImageStatus,
+        productFromText: productFromText ?? this.productFromText,
+        productFromTextStatus: productFromTextStatus ?? this.productFromTextStatus,);
 }

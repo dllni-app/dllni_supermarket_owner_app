@@ -10,8 +10,17 @@ import '../../../../core/themes/app_colors.dart';
 import '../../../../core/themes/app_shadows.dart';
 
 class ProductPickMainImage extends StatefulWidget {
-  const ProductPickMainImage({super.key, required this.onPickImage});
+  const ProductPickMainImage({
+    super.key,
+    required this.onPickImage,
+    required this.title,
+    required this.icon,
+    required this.isRequired,
+  });
   final void Function(String imagePath) onPickImage;
+  final String title;
+  final IconData icon;
+  final bool isRequired;
   @override
   State<ProductPickMainImage> createState() => _ProductPickMainImageState();
 }
@@ -25,8 +34,23 @@ class _ProductPickMainImageState extends State<ProductPickMainImage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 8,
       children: [
-        AppText(
-          "صورة رئيسية",
+        Text.rich(
+          TextSpan(
+            text: widget.title,
+            children: [
+              if(widget.isRequired)
+              TextSpan(
+                text: "*",
+                style: TextStyle(
+                  color: Color(0xFFEF4444),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  height: 1.42,
+                ),
+              ),
+            ],
+          ),
+
           style: TextStyle(
             color: Color(0xFF374151),
             fontSize: 14,
@@ -76,7 +100,7 @@ class _ProductPickMainImageState extends State<ProductPickMainImage> {
                         boxShadow: [AppShadows.shadow],
                       ),
                       child: Icon(
-                        FontAwesomeIcons.solidCamera,
+                        widget.icon,
                         size: 18,
                         color: const Color(0xFF9CA3AF),
                       ),

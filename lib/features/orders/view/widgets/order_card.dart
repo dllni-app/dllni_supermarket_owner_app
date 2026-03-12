@@ -133,7 +133,7 @@ class OrderCard extends StatelessWidget {
                         AppText(
                           "${order.totalAmount} ل.س",
                           style: TextStyle(
-                            color: AppColors.primary,
+                            color: context.primary,
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
                             height: 1.42,

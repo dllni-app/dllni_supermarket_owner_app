@@ -54,7 +54,9 @@ class AddNewProductScreen extends StatelessWidget {
                           hint: "موصى بها",
                         ),
                         AddProductWayCard(
-                          onTap: () {},
+                          onTap: () {
+                            context.pushRoute("/products/new_product/details");
+                          },
                           backgroundColor: Color(0x1FF96CC8),
                           foregroundColor: Color(0xFFFF15A5),
                           icon: FontAwesomeIcons.pen,

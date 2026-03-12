@@ -39,7 +39,7 @@ class HomeAppBar extends StatelessWidget {
       child: Row(
         spacing: 12,
         children: [
-          Icon(FontAwesomeIcons.store, color: AppColors.primary, size: 29),
+          Icon(FontAwesomeIcons.store, color: context.primary, size: 29),
           AppText(
             "سوبر ماركت السلطان",
             style: TextStyle(
@@ -56,7 +56,7 @@ class HomeAppBar extends StatelessWidget {
             },
             child: Icon(
               FontAwesomeIcons.bell,
-              color: AppColors.primary,
+              color: context.primary,
               size: 30,
             ),
           ),

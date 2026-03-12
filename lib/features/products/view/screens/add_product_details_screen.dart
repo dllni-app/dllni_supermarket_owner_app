@@ -1,17 +1,41 @@
+import 'dart:typed_data';
+
 import 'package:common_package/common_package.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../../../core/themes/app_colors.dart';
-import '../../../../core/utils/app_images.dart';
-import '../../../../core/widgets/app_buttons.dart';
+import '../../../../core/themes/app_gradients.dart';
+import '../../../../core/themes/app_shadows.dart';
 import '../../../../core/widgets/app_app_bars.dart';
+import '../../../../core/widgets/app_buttons.dart';
 import '../widgets/product_pick_images.dart';
 import '../widgets/product_text_field.dart';
 
 @AutoRoutePage(path: "/products/new_product/details")
-class AddProductDetailsScreen extends StatelessWidget {
-  const AddProductDetailsScreen({super.key});
+class AddProductDetailsScreen extends StatefulWidget {
+  const AddProductDetailsScreen({super.key, this.params});
+
+  final AddProductDetailsParams? params;
+
+  @override
+  State<AddProductDetailsScreen> createState() =>
+      _AddProductDetailsScreenState();
+}
+
+class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
+  late TextEditingController unitController;
+  @override
+  void initState() {
+    unitController = TextEditingController();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    unitController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,6 +91,9 @@ class AddProductDetailsScreen extends StatelessWidget {
                           ),
                           SizedBox(height: 20),
                           ProductPickMainImage(
+                            title: "صورة رئيسية",
+                            isRequired: true,
+                            icon: FontAwesomeIcons.solidCamera,
                             onPickImage: (imagePath) {
                               print(imagePath);
                             },
@@ -76,6 +103,49 @@ class AddProductDetailsScreen extends StatelessWidget {
                             numOfImages: 6,
                             onPickImage: (imagesPath) {
                               print(imagesPath);
+                            },
+                          ),
+                          SizedBox(height: 24),
+                          ProductPickMainImage(
+                            title: "صورة  الباركود",
+                            isRequired: true,
+                            icon: FontAwesomeIcons.barcode,
+                            onPickImage: (imagePath) {
+                              print(imagePath);
+                            },
+                          ),
+                          SizedBox(height: 24),
+                          ProductUnit(
+                            onChanged: (unit) {
+                              print(unit);
+                            },
+                            controller: unitController,
+                          ),
+                          SizedBox(height: 24),
+                          Row(
+                            spacing: 10,
+                            children: [
+                              Expanded(
+                                child: ProductTextField(
+                                  title: "الكمية الأولية",
+                                  isRequired: true,
+                                  hintText: "0",
+                                ),
+                              ),
+                              Expanded(
+                                child: ProductTextField(
+                                  title: "الحد الأدنى",
+                                  isRequired: true,
+                                  hintText: "0",
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 24),
+                          ProductDatePicker(
+                            title: "صلاحية المنتج",
+                            onDateChanged: (expiredDate) {
+                              print(expiredDate);
                             },
                           ),
                         ],
@@ -89,6 +159,7 @@ class AddProductDetailsScreen extends StatelessWidget {
                         children: [
                           ProductTextField(
                             title: "السعر الأساسي",
+                            isRequired: true,
                             hintText: "0.00",
                             suffixIcon: Padding(
                               padding: const EdgeInsets.only(top: 12),
@@ -106,6 +177,7 @@ class AddProductDetailsScreen extends StatelessWidget {
                           ProductTextField(
                             title: "السعر بعد الحسم",
                             hintText: "0.00",
+                            isRequired: true,
                             suffixIcon: Padding(
                               padding: const EdgeInsets.only(top: 12),
                               child: Text(
@@ -122,74 +194,6 @@ class AddProductDetailsScreen extends StatelessWidget {
                       ),
                     ),
                     SizedBox(height: 16),
-                    ProductStepDetails(
-                      number: 3,
-                      title: "الربط بالمخزون",
-                      child: Column(
-                        children: [
-                          ProductTextField(
-                            title: "السعر الأساسي",
-                            hintText: "بحث في المخزون...",
-                            suffixIcon: AppImage.asset(
-                              AppImages.search,
-                              size: 16,
-                            ),
-                          ),
-                          SizedBox(height: 20),
-                          InfoAlert(),
-                          SizedBox(height: 20),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: ProductTextField(
-                                  title: "كمية الخصم",
-                                  hintText: "1",
-                                  keyboardType: TextInputType.number,
-                                ),
-                              ),
-                              SizedBox(width: 10),
-                              Expanded(
-                                child: ProductTextField(
-                                  title: "الواحدة",
-                                  hintText: "قطعة",
-                                  keyboardType: TextInputType.number,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    ProductStepDetails(
-                      number: 3,
-                      title: "تفاصيل أخرى",
-                      child: Column(
-                        children: [
-                          ProductTextField(
-                            title: "الوقت المتوقع للتحضير",
-                            hintText: "1",
-                            suffixIcon: Padding(
-                              padding: const EdgeInsets.only(top: 12),
-                              child: Text(
-                                "دقيقة",
-                                style: TextStyle(
-                                  color: Color(0xFF9CA3AF),
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ),
-                            keyboardType: TextInputType.number,
-                          ),
-                          ProductTextField(
-                            title: "الحد الأدنى للطلب",
-                            hintText: "1",
-                            keyboardType: TextInputType.number,
-                          ),
-                        ],
-                      ),
-                    ),
-
                     SizedBox(height: 16),
                     Row(
                       children: [
@@ -215,6 +219,149 @@ class AddProductDetailsScreen extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class ProductUnit extends StatefulWidget {
+  const ProductUnit({
+    super.key,
+    required this.onChanged,
+    required this.controller,
+  });
+  final void Function(String unit) onChanged;
+  final TextEditingController controller;
+  @override
+  State<ProductUnit> createState() => _ProductUnitState();
+}
+
+class _ProductUnitState extends State<ProductUnit> {
+  String? unit;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text.rich(
+          TextSpan(
+            text: "وحدة القياس",
+            children: [
+              TextSpan(
+                text: "*",
+                style: TextStyle(
+                  color: Color(0xFFEF4444),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  height: 1.42,
+                ),
+              ),
+            ],
+          ),
+          style: TextStyle(
+            color: Color(0xFF374151),
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            height: 1.42,
+          ),
+        ),
+        SizedBox(height: 8),
+        Row(
+          spacing: 8,
+          children: [
+            Expanded(
+              child: GestureDetector(
+                onTap: () {
+                  if (unit == "كغ") return;
+                  unit = "كغ";
+                  widget.controller.clear();
+                  setState(() {});
+                },
+                child: _ProductUnitChip(unit: unit, value: "كغ"),
+              ),
+            ),
+            Expanded(
+              child: GestureDetector(
+                onTap: () {
+                  if (unit == "لتر") return;
+                  unit = "لتر";
+                  widget.controller.clear();
+                  setState(() {});
+                },
+                child: _ProductUnitChip(unit: unit, value: "لتر"),
+              ),
+            ),
+            Expanded(
+              child: GestureDetector(
+                onTap: () {
+                  if (unit == "قطعة") return;
+                  unit = "قطعة";
+                  widget.controller.clear();
+                  setState(() {});
+                },
+                child: _ProductUnitChip(unit: unit, value: "قطعة"),
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 8),
+        TextField(
+          controller: widget.controller,
+          onChanged: (value) {
+            unit = value;
+            setState(() {});
+          },
+          onTapOutside: (_) => FocusScope.of(context).unfocus(),
+          style: TextStyle(color: Color(0xB22F2B3D), fontSize: 14),
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Color(0xFFF9FAFB),
+            hintText: "أو اكتب وحدة مخصصة",
+            hintStyle: TextStyle(color: Color(0xFF9CA3AF), fontSize: 14),
+            border: OutlineInputBorder(
+              borderSide: BorderSide(color: Color(0xFFE5E7EB)),
+              borderRadius: BorderRadius.all(Radius.circular(16)),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: Color(0xFFE5E7EB)),
+              borderRadius: BorderRadius.all(Radius.circular(16)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: Color(0xFFE5E7EB)),
+              borderRadius: BorderRadius.all(Radius.circular(16)),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ProductUnitChip extends StatelessWidget {
+  const _ProductUnitChip({required this.unit, required this.value});
+  final String? unit;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 9, horizontal: 16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(100)),
+        color: unit == value ? null : AppColors.white,
+        gradient: unit == value ? AppGradients.gradient : null,
+        border: unit != value ? Border.all(color: Color(0xFFE5E7EB)) : null,
+        boxShadow: [AppShadows.shadow],
+      ),
+      child: AppText(
+        value,
+        style: TextStyle(
+          color: unit == value ? AppColors.white : Color(0xFF4B5563),
+          fontSize: 14,
+          fontWeight: unit == value ? FontWeight.w700 : FontWeight.w500,
+          height: 1.42,
+        ),
       ),
     );
   }
@@ -340,4 +487,12 @@ class InfoAlert extends StatelessWidget {
       ),
     );
   }
+}
+
+class AddProductDetailsParams {
+  final Uint8List? image64Based;
+  final String? title;
+  final String? description;
+
+  AddProductDetailsParams({this.image64Based, this.title, this.description});
 }

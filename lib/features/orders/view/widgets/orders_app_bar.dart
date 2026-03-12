@@ -17,7 +17,7 @@ class OrdersAppBar extends StatelessWidget {
         right: 24,
       ),
       decoration: BoxDecoration(
-        color: AppColors.primary,
+        color: context.primary,
         borderRadius: BorderRadius.vertical(bottom: Radius.circular(16)),
         boxShadow: [
           BoxShadow(

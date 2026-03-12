@@ -9,9 +9,21 @@ class OffersManagementAppBar extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: context.onPrimary,
-        borderRadius: BorderRadius.only(bottomRight: Radius.circular(24), bottomLeft: Radius.circular(24)),
-        border: Border(bottom: BorderSide(color: context.primaryContainer, width: 5)),
-        boxShadow: [BoxShadow(color: Colors.black.withAlpha(27), offset: Offset(0, -2), blurRadius: 12, spreadRadius: 0)],
+        borderRadius: BorderRadius.only(
+          bottomRight: Radius.circular(24),
+          bottomLeft: Radius.circular(24),
+        ),
+        border: Border(
+          bottom: BorderSide(color: context.primaryContainer, width: 5),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(27),
+            offset: Offset(0, -2),
+            blurRadius: 12,
+            spreadRadius: 0,
+          ),
+        ],
       ),
       width: context.width,
       height: 80,
@@ -33,7 +45,12 @@ class OffersManagementAppBar extends StatelessWidget {
           ),
           SizedBox(width: 12),
           Expanded(
-            child: AppText.headlineLarge('إدارة العروض', fontWeight: FontWeight.w700, textAlign: TextAlign.start, color: context.primary),
+            child: AppText.headlineLarge(
+              'إدارة العروض',
+              fontWeight: FontWeight.w700,
+              textAlign: TextAlign.start,
+              color: context.primary,
+            ),
           ),
         ],
       ),

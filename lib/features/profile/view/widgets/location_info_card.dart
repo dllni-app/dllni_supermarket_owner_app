@@ -10,7 +10,14 @@ class LocationInfoCard extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(32),
         color: context.onPrimaryContainer,
-        boxShadow: [BoxShadow(color: Colors.black.withAlpha(6), offset: Offset(0, 4), blurRadius: 20, spreadRadius: -2)],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(6),
+            offset: Offset(0, 4),
+            blurRadius: 20,
+            spreadRadius: -2,
+          ),
+        ],
       ),
       padding: EdgeInsetsDirectional.all(25),
       child: Column(
@@ -21,10 +28,18 @@ class LocationInfoCard extends StatelessWidget {
               CircleAvatar(
                 backgroundColor: context.primaryContainer,
                 radius: 16,
-                child: AppText.labelLarge('2', color: context.onPrimaryContainer, fontWeight: FontWeight.bold),
+                child: AppText.labelLarge(
+                  '2',
+                  color: context.onPrimaryContainer,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               SizedBox(width: 12),
-              AppText.titleLarge('العنوان والموقع', color: context.primaryContainer, fontWeight: FontWeight.bold),
+              AppText.titleLarge(
+                'العنوان والموقع',
+                color: context.primaryContainer,
+                fontWeight: FontWeight.bold,
+              ),
             ],
           ),
           SizedBox(height: 24),
@@ -35,60 +50,97 @@ class LocationInfoCard extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        AppText.bodyMedium('المدينة', fontWeight: FontWeight.w500),
-                        AppText.bodyMedium('*', fontWeight: FontWeight.w500, color: context.error),
+                        AppText.bodyMedium(
+                          'المدينة',
+                          fontWeight: FontWeight.w500,
+                        ),
+                        AppText.bodyMedium(
+                          '*',
+                          fontWeight: FontWeight.w500,
+                          color: context.error,
+                        ),
                       ],
                     ),
                     SizedBox(height: 8),
                     TextFormField(
-                      style: TextStyle(color: Color(0xff2F2B3D), fontSize: 14, fontWeight: FontWeight.w400),
+                      style: TextStyle(
+                        color: Color(0xff2F2B3D),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                      ),
                       decoration: InputDecoration(
                         filled: true,
                         fillColor: Color(0xffF9FAFB),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(color: Color(0xffE5E7EB), width: 1),
+                          borderSide: BorderSide(
+                            color: Color(0xffE5E7EB),
+                            width: 1,
+                          ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(color: Color(0xffE5E7EB), width: 1),
+                          borderSide: BorderSide(
+                            color: Color(0xffE5E7EB),
+                            width: 1,
+                          ),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(color: Color(0xffE5E7EB), width: 1),
+                          borderSide: BorderSide(
+                            color: Color(0xffE5E7EB),
+                            width: 1,
+                          ),
                         ),
                       ),
                     ),
                   ],
                 ),
               ),
-              SizedBox(width: 10,),
+              SizedBox(width: 10),
               Expanded(
                 child: Column(
                   children: [
                     Row(
                       children: [
                         AppText.bodyMedium('الحي', fontWeight: FontWeight.w500),
-                        AppText.bodyMedium('*', fontWeight: FontWeight.w500, color: context.error),
+                        AppText.bodyMedium(
+                          '*',
+                          fontWeight: FontWeight.w500,
+                          color: context.error,
+                        ),
                       ],
                     ),
                     SizedBox(height: 8),
                     TextFormField(
-                      style: TextStyle(color: Color(0xff2F2B3D), fontSize: 14, fontWeight: FontWeight.w400),
+                      style: TextStyle(
+                        color: Color(0xff2F2B3D),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                      ),
                       decoration: InputDecoration(
                         filled: true,
                         fillColor: Color(0xffF9FAFB),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(color: Color(0xffE5E7EB), width: 1),
+                          borderSide: BorderSide(
+                            color: Color(0xffE5E7EB),
+                            width: 1,
+                          ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(color: Color(0xffE5E7EB), width: 1),
+                          borderSide: BorderSide(
+                            color: Color(0xffE5E7EB),
+                            width: 1,
+                          ),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(color: Color(0xffE5E7EB), width: 1),
+                          borderSide: BorderSide(
+                            color: Color(0xffE5E7EB),
+                            width: 1,
+                          ),
                         ),
                       ),
                     ),
@@ -97,16 +149,24 @@ class LocationInfoCard extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 20,),
+          SizedBox(height: 20),
           Row(
             children: [
               AppText.bodyMedium('تفاصيل الموقع', fontWeight: FontWeight.w500),
-              AppText.bodyMedium('*', fontWeight: FontWeight.w500, color: context.error),
+              AppText.bodyMedium(
+                '*',
+                fontWeight: FontWeight.w500,
+                color: context.error,
+              ),
             ],
           ),
-          SizedBox(height: 8,),
+          SizedBox(height: 8),
           TextFormField(
-            style: TextStyle(color: Color(0xff2F2B3D), fontSize: 14, fontWeight: FontWeight.w400),
+            style: TextStyle(
+              color: Color(0xff2F2B3D),
+              fontSize: 14,
+              fontWeight: FontWeight.w400,
+            ),
             decoration: InputDecoration(
               filled: true,
               fillColor: Color(0xffF9FAFB),
@@ -124,9 +184,9 @@ class LocationInfoCard extends StatelessWidget {
               ),
             ),
           ),
-          SizedBox(height: 20,),
+          SizedBox(height: 20),
           AppText.bodyMedium('الموقع على الخريطة', fontWeight: FontWeight.w500),
-          SizedBox(height: 8,),
+          SizedBox(height: 8),
           Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
@@ -136,7 +196,7 @@ class LocationInfoCard extends StatelessWidget {
             child: Stack(
               alignment: Alignment.center,
               children: [
-                Icon(Icons.location_on_sharp, color: context.error, size: 60,),
+                Icon(Icons.location_on_sharp, color: context.error, size: 60),
                 Column(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
@@ -146,13 +206,24 @@ class LocationInfoCard extends StatelessWidget {
                         color: Color(0xff064E3B),
                       ),
                       padding: EdgeInsetsDirectional.symmetric(vertical: 12),
-                      margin: EdgeInsetsDirectional.symmetric(vertical: 12, horizontal: 16),
+                      margin: EdgeInsetsDirectional.symmetric(
+                        vertical: 12,
+                        horizontal: 16,
+                      ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.my_location, color: context.onPrimary, size: 14,),
-                          SizedBox(width: 8,),
-                          AppText.bodyMedium('تحديد الموقع', color: context.onPrimary, fontWeight: FontWeight.bold,),
+                          Icon(
+                            Icons.my_location,
+                            color: context.onPrimary,
+                            size: 14,
+                          ),
+                          SizedBox(width: 8),
+                          AppText.bodyMedium(
+                            'تحديد الموقع',
+                            color: context.onPrimary,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ],
                       ),
                     ),
@@ -160,7 +231,7 @@ class LocationInfoCard extends StatelessWidget {
                 ),
               ],
             ),
-          )
+          ),
         ],
       ),
     );

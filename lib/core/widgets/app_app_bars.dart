@@ -63,7 +63,7 @@ class AppSimpleAppBarWithSearch extends StatelessWidget {
         20,
       ),
       decoration: BoxDecoration(
-        color: AppColors.primary,
+        color: context.primary,
         borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
         boxShadow: [
           BoxShadow(
@@ -84,7 +84,7 @@ class AppSimpleAppBarWithSearch extends StatelessWidget {
               fontSize: 20,
             ),
           ),
-          //  TextStyle(fontSize: 24, color: AppColors.primary, fontWeight: FontWeight.w700)),
+          //  TextStyle(fontSize: 24, color: context.primary, fontWeight: FontWeight.w700)),
           SizedBox(height: 16),
           Row(
             children: [
@@ -118,9 +118,9 @@ class _FilterButton extends StatelessWidget {
         width: 48,
         height: 48,
         decoration: BoxDecoration(
-          // color: AppColors.primary,
+          // color: context.primary,
           gradient: LinearGradient(
-            colors: [const Color(0x996C63FF), AppColors.primary],
+            colors: [const Color(0x996C63FF), context.primary],
             stops: [.3, .9],
             begin: Alignment.topRight,
             end: Alignment.bottomLeft,
