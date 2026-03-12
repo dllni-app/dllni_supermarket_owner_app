@@ -1,14 +1,15 @@
 import 'package:common_package/common_package.dart';
 import 'package:injectable/injectable.dart';
-import '../models/get_products_model.dart';
+
+import '../../domain/usecases/get_low_stock_use_case.dart';
 import '../../domain/usecases/get_products_use_case.dart';
+import '../../domain/usecases/total_producst_count_use_case.dart';
+import '../models/get_low_stock_model.dart';
+import '../models/get_products_model.dart';
+import '../models/total_producst_count_model.dart';
+import 'package:common_package/helpers/api_handler.dart';
 import '../models/get_categories_model.dart';
 import '../../domain/usecases/get_categories_use_case.dart';
-import '../models/get_low_stock_model.dart';
-import '../../domain/usecases/get_low_stock_use_case.dart';
-import 'package:common_package/helpers/api_handler.dart';
-import '../models/total_producst_count_model.dart';
-import '../../domain/usecases/total_producst_count_use_case.dart';
 
 @lazySingleton
 class ProductsRemoteDataSource with HandlingApiManager {
@@ -27,17 +28,6 @@ class ProductsRemoteDataSource with HandlingApiManager {
     );
   }
 
-  Future<GetCategoriesModel> getCategories(GetCategoriesParams params) {
-    return wrapHandlingApi(
-      tryCall: () => dioNetwork.getData(
-        endPoint: '/api/v1/sm-categories',
-        params: params.getParams(),
-        data: params.getBody().isEmpty ? null : params.getBody(),
-      ),
-      jsonConvert: getCategoriesModelFromJson,
-    );
-  }
-
   Future<GetLowStockModel> getLowStock(GetLowStockParams params) {
     return wrapHandlingApi(
       tryCall: () => dioNetwork.getData(
@@ -50,7 +40,7 @@ class ProductsRemoteDataSource with HandlingApiManager {
   }
 
   Future<TotalProducstCountModel> totalProducstCount(
-    TotalProducstCountParams params,
+    TotalProductsCountParams params,
   ) {
     return wrapHandlingApi(
       tryCall: () => dioNetwork.getData(
@@ -61,4 +51,12 @@ class ProductsRemoteDataSource with HandlingApiManager {
       jsonConvert: totalProducstCountModelFromJson,
     );
   }
-}
+
+
+
+  Future<GetCategoriesModel> getCategories(GetCategoriesParams params) {
+    return wrapHandlingApi(
+      tryCall: () => dioNetwork.getData(endPoint: '/api/v1/sm-categories', params: params.getParams(), data: params.getBody().isEmpty ? null : params.getBody()),
+      jsonConvert: getCategoriesModelFromJson,
+    );
+  }}

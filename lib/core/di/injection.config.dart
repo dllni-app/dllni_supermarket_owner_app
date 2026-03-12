@@ -47,6 +47,12 @@ import '../../features/orders/data/repository/orders_repo_impl.dart' as _i849;
 import '../../features/orders/data/source/orders_remote_data_source.dart'
     as _i702;
 import '../../features/orders/domain/repository/orders_repo.dart' as _i132;
+import '../../features/orders/domain/usecases/accept_order_use_case.dart'
+    as _i420;
+import '../../features/orders/domain/usecases/get_orders_use_case.dart'
+    as _i1013;
+import '../../features/orders/domain/usecases/reject_order_use_case.dart'
+    as _i194;
 import '../../features/orders/view/manager/bloc/orders_bloc.dart' as _i305;
 import '../../features/products/data/repository/products_repo_impl.dart'
     as _i99;
@@ -78,19 +84,14 @@ _i174.GetIt $initGetIt(
   final gh = _i526.GetItHelper(getIt, environment, environmentFilter);
   final injectableModule = _$InjectableModule();
   gh.factory<_i784.InventoryBloc>(() => _i784.InventoryBloc());
-  gh.factory<_i305.OrdersBloc>(() => _i305.OrdersBloc());
   gh.factory<_i821.ProfileBloc>(() => _i821.ProfileBloc());
   gh.singleton<_i960.DioNetwork>(() => injectableModule.dio);
   gh.lazySingleton<_i543.InventoryRemoteDataSource>(
     () => _i543.InventoryRemoteDataSource(),
   );
-  gh.lazySingleton<_i702.OrdersRemoteDataSource>(
-    () => _i702.OrdersRemoteDataSource(),
-  );
   gh.lazySingleton<_i502.ProfileRemoteDataSource>(
     () => _i502.ProfileRemoteDataSource(),
   );
-  gh.lazySingleton<_i132.OrdersRepo>(() => _i849.OrdersRepoImpl());
   gh.lazySingleton<_i777.AuthRemoteDataSource>(
     () => _i777.AuthRemoteDataSource(dioNetwork: gh<_i497.DioNetwork>()),
   );
@@ -99,6 +100,9 @@ _i174.GetIt $initGetIt(
   );
   gh.lazySingleton<_i1071.InventoryRepo>(() => _i821.InventoryRepoImpl());
   gh.lazySingleton<_i275.ProfileRepo>(() => _i265.ProfileRepoImpl());
+  gh.lazySingleton<_i702.OrdersRemoteDataSource>(
+    () => _i702.OrdersRemoteDataSource(dioNetwork: gh<_i960.DioNetwork>()),
+  );
   gh.lazySingleton<_i811.ProductsRemoteDataSource>(
     () => _i811.ProductsRemoteDataSource(dioNetwork: gh<_i960.DioNetwork>()),
   );
@@ -119,6 +123,11 @@ _i174.GetIt $initGetIt(
   gh.lazySingleton<_i119.TotalProducstCountUseCase>(
     () => _i119.TotalProducstCountUseCase(products: gh<_i466.ProductsRepo>()),
   );
+  gh.lazySingleton<_i132.OrdersRepo>(
+    () => _i849.OrdersRepoImpl(
+      ordersRemoteDataSource: gh<_i702.OrdersRemoteDataSource>(),
+    ),
+  );
   gh.lazySingleton<_i976.AuthRepo>(
     () => _i751.AuthRepoImpl(
       authRemoteDataSource: gh<_i777.AuthRemoteDataSource>(),
@@ -132,13 +141,14 @@ _i174.GetIt $initGetIt(
       homeRemoteDataSource: gh<_i557.HomeRemoteDataSource>(),
     ),
   );
-  gh.factory<_i113.ProductsBloc>(
-    () => _i113.ProductsBloc(
-      gh<_i846.GetProductsUseCase>(),
-      gh<_i862.GetCategoriesUseCase>(),
-      gh<_i348.GetLowStockUseCase>(),
-      gh<_i119.TotalProducstCountUseCase>(),
-    ),
+  gh.lazySingleton<_i420.AcceptOrderUseCase>(
+    () => _i420.AcceptOrderUseCase(orders: gh<_i132.OrdersRepo>()),
+  );
+  gh.lazySingleton<_i1013.GetOrdersUseCase>(
+    () => _i1013.GetOrdersUseCase(orders: gh<_i132.OrdersRepo>()),
+  );
+  gh.lazySingleton<_i194.RejectOrderUseCase>(
+    () => _i194.RejectOrderUseCase(orders: gh<_i132.OrdersRepo>()),
   );
   gh.factory<_i958.AuthBloc>(() => _i958.AuthBloc(gh<_i37.LoginUseCase>()));
   gh.lazySingleton<_i982.AcceptOrderUseCase>(
@@ -158,6 +168,21 @@ _i174.GetIt $initGetIt(
   );
   gh.lazySingleton<_i501.RejectOrderUseCase>(
     () => _i501.RejectOrderUseCase(home: gh<_i396.HomeRepo>()),
+  );
+  gh.factory<_i305.OrdersBloc>(
+    () => _i305.OrdersBloc(
+      gh<_i1013.GetOrdersUseCase>(),
+      gh<_i420.AcceptOrderUseCase>(),
+      gh<_i194.RejectOrderUseCase>(),
+    ),
+  );
+  gh.factory<_i113.ProductsBloc>(
+    () => _i113.ProductsBloc(
+      gh<_i846.GetProductsUseCase>(),
+      gh<_i348.GetLowStockUseCase>(),
+      gh<_i119.TotalProducstCountUseCase>(),
+      gh<_i862.GetCategoriesUseCase>(),
+    ),
   );
   gh.factory<_i648.HomeBloc>(
     () => _i648.HomeBloc(

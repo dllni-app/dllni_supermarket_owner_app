@@ -5,6 +5,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../../../core/themes/app_colors.dart';
 import '../../../../core/widgets/app_buttons.dart';
+import '../../data/models/get_orders_model.dart';
 import '../screens/order_details_screen.dart';
 
 enum PaymentWay { cash }
@@ -12,13 +13,19 @@ enum PaymentWay { cash }
 enum OrderStatus { pending, preparing, readyForPickup, completed, rejected }
 
 class OrderCard extends StatelessWidget {
-  const OrderCard({
-    super.key,
-    required this.status,
-    this.paymentWay = PaymentWay.cash,
-  });
+  const OrderCard({super.key, required this.status, required this.order});
   final OrderStatus status;
-  final PaymentWay paymentWay;
+  final GetOrdersModelDataItem order;
+
+  String get orderDelay {
+    final Duration diffDate = DateTime.now().difference(
+      DateTime.parse(order.updatedAt!),
+    );
+    if (diffDate.inDays != 0) return "${diffDate.inDays} يوم";
+    if (diffDate.inHours != 0) return "${diffDate.inHours} ساعة";
+    if (diffDate.inMinutes != 0) return "${diffDate.inMinutes} دقيقة";
+    return "${diffDate.inSeconds} ثانية";
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -77,7 +84,6 @@ class OrderCard extends StatelessWidget {
                 ),
               ),
             ),
-
             Padding(
               padding: EdgeInsets.fromLTRB(
                 13,
@@ -103,7 +109,7 @@ class OrderCard extends StatelessWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             AppText(
-                              "#ORD-4923",
+                              "#${order.orderNumber}",
                               style: TextStyle(
                                 color: Color(0xE52F2B3D),
                                 fontSize: 14,
@@ -112,7 +118,7 @@ class OrderCard extends StatelessWidget {
                               ),
                             ),
                             AppText(
-                              "منذ ساعة",
+                              "منذ $orderDelay",
                               textDirection: TextDirection.ltr,
                               style: TextStyle(
                                 color: Color(0x992F2B3D),
@@ -125,7 +131,7 @@ class OrderCard extends StatelessWidget {
                         ),
                         Spacer(),
                         AppText(
-                          "145 ل.س",
+                          "${order.totalAmount} ل.س",
                           style: TextStyle(
                             color: AppColors.primary,
                             fontSize: 14,
@@ -172,7 +178,7 @@ class OrderCard extends StatelessWidget {
                                   ),
                                 ),
                                 AppText(
-                                  "#ORD-4923 • منذ 2 دقيقة",
+                                  "#${order.orderNumber} • منذ $orderDelay",
                                   textDirection: TextDirection.ltr,
                                   style: TextStyle(
                                     color: Color(0x992F2B3D),
@@ -190,7 +196,7 @@ class OrderCard extends StatelessWidget {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   AppText(
-                                    "145 ل.س",
+                                    "${order.totalAmount} ل.س",
                                     style: TextStyle(
                                       color: AppColors.accent,
                                       fontSize: 13,

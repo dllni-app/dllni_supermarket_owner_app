@@ -7,19 +7,21 @@ import 'package:toastification/toastification.dart';
 import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_shadows.dart';
 import '../../../../../core/widgets/app_buttons.dart';
+import '../../../../home/view/widgets/home_menu_field.dart';
 import '../../../domain/usecases/accept_order_use_case.dart';
-import '../../../domain/usecases/get_new_orders_use_case.dart';
-import '../../manager/bloc/home_bloc.dart';
-import '../home_menu_field.dart';
+import '../../../domain/usecases/get_orders_use_case.dart';
+import '../../manager/bloc/orders_bloc.dart';
 
 class AcceptOrderBottomSheet extends StatelessWidget {
   const AcceptOrderBottomSheet({
     super.key,
     required this.orderId,
     required this.orderNumber,
+    required this.status,
   });
   final int orderId;
   final String orderNumber;
+  final String? status;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -299,7 +301,7 @@ class AcceptOrderBottomSheet extends StatelessWidget {
                     child: AppButton(
                       title: "تأكيد القبول",
                       onTap: () {
-                        context.read<HomeBloc>().add(
+                        context.read<OrdersBloc>().add(
                           AcceptOrderEvent(
                             params: AcceptOrderParams(orderId: orderId),
                           ),
@@ -316,7 +318,7 @@ class AcceptOrderBottomSheet extends StatelessWidget {
               ),
             ),
           ),
-          BlocConsumer<HomeBloc, HomeState>(
+          BlocConsumer<OrdersBloc, OrdersState>(
             buildWhen: (previous, current) =>
                 previous.acceptOrderStatus != current.acceptOrderStatus,
             listenWhen: (previous, current) =>
@@ -335,10 +337,10 @@ class AcceptOrderBottomSheet extends StatelessWidget {
                   message: "تم قبول الطلب بنجاح",
                   type: ToastificationType.success,
                 );
-                context.read<HomeBloc>().add(
-                  GetNewOrdersEvent(
+                context.read<OrdersBloc>().add(
+                  GetOrdersEvent(
                     isReload: true,
-                    params: GetNewOrdersParams(),
+                    params: GetOrdersParams(status: status),
                   ),
                 );
                 context.pop();

@@ -19,6 +19,15 @@ class GetProductsUseCase
 
 class GetProductsParams with Params {
   final int page;
+  final int? categoryId;
 
-  GetProductsParams({required this.page});
+  GetProductsParams({this.categoryId, required this.page});
+
+  @override
+  QueryParams getParams() {
+    return {
+      "page": page,
+      if (categoryId != null) "filter[categoryId]": categoryId,
+    };
+  }
 }

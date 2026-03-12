@@ -8,14 +8,6 @@ class GetLowStockEvent extends ProductsEvent {
   GetLowStockEvent({required this.params});
 }
 
-class GetCategoriesEvent extends ProductsEvent with EventWithReload {
-  final GetCategoriesParams params;
-
-  @override
-  final bool isReload;
-  GetCategoriesEvent({required this.params, this.isReload = false});
-}
-
 class GetProductsEvent extends ProductsEvent with EventWithReload {
   final GetProductsParams params;
 
@@ -25,8 +17,14 @@ class GetProductsEvent extends ProductsEvent with EventWithReload {
   GetProductsEvent({required this.params, this.isReload = false});
 }
 
-class TotalProducstCountEvent extends ProductsEvent {
-  final TotalProducstCountParams params;
+class TotalProductsCountEvent extends ProductsEvent {
+  final TotalProductsCountParams params;
 
-  TotalProducstCountEvent({required this.params});
+  TotalProductsCountEvent({required this.params});
+}
+
+class GetCategoriesEvent extends ProductsEvent {
+  final GetCategoriesParams params;
+
+  GetCategoriesEvent({required this.params});
 }

@@ -1,6 +1,5 @@
 import 'package:common_package/common_package.dart';
-import 'package:dllni_supermarket_owner_app/features/home/domain/usecases/get_new_orders_use_case.dart';
-import 'package:dllni_supermarket_owner_app/features/home/domain/usecases/reject_order_use_case.dart';
+import 'package:dllni_supermarket_owner_app/features/orders/domain/usecases/get_orders_use_case.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -8,9 +7,10 @@ import 'package:toastification/toastification.dart';
 
 import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/widgets/app_buttons.dart';
-import '../../manager/bloc/home_bloc.dart';
-import '../home_radio_group.dart';
-import '../home_text_field_with_title.dart';
+import '../../../../home/view/widgets/home_radio_group.dart';
+import '../../../../home/view/widgets/home_text_field_with_title.dart';
+import '../../../domain/usecases/reject_order_use_case.dart';
+import '../../manager/bloc/orders_bloc.dart';
 
 class RejectOrderBottomSheet extends StatefulWidget {
   const RejectOrderBottomSheet({
@@ -224,7 +224,7 @@ class _RejectOrderBottomSheetState extends State<RejectOrderBottomSheet> {
                                   );
                                   return;
                               }
-                              context.read<HomeBloc>().add(
+                              context.read<OrdersBloc>().add(
                                 RejectOrderEvent(
                                   params: RejectOrderParams(
                                     rejectType: rejectType,
@@ -246,7 +246,7 @@ class _RejectOrderBottomSheetState extends State<RejectOrderBottomSheet> {
               ),
             ),
           ),
-          BlocConsumer<HomeBloc, HomeState>(
+          BlocConsumer<OrdersBloc, OrdersState>(
             buildWhen: (previous, current) =>
                 previous.rejectOrderStatus != current.rejectOrderStatus,
             listenWhen: (previous, current) =>
@@ -265,11 +265,8 @@ class _RejectOrderBottomSheetState extends State<RejectOrderBottomSheet> {
                   message: "تم رفض الطلب بنجاح",
                   type: ToastificationType.success,
                 );
-                context.read<HomeBloc>().add(
-                  GetNewOrdersEvent(
-                    isReload: true,
-                    params: GetNewOrdersParams(),
-                  ),
+                context.read<OrdersBloc>().add(
+                  GetOrdersEvent(isReload: true, params: GetOrdersParams()),
                 );
                 context.pop();
               }

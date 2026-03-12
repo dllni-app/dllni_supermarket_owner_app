@@ -1,20 +1,20 @@
-import 'package:injectable/injectable.dart';
 import 'package:common_package/helpers/typedef.dart';
+import 'package:injectable/injectable.dart';
 
-import '../repository/products_repo.dart';
 import '../../data/models/total_producst_count_model.dart';
+import '../repository/products_repo.dart';
 
 @lazySingleton
-class TotalProducstCountUseCase implements UseCase<TotalProducstCountModel, TotalProducstCountParams> {
-
+class TotalProducstCountUseCase
+    implements UseCase<TotalProducstCountModel, TotalProductsCountParams> {
   final ProductsRepo products;
 
   TotalProducstCountUseCase({required this.products});
 
   @override
-  DataResponse<TotalProducstCountModel> call(TotalProducstCountParams params) {
+  DataResponse<TotalProducstCountModel> call(TotalProductsCountParams params) {
     return products.totalProducstCount(params);
   }
 }
 
-class TotalProducstCountParams with Params{}
+class TotalProductsCountParams with Params {}
