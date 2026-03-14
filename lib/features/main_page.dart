@@ -11,8 +11,8 @@ import 'profile/view/screens/more_screen.dart';
 
 @AutoRoutePage(path: "/")
 class MainPage extends StatefulWidget {
-  const MainPage({super.key});
-
+  const MainPage({super.key, this.initialPage});
+  final int? initialPage;
   @override
   State<MainPage> createState() => _MainPageState();
 }
@@ -24,7 +24,12 @@ class _MainPageState extends State<MainPage>
   @override
   void initState() {
     super.initState();
-    tabController = TabController(length: 5, vsync: this);
+    if (widget.initialPage != null) selectedTab = widget.initialPage!;
+    tabController = TabController(
+      length: 5,
+      vsync: this,
+      initialIndex: selectedTab,
+    );
   }
 
   @override

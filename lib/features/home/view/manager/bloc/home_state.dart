@@ -1,6 +1,8 @@
 part of 'home_bloc.dart';
 
 class HomeState {
+  BlocStatus? performanceReportStatus;
+  GetPerformanceReportModel? performanceReport;
   BlocStatus? acceptOrderStatus;
   AcceptOrderModel? acceptOrder;
   BlocStatus? dailyCountStatus;
@@ -25,6 +27,9 @@ class HomeState {
     this.dailyCountStatus,
     this.acceptOrder,
     this.acceptOrderStatus,
+
+    this.performanceReport,
+    this.performanceReportStatus,
   });
 
   HomeState copyWith({
@@ -39,6 +44,8 @@ class HomeState {
     BlocStatus? dailyCountStatus,
     AcceptOrderModel? acceptOrder,
     BlocStatus? acceptOrderStatus,
+    GetPerformanceReportModel? performanceReport,
+    BlocStatus? performanceReportStatus,
   }) => HomeState(
     errorMessage: errorMessage ?? this.errorMessage,
     dashboardOverview: dashboardOverview ?? this.dashboardOverview,
@@ -52,5 +59,8 @@ class HomeState {
     dailyCountStatus: dailyCountStatus ?? this.dailyCountStatus,
     acceptOrder: acceptOrder ?? this.acceptOrder,
     acceptOrderStatus: acceptOrderStatus ?? this.acceptOrderStatus,
+    performanceReport: performanceReport ?? this.performanceReport,
+    performanceReportStatus:
+        performanceReportStatus ?? this.performanceReportStatus,
   );
 }

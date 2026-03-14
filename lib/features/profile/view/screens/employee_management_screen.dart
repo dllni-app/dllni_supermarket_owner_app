@@ -31,7 +31,9 @@ class EmployeeManagementScreen extends StatelessWidget {
                   child: BigButtonWithIcon(
                     icon: AppImage.asset(AppSvgs.add, size: 22),
                     title: "إضافة موظف جديد",
-                    onPressed: () {},
+                    onPressed: () {
+                      context.pushRoute("/profile/employees/create_employee");
+                    },
                   ),
                 ),
                 SizedBox(height: 16),

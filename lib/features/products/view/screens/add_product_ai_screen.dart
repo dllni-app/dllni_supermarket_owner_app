@@ -30,8 +30,8 @@ class AddProductAIScreen extends StatefulWidget {
 
 class _AddProductAIScreenState extends State<AddProductAIScreen> {
   // from Text to Image properties
-  late TextEditingController productNameController;
-  late TextEditingController productDescriptionController;
+  String productName = "";
+  String productDescription = "";
   Uint8List? generatedImage64Based;
 
   // from Image to Text properties
@@ -42,8 +42,6 @@ class _AddProductAIScreenState extends State<AddProductAIScreen> {
   @override
   void initState() {
     super.initState();
-    productNameController = TextEditingController();
-    productDescriptionController = TextEditingController();
     generatedProductNameController = TextEditingController();
     generatedProductDescriptionController = TextEditingController();
   }
@@ -51,8 +49,6 @@ class _AddProductAIScreenState extends State<AddProductAIScreen> {
   @override
   void dispose() {
     super.dispose();
-    productNameController.dispose();
-    productDescriptionController.dispose();
     generatedProductNameController.dispose();
     generatedProductDescriptionController.dispose();
   }
@@ -82,17 +78,21 @@ class _AddProductAIScreenState extends State<AddProductAIScreen> {
                         expandedWidget: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            ProductTextField(
+                            AppTextField(
                               title: "اسم المنتج",
                               isRequired: true,
                               hintText: "مثال: برجر دجاج كلاسيك",
-                              controller: productNameController,
+                              onChanged: (value) {
+                                productName = value;
+                              },
                             ),
                             SizedBox(height: 8),
-                            ProductTextField(
+                            AppTextField(
                               title: "وصف المنتج",
                               hintText: "وصف مكونات المنتج ومميزاته...",
-                              controller: productDescriptionController,
+                              onChanged: (value) {
+                                productDescription = value;
+                              },
                               maxLines: 4,
                             ),
                             SizedBox(height: 16),
@@ -117,9 +117,7 @@ class _AddProductAIScreenState extends State<AddProductAIScreen> {
                                     color: AppColors.white,
                                   ),
                                   onTap: () {
-                                    if (productNameController.text
-                                        .trim()
-                                        .isEmpty) {
+                                    if (productName.trim().isEmpty) {
                                       AppToast.showToast(
                                         context: context,
                                         message: "يجب تعبئة حقل 'اسم المنتج'",
@@ -130,11 +128,9 @@ class _AddProductAIScreenState extends State<AddProductAIScreen> {
                                     context.read<ProductsBloc>().add(
                                       GetProductFromTextEvent(
                                         params: GetProductFromTextParams(
-                                          title: productNameController.text
+                                          title: productName.trim(),
+                                          description: productDescription
                                               .trim(),
-                                          description:
-                                              productDescriptionController.text
-                                                  .trim(),
                                         ),
                                       ),
                                     );
@@ -235,7 +231,7 @@ class _AddProductAIScreenState extends State<AddProductAIScreen> {
                                                           "/products/new_product/details",
                                                           arguments:
                                                               AddProductDetailsParams(
-                                                                image64Based:
+                                                                mainImage64Based:
                                                                     generatedImage64Based,
                                                               ),
                                                         );
@@ -268,7 +264,8 @@ class _AddProductAIScreenState extends State<AddProductAIScreen> {
                         expandedWidget: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            ProductImageField(
+                            AppImageField(
+                              title: "صورة المنتج",
                               onPickImage: (imagePath) {
                                 this.imagePath = imagePath;
                               },
@@ -338,13 +335,13 @@ class _AddProductAIScreenState extends State<AddProductAIScreen> {
                                   return Column(
                                     children: [
                                       SizedBox(height: 16),
-                                      ProductTextField(
+                                      AppTextField(
                                         title: "اسم المنتج",
                                         controller:
                                             generatedProductNameController,
                                       ),
                                       SizedBox(height: 8),
-                                      ProductTextField(
+                                      AppTextField(
                                         title: "وصف المنتج",
                                         maxLines: null,
                                         controller:

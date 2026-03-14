@@ -11,6 +11,8 @@ import '../usecases/get_daily_count_use_case.dart';
 import '../../data/models/get_daily_count_model.dart';
 import '../usecases/accept_order_use_case.dart';
 import '../../data/models/accept_order_model.dart';
+import '../usecases/get_performance_report_use_case.dart';
+import '../../data/models/get_performance_report_model.dart';
 abstract class HomeRepo {
   DataResponse<GetDashboardOverviewModel> getDashboardOverview(GetDashboardOverviewParams params);
 
@@ -23,4 +25,6 @@ abstract class HomeRepo {
   DataResponse<GetDailyCountModel> getDailyCount(GetDailyCountParams params);
 
   DataResponse<AcceptOrderModel> acceptOrder(AcceptOrderParams params);
+
+  DataResponse<GetPerformanceReportModel> getPerformanceReport(GetPerformanceReportParams params);
 }

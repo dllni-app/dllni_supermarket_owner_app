@@ -17,12 +17,15 @@ import '../../../domain/usecases/get_product_from_image_use_case.dart';
 import '../../../data/models/get_product_from_image_model.dart';
 import '../../../domain/usecases/get_product_from_text_use_case.dart';
 import '../../../data/models/get_product_from_text_model.dart';
+import '../../../domain/usecases/add_product_use_case.dart';
+import '../../../data/models/add_product_model.dart';
 
 part 'products_event.dart';
 part 'products_state.dart';
 
 @injectable
 class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
+  final AddProductUseCase addProductUseCase;
   final GetProductFromTextUseCase getProductFromTextUseCase;
   final GetProductFromImageUseCase getProductFromImageUseCase;
   final GetCategoriesUseCase getCategoriesUseCase;
@@ -35,13 +38,15 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
     this.totalProducstCountUseCase,
     this.getCategoriesUseCase,
     this.getProductFromImageUseCase,
-    this.getProductFromTextUseCase,) : super(ProductsState()) {
+    this.getProductFromTextUseCase,
+    this.addProductUseCase,) : super(ProductsState()) {
     on<GetProductsEvent>(_getProducts, transformer: droppableProMax());
     on<GetLowStockEvent>(_getLowStock);
     on<TotalProductsCountEvent>(_totalProducstCount);
     on<GetCategoriesEvent>(_getCategories);
     on<GetProductFromImageEvent>(_getProductFromImage);
-    on<GetProductFromTextEvent>(_getProductFromText);}
+    on<GetProductFromTextEvent>(_getProductFromText);
+    on<AddProductEvent>(_addProduct);}
 
   EventTransformer<T> droppableProMax<T extends EventWithReload>() {
     return (events, mapper) {
@@ -170,6 +175,22 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
       emit(state.copyWith(
         productFromTextStatus: BlocStatus.success,
         productFromText: r,
+      ));
+    });
+  }
+
+  FutureOr<void> _addProduct(AddProductEvent event, Emitter<ProductsState> emit) async {
+    emit(state.copyWith(addProductStatus: BlocStatus.loading));
+    final res = await addProductUseCase(event.params);
+    res.fold((l) {
+      emit(state.copyWith(
+        addProductStatus: BlocStatus.failed,
+        errorMessage: l.message,
+      ));
+    }, (r) {
+      emit(state.copyWith(
+        addProductStatus: BlocStatus.success,
+        addProduct: r,
       ));
     });
   }}

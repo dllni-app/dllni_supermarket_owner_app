@@ -6,14 +6,19 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 
-class ProductImageField extends StatefulWidget {
-  const ProductImageField({super.key, required this.onPickImage});
+class AppImageField extends StatefulWidget {
+  const AppImageField({
+    super.key,
+    required this.onPickImage,
+    required this.title,
+  });
   final void Function(String imagePath) onPickImage;
+  final String title;
   @override
-  State<ProductImageField> createState() => _ProductImageFieldState();
+  State<AppImageField> createState() => _AppImageFieldState();
 }
 
-class _ProductImageFieldState extends State<ProductImageField> {
+class _AppImageFieldState extends State<AppImageField> {
   String? imagePath;
   @override
   Widget build(BuildContext context) {
@@ -23,7 +28,7 @@ class _ProductImageFieldState extends State<ProductImageField> {
       spacing: 8,
       children: [
         AppText(
-          "صورة المنتج",
+          widget.title,
           style: TextStyle(
             color: Color(0xFF374151),
             fontSize: 14,

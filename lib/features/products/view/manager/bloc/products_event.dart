@@ -40,3 +40,9 @@ class GetProductFromTextEvent extends ProductsEvent {
 
   GetProductFromTextEvent({required this.params});
 }
+
+class AddProductEvent extends ProductsEvent {
+  final AddProductParams params;
+
+  AddProductEvent({required this.params});
+}

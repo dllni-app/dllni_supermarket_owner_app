@@ -3,14 +3,17 @@
 import 'package:flutter/material.dart';
 import 'package:dllni_supermarket_owner_app/features/auth/view/screens/login_screen.dart';
 import 'package:dllni_supermarket_owner_app/features/home/view/screens/notification_screen.dart';
+import 'package:dllni_supermarket_owner_app/features/home/view/screens/performance_report_screen.dart';
 import 'package:dllni_supermarket_owner_app/features/main_page.dart';
+import 'package:dllni_supermarket_owner_app/features/orders/view/screens/order_details_screen.dart';
 import 'package:dllni_supermarket_owner_app/features/products/view/screens/add_new_product_screen.dart';
 import 'package:dllni_supermarket_owner_app/features/products/view/screens/add_product_ai_screen.dart';
 import 'package:dllni_supermarket_owner_app/features/products/view/screens/add_product_details_screen.dart';
 import 'package:dllni_supermarket_owner_app/features/products/view/screens/add_product_menu_screen.dart';
 import 'package:dllni_supermarket_owner_app/features/profile/view/screens/coupons_management_screen.dart';
+import 'package:dllni_supermarket_owner_app/features/profile/view/screens/create_new_employee_screen.dart';
+import 'package:dllni_supermarket_owner_app/features/profile/view/screens/create_offer_screen.dart';
 import 'package:dllni_supermarket_owner_app/features/profile/view/screens/employee_management_screen.dart';
-import 'package:dllni_supermarket_owner_app/features/profile/view/screens/offers_management_screen.dart';
 import 'package:dllni_supermarket_owner_app/features/profile/view/screens/profile_screen.dart';
 import 'package:dllni_supermarket_owner_app/features/profile/view/screens/working_time_screen.dart';
 
@@ -29,11 +32,27 @@ class GeneratedAppRoutes {
           builder: (_) => NotificationsScreen(),
           settings: settings,
         );
-      case '/':
+      case '/performance_report':
         return MaterialPageRoute(
-          builder: (_) => MainPage(),
+          builder: (_) => PerformanceReportScreen(),
           settings: settings,
         );
+      case '/':
+        if (args is int?) {
+          return MaterialPageRoute(
+            builder: (_) => MainPage(initialPage: args),
+            settings: settings,
+          );
+        }
+        return _errorRoute(settings);
+      case '/orders/order_details':
+        if (args is int) {
+          return MaterialPageRoute(
+            builder: (_) => OrderDetailsScreen(orderId: args),
+            settings: settings,
+          );
+        }
+        return _errorRoute(settings);
       case '/products/new_product':
         return MaterialPageRoute(
           builder: (_) => AddNewProductScreen(),
@@ -53,23 +72,31 @@ class GeneratedAppRoutes {
         }
         return _errorRoute(settings);
       case '/products/new_product/menu':
-        return MaterialPageRoute(
-          builder: (_) => AddProductMenuScreen(),
-          settings: settings,
-        );
+        if (args is UploadFileType?) {
+          return MaterialPageRoute(
+            builder: (_) => AddProductMenuScreen(type: args),
+            settings: settings,
+          );
+        }
+        return _errorRoute(settings);
       case '/couponsmanagement':
         return MaterialPageRoute(
           builder: (_) => CouponsManagementScreen(),
           settings: settings,
         );
+      case '/profile/employees/create_employee':
+        return MaterialPageRoute(
+          builder: (_) => CreateNewEmployeeScreen(),
+          settings: settings,
+        );
+      case '/create_offer':
+        return MaterialPageRoute(
+          builder: (_) => CreateOfferScreen(),
+          settings: settings,
+        );
       case '/profile/employees':
         return MaterialPageRoute(
           builder: (_) => EmployeeManagementScreen(),
-          settings: settings,
-        );
-      case '/offersmanagement':
-        return MaterialPageRoute(
-          builder: (_) => OffersManagementScreen(),
           settings: settings,
         );
       case '/profile':

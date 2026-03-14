@@ -16,6 +16,8 @@ import '../../domain/usecases/get_daily_count_use_case.dart';
 import '../models/get_daily_count_model.dart';
 import '../../domain/usecases/accept_order_use_case.dart';
 import '../models/accept_order_model.dart';
+import '../../domain/usecases/get_performance_report_use_case.dart';
+import '../models/get_performance_report_model.dart';
 
 @LazySingleton(as: HomeRepo)
 class HomeRepoImpl with HandlingException implements HomeRepo {
@@ -62,6 +64,13 @@ class HomeRepoImpl with HandlingException implements HomeRepo {
   DataResponse<AcceptOrderModel> acceptOrder(AcceptOrderParams params) {
     return wrapHandlingException(
       tryCall: () => homeRemoteDataSource.acceptOrder(params),
+    );
+  }
+
+  @override
+  DataResponse<GetPerformanceReportModel> getPerformanceReport(GetPerformanceReportParams params) {
+    return wrapHandlingException(
+      tryCall: () => homeRemoteDataSource.getPerformanceReport(params),
     );
   }}
 

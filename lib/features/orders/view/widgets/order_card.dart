@@ -6,16 +6,25 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../core/themes/app_colors.dart';
 import '../../../../core/widgets/app_buttons.dart';
 import '../../data/models/get_orders_model.dart';
-import '../screens/order_details_screen.dart';
 
 enum PaymentWay { cash }
 
 enum OrderStatus { pending, preparing, readyForPickup, completed, rejected }
 
 class OrderCard extends StatelessWidget {
-  const OrderCard({super.key, required this.status, required this.order});
+  const OrderCard({
+    super.key,
+    required this.status,
+    required this.order,
+    required this.onAcceptTap,
+    required this.onRejectTap,
+    required this.onViewDetailsTap,
+  });
   final OrderStatus status;
   final GetOrdersModelDataItem order;
+  final void Function() onAcceptTap;
+  final void Function() onRejectTap;
+  final void Function() onViewDetailsTap;
 
   String get orderDelay {
     final Duration diffDate = DateTime.now().difference(
@@ -169,7 +178,7 @@ class OrderCard extends StatelessWidget {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 AppText(
-                                  "عبدالله المحمد",
+                                  "عميل السوبرماركت",
                                   style: TextStyle(
                                     color: Color(0xE5000000),
                                     fontSize: 14,
@@ -229,19 +238,12 @@ class OrderCard extends StatelessWidget {
                           ),
                           child: Column(
                             spacing: 12,
-                            children: [
-                              _RequirementRow(
-                                label: "1- سيتي كورن ( نكهة الحار و الحلو )",
+                            children: List.generate(
+                              order.items!.length,
+                              (index) => _RequirementRow(
+                                label: "${index + 1}- ${order.items![index]}",
                               ),
-                              _RequirementRow(label: "2- سطل لبن بقر"),
-                              _RequirementRow(
-                                label: "4- علبة كاتشب العجمي (حار) * 2",
-                              ),
-                              _RequirementRow(
-                                label: "3- كيس كريم توم العجمي * 2",
-                              ),
-                              _RequirementRow(label: "5- كيس مخلل الأزرق * 2"),
-                            ],
+                            ),
                           ),
                         ),
                         if (status == OrderStatus.pending)
@@ -251,21 +253,13 @@ class OrderCard extends StatelessWidget {
                               Expanded(
                                 child: AppButton(
                                   title: "قبول الطلب",
-                                  onTap: () {
-                                    print("accept");
-                                  },
+                                  onTap: onAcceptTap,
                                 ),
                               ),
                               AppOutlinedButton(
                                 color: const Color(0xFFFF4C51),
                                 title: "رفض",
-                                onTap: () {
-                                  print("Reject");
-                                  // showModalBottomSheet(
-                                  //   context: context,
-                                  //   builder: (_) => RejectOrderSheet(orderId: 1),
-                                  // );
-                                },
+                                onTap: onRejectTap,
                               ),
                             ],
                           )
@@ -277,11 +271,15 @@ class OrderCard extends StatelessWidget {
                               title: "عرض التفاصيل",
                               onTap: () {
                                 print("show details");
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (_) => OrderDetailsScreen(),
-                                  ),
+                                context.pushRoute(
+                                  "/orders/order_details",
+                                  arguments: order.id!,
                                 );
+                                // Navigator.of(context).push(
+                                //   MaterialPageRoute(
+                                //     builder: (_) => OrderDetailsScreen(),
+                                //   ),
+                                // );
                               },
                             ),
                           )

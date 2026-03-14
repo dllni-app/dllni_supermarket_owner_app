@@ -5,6 +5,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../core/themes/app_colors.dart';
 import '../../../../core/widgets/app_app_bars.dart';
 import '../widgets/add_product_way_card.dart';
+import 'add_product_menu_screen.dart';
 
 @AutoRoutePage(path: "/products/new_product")
 class AddNewProductScreen extends StatelessWidget {
@@ -44,7 +45,12 @@ class AddNewProductScreen extends StatelessWidget {
                           hint: "الأسرع",
                         ),
                         AddProductWayCard(
-                          onTap: () {},
+                          onTap: () {
+                            context.pushRoute(
+                              "/products/new_product/menu",
+                              arguments: UploadFileType.image,
+                            );
+                          },
                           backgroundColor: Color(0xFFEFF6FF),
                           foregroundColor: Color(0xFF2563EB),
                           icon: FontAwesomeIcons.solidCamera,
@@ -65,7 +71,10 @@ class AddNewProductScreen extends StatelessWidget {
                         ),
                         AddProductWayCard(
                           onTap: () {
-                            context.pushRoute("/products/new_product/menu");
+                            context.pushRoute(
+                              "/products/new_product/menu",
+                              arguments: UploadFileType.file,
+                            );
                           },
                           backgroundColor: Color(0xFFFFF7ED),
                           foregroundColor: Color(0xFFEA580C),

@@ -12,6 +12,8 @@ import '../usecases/get_product_from_image_use_case.dart';
 import '../../data/models/get_product_from_image_model.dart';
 import '../usecases/get_product_from_text_use_case.dart';
 import '../../data/models/get_product_from_text_model.dart';
+import '../usecases/add_product_use_case.dart';
+import '../../data/models/add_product_model.dart';
 
 abstract class ProductsRepo {
   DataResponse<GetProductsModel> getProducts(GetProductsParams params);
@@ -28,4 +30,6 @@ abstract class ProductsRepo {
   DataResponse<GetProductFromImageModel> getProductFromImage(GetProductFromImageParams params);
 
   DataResponse<GetProductFromTextModel> getProductFromText(GetProductFromTextParams params);
+
+  DataResponse<AddProductModel> addProduct(AddProductParams params);
 }

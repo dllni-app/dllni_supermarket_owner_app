@@ -43,3 +43,9 @@ class AcceptOrderEvent extends HomeEvent {
 
   AcceptOrderEvent({required this.params});
 }
+
+class GetPerformanceReportEvent extends HomeEvent {
+  final GetPerformanceReportParams params;
+
+  GetPerformanceReportEvent({required this.params});
+}

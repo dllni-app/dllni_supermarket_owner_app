@@ -70,47 +70,66 @@ dynamic _asDynamic(dynamic value) {
   return value.toString();
 }
 
-GetNewOrdersModel getNewOrdersModelFromJson(str) => GetNewOrdersModel.fromJson(str);
+GetNewOrdersModel getNewOrdersModelFromJson(str) =>
+    GetNewOrdersModel.fromJson(str);
 
-String getNewOrdersModelToJson(GetNewOrdersModel data) => json.encode(data.toJson());
+String getNewOrdersModelToJson(GetNewOrdersModel data) =>
+    json.encode(data.toJson());
 
+GetNewOrdersModelMeta getNewOrdersModelMetaFromJson(str) =>
+    GetNewOrdersModelMeta.fromJson(str);
 
-GetNewOrdersModelMeta getNewOrdersModelMetaFromJson(str) => GetNewOrdersModelMeta.fromJson(str);
+String getNewOrdersModelMetaToJson(GetNewOrdersModelMeta data) =>
+    json.encode(data.toJson());
 
-String getNewOrdersModelMetaToJson(GetNewOrdersModelMeta data) => json.encode(data.toJson());
+GetNewOrdersModelMetaLinksItem getNewOrdersModelMetaLinksItemFromJson(str) =>
+    GetNewOrdersModelMetaLinksItem.fromJson(str);
 
+String getNewOrdersModelMetaLinksItemToJson(
+  GetNewOrdersModelMetaLinksItem data,
+) => json.encode(data.toJson());
 
-GetNewOrdersModelMetaLinksItem getNewOrdersModelMetaLinksItemFromJson(str) => GetNewOrdersModelMetaLinksItem.fromJson(str);
+GetNewOrdersModelLinks getNewOrdersModelLinksFromJson(str) =>
+    GetNewOrdersModelLinks.fromJson(str);
 
-String getNewOrdersModelMetaLinksItemToJson(GetNewOrdersModelMetaLinksItem data) => json.encode(data.toJson());
+String getNewOrdersModelLinksToJson(GetNewOrdersModelLinks data) =>
+    json.encode(data.toJson());
 
+GetNewOrdersModelDataItem getNewOrdersModelDataItemFromJson(str) =>
+    GetNewOrdersModelDataItem.fromJson(str);
 
-GetNewOrdersModelLinks getNewOrdersModelLinksFromJson(str) => GetNewOrdersModelLinks.fromJson(str);
-
-String getNewOrdersModelLinksToJson(GetNewOrdersModelLinks data) => json.encode(data.toJson());
-
-
-GetNewOrdersModelDataItem getNewOrdersModelDataItemFromJson(str) => GetNewOrdersModelDataItem.fromJson(str);
-
-String getNewOrdersModelDataItemToJson(GetNewOrdersModelDataItem data) => json.encode(data.toJson());
-
+String getNewOrdersModelDataItemToJson(GetNewOrdersModelDataItem data) =>
+    json.encode(data.toJson());
 
 class GetNewOrdersModel {
   List<GetNewOrdersModelDataItem>? data;
   GetNewOrdersModelLinks? links;
   GetNewOrdersModelMeta? meta;
 
-  GetNewOrdersModel({
-    this.data,
-    this.links,
-    this.meta,
-  });
+  GetNewOrdersModel({this.data, this.links, this.meta});
 
   factory GetNewOrdersModel.fromJson(Map<String, dynamic> json) {
     return GetNewOrdersModel(
-      data: json['data'] is List ? (json['data'] as List).whereType<Map>().map((item) => GetNewOrdersModelDataItem.fromJson(Map<String, dynamic>.from(item))).toList() : null,
-      links: json['links'] is Map ? GetNewOrdersModelLinks.fromJson(Map<String, dynamic>.from(json['links'] as Map)) : null,
-      meta: json['meta'] is Map ? GetNewOrdersModelMeta.fromJson(Map<String, dynamic>.from(json['meta'] as Map)) : null,
+      data: json['data'] is List
+          ? (json['data'] as List)
+                .whereType<Map>()
+                .map(
+                  (item) => GetNewOrdersModelDataItem.fromJson(
+                    Map<String, dynamic>.from(item),
+                  ),
+                )
+                .toList()
+          : null,
+      links: json['links'] is Map
+          ? GetNewOrdersModelLinks.fromJson(
+              Map<String, dynamic>.from(json['links'] as Map),
+            )
+          : null,
+      meta: json['meta'] is Map
+          ? GetNewOrdersModelMeta.fromJson(
+              Map<String, dynamic>.from(json['meta'] as Map),
+            )
+          : null,
     );
   }
 
@@ -149,7 +168,16 @@ class GetNewOrdersModelMeta {
       currentPage: _asInt(json['current_page']),
       from: _asInt(json['from']),
       lastPage: _asInt(json['last_page']),
-      links: json['links'] is List ? (json['links'] as List).whereType<Map>().map((item) => GetNewOrdersModelMetaLinksItem.fromJson(Map<String, dynamic>.from(item))).toList() : null,
+      links: json['links'] is List
+          ? (json['links'] as List)
+                .whereType<Map>()
+                .map(
+                  (item) => GetNewOrdersModelMetaLinksItem.fromJson(
+                    Map<String, dynamic>.from(item),
+                  ),
+                )
+                .toList()
+          : null,
       path: _asString(json['path']),
       perPage: _asInt(json['per_page']),
       to: _asInt(json['to']),
@@ -194,12 +222,7 @@ class GetNewOrdersModelMetaLinksItem {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'url': url,
-      'label': label,
-      'page': page,
-      'active': active,
-    };
+    return {'url': url, 'label': label, 'page': page, 'active': active};
   }
 }
 
@@ -209,12 +232,7 @@ class GetNewOrdersModelLinks {
   dynamic prev;
   dynamic next;
 
-  GetNewOrdersModelLinks({
-    this.first,
-    this.last,
-    this.prev,
-    this.next,
-  });
+  GetNewOrdersModelLinks({this.first, this.last, this.prev, this.next});
 
   factory GetNewOrdersModelLinks.fromJson(Map<String, dynamic> json) {
     return GetNewOrdersModelLinks(
@@ -226,12 +244,7 @@ class GetNewOrdersModelLinks {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'first': first,
-      'last': last,
-      'prev': prev,
-      'next': next,
-    };
+    return {'first': first, 'last': last, 'prev': prev, 'next': next};
   }
 }
 
@@ -259,6 +272,7 @@ class GetNewOrdersModelDataItem {
   dynamic cancellationReason;
   String? createdAt;
   String? updatedAt;
+  List<String>? items;
 
   GetNewOrdersModelDataItem({
     this.id,
@@ -284,6 +298,7 @@ class GetNewOrdersModelDataItem {
     this.cancellationReason,
     this.createdAt,
     this.updatedAt,
+    this.items,
   });
 
   factory GetNewOrdersModelDataItem.fromJson(Map<String, dynamic> json) {
@@ -305,12 +320,19 @@ class GetNewOrdersModelDataItem {
       serviceFee: _asString(json['serviceFee']),
       totalAmount: _asString(json['totalAmount']),
       cancellationFeeAmount: _asDynamic(json['cancellationFeeAmount']),
-      cancellationPolicySnapshot: _asDynamic(json['cancellationPolicySnapshot']),
+      cancellationPolicySnapshot: _asDynamic(
+        json['cancellationPolicySnapshot'],
+      ),
       specialInstructions: _asString(json['specialInstructions']),
       cancelledAt: _asDynamic(json['cancelledAt']),
       cancellationReason: _asDynamic(json['cancellationReason']),
       createdAt: _asString(json['createdAt']),
       updatedAt: _asString(json['updatedAt']),
+      items: json["items"] is! List
+          ? []
+          : (json["items"] as List)
+                .map<String>((element) => element["productName"])
+                .toList(),
     );
   }
 

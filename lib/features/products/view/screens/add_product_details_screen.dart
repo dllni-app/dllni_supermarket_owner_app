@@ -1,14 +1,23 @@
+import 'dart:convert';
+import 'dart:developer' show log;
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:common_package/common_package.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_mlkit_barcode_scanning/google_mlkit_barcode_scanning.dart';
+import 'package:toastification/toastification.dart';
 
-import '../../../../core/themes/app_colors.dart';
-import '../../../../core/themes/app_gradients.dart';
-import '../../../../core/themes/app_shadows.dart';
+import '../../../../core/di/injection.dart';
 import '../../../../core/widgets/app_app_bars.dart';
 import '../../../../core/widgets/app_buttons.dart';
+import '../../../../core/widgets/failure_widget.dart';
+import '../../../../core/widgets/step_details.dart';
+import '../../domain/usecases/add_product_use_case.dart';
+import '../../domain/usecases/get_categories_use_case.dart';
+import '../manager/bloc/products_bloc.dart';
 import '../widgets/product_pick_images.dart';
 import '../widgets/product_text_field.dart';
 
@@ -24,475 +33,444 @@ class AddProductDetailsScreen extends StatefulWidget {
 }
 
 class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
-  late TextEditingController unitController;
+  late BarcodeScanner _barcodeScanner;
+  late AddProductDetailsParams params;
   @override
   void initState() {
-    unitController = TextEditingController();
+    _barcodeScanner = BarcodeScanner();
+    if (widget.params != null) {
+      params = widget.params!;
+    } else {
+      params = AddProductDetailsParams();
+    }
     super.initState();
   }
 
   @override
   void dispose() {
-    unitController.dispose();
+    _barcodeScanner.close();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        children: [
-          AppSimpleAppBar(title: "إضافة منتج جديد"),
-          Expanded(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                child: Column(
-                  children: [
-                    SizedBox(height: 16),
-                    ProductStepDetails(
-                      number: 1,
-                      title: "المعلومات الأساسية",
-                      child: Column(
-                        children: [
-                          ProductTextField(
-                            title: "اسم المنتج",
-                            hintText: "مثال: برجر دجاج كلاسيك",
-                          ),
-                          SizedBox(height: 20),
-                          ProductTextField(
-                            title: "وصف المنتج",
-                            hintText: "وصف مكونات المنتج ومميزاته...",
-                            maxLines: 4,
-                          ),
-                          SizedBox(height: 20),
-                          ProductMenuField(
-                            title: "التصنيف",
-                            hintText: "اختر تصنيف...",
-                            onChanged: (value) {
-                              print(value);
-                            },
-                            items: [
-                              DropdownMenuItem(
-                                value: "التصنيف 1",
-                                child: AppText(
-                                  "التصنيف 1",
-                                  style: TextStyle(fontFamily: "Cairo"),
+    return BlocProvider(
+      create: (context) =>
+          getIt<ProductsBloc>()
+            ..add(GetCategoriesEvent(params: GetCategoriesParams())),
+      child: Scaffold(
+        body: Column(
+          children: [
+            AppSimpleAppBar(title: "إضافة منتج جديد"),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                  child: Column(
+                    children: [
+                      SizedBox(height: 16),
+                      StepDetails(
+                        number: 1,
+                        title: "المعلومات الأساسية",
+                        child: Column(
+                          children: [
+                            AppTextField(
+                              title: "اسم المنتج",
+                              hintText: "مثال: برجر دجاج كلاسيك",
+                              isRequired: true,
+                              controller: TextEditingController(
+                                text: params.title,
+                              ),
+                              onChanged: (value) {
+                                params.title = value;
+                              },
+                            ),
+                            SizedBox(height: 20),
+                            AppTextField(
+                              title: "وصف المنتج",
+                              hintText: "وصف مكونات المنتج ومميزاته...",
+                              controller: TextEditingController(
+                                text: params.description,
+                              ),
+                              maxLines: 4,
+                              onChanged: (value) {
+                                params.description = value;
+                              },
+                            ),
+                            SizedBox(height: 20),
+                            BlocBuilder<ProductsBloc, ProductsState>(
+                              buildWhen: (previous, current) =>
+                                  previous.categoriesStatus !=
+                                  current.categoriesStatus,
+                              builder: (context, state) {
+                                return switch (state.categoriesStatus) {
+                                  BlocStatus.loading =>
+                                    CircularProgressIndicator.adaptive(),
+                                  BlocStatus.failed => FailureWidget(
+                                    message:
+                                        state.errorMessage ?? "Unknown Error",
+                                  ),
+                                  BlocStatus.success => ProductMenuField(
+                                    title: "التصنيف",
+                                    isRequired: true,
+                                    hintText: "اختر تصنيف...",
+                                    onChanged: (value) {
+                                      if (value != null &&
+                                          params.categoryId != value) {
+                                        params.categoryId = value;
+                                      }
+                                    },
+                                    items: List.generate(
+                                      state.categories!.data!.length,
+                                      (index) => DropdownMenuItem(
+                                        value:
+                                            state.categories!.data![index].id,
+                                        child: AppText(
+                                          state.categories!.data![index].name ??
+                                              "null",
+                                          style: TextStyle(fontFamily: "Cairo"),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  _ => SizedBox(),
+                                };
+                              },
+                            ),
+                            SizedBox(height: 20),
+                            ProductPickMainImage(
+                              title: "صورة رئيسية",
+                              isRequired: true,
+                              icon: FontAwesomeIcons.solidCamera,
+                              onPickImage: (imagePath) {
+                                print(imagePath);
+                                params.mainImagePath = imagePath;
+                                // params.mainImage64Based = File(
+                                //   params.mainImagePath!,
+                                // ).readAsBytesSync();
+                              },
+                            ),
+                            SizedBox(height: 16),
+                            ProductPickAdditionalImages(
+                              numOfImages: 6,
+                              onPickImage: (imagesPath) {
+                                print(imagesPath);
+                                params.additionalImagesPath = imagesPath;
+                              },
+                            ),
+                            SizedBox(height: 24),
+                            ProductPickMainImage(
+                              title: "صورة  الباركود",
+                              isRequired: true,
+                              icon: FontAwesomeIcons.barcode,
+                              onPickImage: (imagePath) async {
+                                List<Barcode> barcodes = await _barcodeScanner
+                                    .processImage(
+                                      InputImage.fromFilePath(imagePath),
+                                    );
+                                if (!context.mounted) return;
+                                if (barcodes.isEmpty) {
+                                  AppToast.showToast(
+                                    context: context,
+                                    message: "الصورة ليست barcode",
+                                    type: ToastificationType.error,
+                                  );
+                                  return;
+                                }
+                                params.barcode = barcodes.first.rawValue;
+                                log(
+                                  'Detected Barcode: ${barcodes.first.rawValue}',
+                                );
+                                log('Barcode Type: ${barcodes.first.type}');
+                              },
+                            ),
+                            SizedBox(height: 24),
+                            ProductUnit(
+                              onChanged: (unit) {
+                                print(unit);
+                                params.unit = unit;
+                              },
+                            ),
+                            SizedBox(height: 24),
+                            Row(
+                              spacing: 10,
+                              children: [
+                                Expanded(
+                                  child: AppTextField(
+                                    title: "الكمية الأولية",
+                                    isRequired: true,
+                                    hintText: "0",
+                                    onChanged: (value) {
+                                      if (int.tryParse(value) == null) return;
+                                      params.quantity = int.parse(value);
+                                    },
+                                  ),
+                                ),
+                                Expanded(
+                                  child: AppTextField(
+                                    title: "الحد الأدنى",
+                                    isRequired: true,
+                                    hintText: "0",
+                                    onChanged: (value) {
+                                      if (int.tryParse(value) == null) return;
+                                      params.lowStockQuantity = int.parse(
+                                        value,
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 24),
+                            AppDatePicker(
+                              title: "صلاحية المنتج",
+                              onDateChanged: (expiredDate) {
+                                print(expiredDate);
+                                params.expiredAt = expiredDate;
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 16),
+                      StepDetails(
+                        number: 2,
+                        title: "التسعير",
+                        child: Column(
+                          children: [
+                            AppTextField(
+                              title: "السعر الأساسي",
+                              isRequired: true,
+                              hintText: "0.00",
+                              onChanged: (value) {
+                                if (num.tryParse(value) == null) return;
+                                params.price = num.parse(value);
+                              },
+                              suffixIcon: Padding(
+                                padding: const EdgeInsets.only(top: 12),
+                                child: Text(
+                                  "ل.س",
+                                  style: TextStyle(
+                                    color: Color(0xFF9CA3AF),
+                                    fontSize: 14,
+                                  ),
                                 ),
                               ),
-                              DropdownMenuItem(
-                                value: "التصنيف 2",
-                                child: AppText(
-                                  "التصنيف 2",
-                                  style: TextStyle(fontFamily: "Cairo"),
+                              keyboardType: TextInputType.number,
+                            ),
+                            SizedBox(height: 20),
+                            AppTextField(
+                              title: "السعر بعد الحسم",
+                              hintText: "0.00",
+                              isRequired: true,
+                              onChanged: (value) {
+                                if (num.tryParse(value) == null) return;
+                                params.discountedPrice = num.parse(value);
+                              },
+                              suffixIcon: Padding(
+                                padding: const EdgeInsets.only(top: 12),
+                                child: Text(
+                                  "ل.س",
+                                  style: TextStyle(
+                                    color: Color(0xFF9CA3AF),
+                                    fontSize: 14,
+                                  ),
                                 ),
                               ),
-                            ],
-                          ),
-                          SizedBox(height: 20),
-                          ProductPickMainImage(
-                            title: "صورة رئيسية",
-                            isRequired: true,
-                            icon: FontAwesomeIcons.solidCamera,
-                            onPickImage: (imagePath) {
-                              print(imagePath);
-                            },
-                          ),
-                          SizedBox(height: 16),
-                          ProductPickAdditionalImages(
-                            numOfImages: 6,
-                            onPickImage: (imagesPath) {
-                              print(imagesPath);
-                            },
-                          ),
-                          SizedBox(height: 24),
-                          ProductPickMainImage(
-                            title: "صورة  الباركود",
-                            isRequired: true,
-                            icon: FontAwesomeIcons.barcode,
-                            onPickImage: (imagePath) {
-                              print(imagePath);
-                            },
-                          ),
-                          SizedBox(height: 24),
-                          ProductUnit(
-                            onChanged: (unit) {
-                              print(unit);
-                            },
-                            controller: unitController,
-                          ),
-                          SizedBox(height: 24),
-                          Row(
-                            spacing: 10,
+                              keyboardType: TextInputType.number,
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 16),
+                      SizedBox(height: 16),
+                      BlocConsumer<ProductsBloc, ProductsState>(
+                        listener: (context, state) {
+                          if (state.addProductStatus == BlocStatus.success) {
+                            context.pushRouteAndRemoveUntil("/", arguments: 2);
+                          }
+                          if (state.addProductStatus == BlocStatus.failed) {
+                            AppToast.showToast(
+                              context: context,
+                              message: state.errorMessage.toString(),
+                              type: ToastificationType.error,
+                            );
+                          }
+                        },
+                        buildWhen: (previous, current) =>
+                            previous.addProductStatus !=
+                            current.addProductStatus,
+                        builder: (context, state) {
+                          if (state.addProductStatus == BlocStatus.loading) {
+                            return CircularProgressIndicator();
+                          }
+                          return Row(
                             children: [
                               Expanded(
-                                child: ProductTextField(
-                                  title: "الكمية الأولية",
-                                  isRequired: true,
-                                  hintText: "0",
+                                child: AppButton(
+                                  title: "نشر المنتج",
+                                  onTap: () {
+                                    if (!validateProductFields(
+                                      context,
+                                      params,
+                                    )) {
+                                      return;
+                                    }
+                                    context.read<ProductsBloc>().add(
+                                      AddProductEvent(
+                                        params: AddProductParams(
+                                          params: params,
+                                        ),
+                                      ),
+                                    );
+                                  },
                                 ),
                               ),
-                              Expanded(
-                                child: ProductTextField(
-                                  title: "الحد الأدنى",
-                                  isRequired: true,
-                                  hintText: "0",
-                                ),
+                              SizedBox(width: 16),
+                              AppOutlinedButton(
+                                title: "إلغاء",
+                                color: const Color(0xFFFF4C51),
                               ),
                             ],
-                          ),
-                          SizedBox(height: 24),
-                          ProductDatePicker(
-                            title: "صلاحية المنتج",
-                            onDateChanged: (expiredDate) {
-                              print(expiredDate);
-                            },
-                          ),
-                        ],
+                          );
+                        },
                       ),
-                    ),
-                    SizedBox(height: 16),
-                    ProductStepDetails(
-                      number: 2,
-                      title: "التسعير",
-                      child: Column(
-                        children: [
-                          ProductTextField(
-                            title: "السعر الأساسي",
-                            isRequired: true,
-                            hintText: "0.00",
-                            suffixIcon: Padding(
-                              padding: const EdgeInsets.only(top: 12),
-                              child: Text(
-                                "ل.س",
-                                style: TextStyle(
-                                  color: Color(0xFF9CA3AF),
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ),
-                            keyboardType: TextInputType.number,
-                          ),
-                          SizedBox(height: 20),
-                          ProductTextField(
-                            title: "السعر بعد الحسم",
-                            hintText: "0.00",
-                            isRequired: true,
-                            suffixIcon: Padding(
-                              padding: const EdgeInsets.only(top: 12),
-                              child: Text(
-                                "ل.س",
-                                style: TextStyle(
-                                  color: Color(0xFF9CA3AF),
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ),
-                            keyboardType: TextInputType.number,
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: AppButton(
-                            title: "نشر المنتج",
-                            onTap: () {
-                              print("publish");
-                            },
-                          ),
-                        ),
-                        SizedBox(width: 16),
-                        AppOutlinedButton(
-                          title: "إلغاء",
-                          color: const Color(0xFFFF4C51),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 170),
-                  ],
+                      SizedBox(height: 170),
+                    ],
+                  ),
                 ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class ProductUnit extends StatefulWidget {
-  const ProductUnit({
-    super.key,
-    required this.onChanged,
-    required this.controller,
-  });
-  final void Function(String unit) onChanged;
-  final TextEditingController controller;
-  @override
-  State<ProductUnit> createState() => _ProductUnitState();
-}
-
-class _ProductUnitState extends State<ProductUnit> {
-  String? unit;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text.rich(
-          TextSpan(
-            text: "وحدة القياس",
-            children: [
-              TextSpan(
-                text: "*",
-                style: TextStyle(
-                  color: Color(0xFFEF4444),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  height: 1.42,
-                ),
-              ),
-            ],
-          ),
-          style: TextStyle(
-            color: Color(0xFF374151),
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            height: 1.42,
-          ),
-        ),
-        SizedBox(height: 8),
-        Row(
-          spacing: 8,
-          children: [
-            Expanded(
-              child: GestureDetector(
-                onTap: () {
-                  if (unit == "كغ") return;
-                  unit = "كغ";
-                  widget.controller.clear();
-                  setState(() {});
-                },
-                child: _ProductUnitChip(unit: unit, value: "كغ"),
-              ),
-            ),
-            Expanded(
-              child: GestureDetector(
-                onTap: () {
-                  if (unit == "لتر") return;
-                  unit = "لتر";
-                  widget.controller.clear();
-                  setState(() {});
-                },
-                child: _ProductUnitChip(unit: unit, value: "لتر"),
-              ),
-            ),
-            Expanded(
-              child: GestureDetector(
-                onTap: () {
-                  if (unit == "قطعة") return;
-                  unit = "قطعة";
-                  widget.controller.clear();
-                  setState(() {});
-                },
-                child: _ProductUnitChip(unit: unit, value: "قطعة"),
               ),
             ),
           ],
         ),
-        SizedBox(height: 8),
-        TextField(
-          controller: widget.controller,
-          onChanged: (value) {
-            unit = value;
-            setState(() {});
-          },
-          onTapOutside: (_) => FocusScope.of(context).unfocus(),
-          style: TextStyle(color: Color(0xB22F2B3D), fontSize: 14),
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: Color(0xFFF9FAFB),
-            hintText: "أو اكتب وحدة مخصصة",
-            hintStyle: TextStyle(color: Color(0xFF9CA3AF), fontSize: 14),
-            border: OutlineInputBorder(
-              borderSide: BorderSide(color: Color(0xFFE5E7EB)),
-              borderRadius: BorderRadius.all(Radius.circular(16)),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Color(0xFFE5E7EB)),
-              borderRadius: BorderRadius.all(Radius.circular(16)),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Color(0xFFE5E7EB)),
-              borderRadius: BorderRadius.all(Radius.circular(16)),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _ProductUnitChip extends StatelessWidget {
-  const _ProductUnitChip({required this.unit, required this.value});
-  final String? unit;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 9, horizontal: 16),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.all(Radius.circular(100)),
-        color: unit == value ? null : AppColors.white,
-        gradient: unit == value ? AppGradients.gradient : null,
-        border: unit != value ? Border.all(color: Color(0xFFE5E7EB)) : null,
-        boxShadow: [AppShadows.shadow],
-      ),
-      child: AppText(
-        value,
-        style: TextStyle(
-          color: unit == value ? AppColors.white : Color(0xFF4B5563),
-          fontSize: 14,
-          fontWeight: unit == value ? FontWeight.w700 : FontWeight.w500,
-          height: 1.42,
-        ),
       ),
     );
   }
 }
 
-class ProductStepDetails extends StatelessWidget {
-  const ProductStepDetails({
-    super.key,
-    required this.number,
-    required this.title,
-    required this.child,
-  });
-  final int number;
-  final String title;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        border: Border.all(color: const Color(0xFFF3F4F6)),
-        borderRadius: BorderRadius.all(Radius.circular(32)),
-        boxShadow: [
-          BoxShadow(
-            offset: Offset(0, 4),
-            blurRadius: 20,
-            spreadRadius: -2,
-            color: const Color(0x0D000000),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              CircleAvatar(
-                radius: 16,
-                backgroundColor: context.primaryContainer,
-                child: AppText(
-                  number.toString(),
-                  style: TextStyle(
-                    color: AppColors.white,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 14,
-                    height: 1.42,
-                  ),
-                ),
-              ),
-              SizedBox(width: 12),
-              AppText(
-                title,
-                style: TextStyle(
-                  color: context.primaryContainer,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  height: 1.555,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 24),
-          child,
-        ],
-      ),
+bool validateProductFields(
+  BuildContext context,
+  AddProductDetailsParams params,
+) {
+  if (params.title == null || params.title!.trim().isEmpty) {
+    AppToast.showToast(
+      context: context,
+      message: "يرجى إدخال اسم المنتج",
+      type: ToastificationType.error,
     );
-  }
-}
-
-class InfoAlert extends StatelessWidget {
-  const InfoAlert({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: const Color(0x1400BAD1),
-        border: Border.all(color: const Color(0x2900BAD1)),
-        borderRadius: BorderRadius.all(Radius.circular(16)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: EdgeInsets.only(top: 4),
-            child: Icon(
-              FontAwesomeIcons.circleInfo,
-              size: 16,
-              color: const Color(0xFF00A7BC),
-            ),
-          ),
-          SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                AppText(
-                  "نظام الخصم التلقائي",
-                  style: TextStyle(
-                    color: const Color(0xFF00A7BC),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    height: 1.42,
-                  ),
-                ),
-                SizedBox(height: 4),
-                AppText(
-                  "سيتم خصم الكمية المحددة من المخزون تلقائياً عند كل عملية بيع لهذا المنتج.",
-                  textAlign: TextAlign.start,
-                  style: TextStyle(
-                    color: const Color(0xFF00BAD1),
-                    fontSize: 12,
-                    height: 1.333,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+    return false;
+  } else if (params.title!.length < 3) {
+    AppToast.showToast(
+      context: context,
+      message: "اسم المنتج قصير جداً (3 أحرف على الأقل)",
+      type: ToastificationType.error,
     );
+    return false;
   }
+
+  if (params.categoryId == null) {
+    AppToast.showToast(
+      context: context,
+      message: "يرجى اختيار تصنيف للمنتج",
+      type: ToastificationType.error,
+    );
+    return false;
+  }
+
+  if (params.mainImagePath == null && params.mainImage64Based == null) {
+    AppToast.showToast(
+      context: context,
+      message: "يجب إضافة صورة أساسية للمنتج",
+      type: ToastificationType.error,
+    );
+    return false;
+  }
+
+  if (params.barcode == null || params.barcode!.isEmpty) {
+    AppToast.showToast(
+      context: context,
+      message: "يرجى إدخال رمز الباركود",
+      type: ToastificationType.error,
+    );
+    return false;
+  }
+
+  if (params.unit == null || params.unit!.trim().isEmpty) {
+    AppToast.showToast(
+      context: context,
+      message: "يرجى إدخال وحدة القياس",
+      type: ToastificationType.error,
+    );
+    return false;
+  }
+
+  if (params.quantity == null || params.quantity! < 0) {
+    AppToast.showToast(
+      context: context,
+      message: "الكمية الحالية غير منطقية",
+      type: ToastificationType.error,
+    );
+    return false;
+  }
+
+  if (params.lowStockQuantity != null &&
+      params.lowStockQuantity! > params.quantity!) {
+    AppToast.showToast(
+      context: context,
+      message: "حد التنبيه لا يمكن أن يكون أكبر من الكمية الحالية",
+      type: ToastificationType.error,
+    );
+    return false;
+  }
+
+  if (params.price == null || params.price! <= 0) {
+    AppToast.showToast(
+      context: context,
+      message: "يرجى تحديد سعر صالح للمنتج",
+      type: ToastificationType.error,
+    );
+    return false;
+  }
+
+  if (params.discountedPrice != null) {
+    if (params.discountedPrice! >= params.price!) {
+      AppToast.showToast(
+        context: context,
+        message: "سعر الخصم يجب أن يكون أقل من السعر الأساسي",
+        type: ToastificationType.error,
+      );
+      return false;
+    }
+  }
+
+  return true;
 }
 
 class AddProductDetailsParams {
-  final Uint8List? image64Based;
-  final String? title;
-  final String? description;
+  String? title;
+  String? description;
+  int? categoryId;
+  Uint8List? mainImage64Based;
+  String? mainImagePath;
+  List<String>? additionalImagesPath;
+  String? barcode;
+  String? unit;
+  int? quantity, lowStockQuantity;
+  DateTime? expiredAt;
+  num? price, discountedPrice;
 
-  AddProductDetailsParams({this.image64Based, this.title, this.description});
+  AddProductDetailsParams({
+    this.title,
+    this.description,
+    this.mainImage64Based,
+    this.mainImagePath,
+    this.additionalImagesPath,
+    this.barcode,
+    this.unit,
+    this.quantity,
+    this.lowStockQuantity,
+    this.expiredAt,
+    this.price,
+    this.discountedPrice,
+  });
 }

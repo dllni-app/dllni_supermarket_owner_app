@@ -9,24 +9,29 @@ import '../../../domain/usecases/accept_order_use_case.dart';
 import '../../../data/models/accept_order_model.dart';
 import '../../../domain/usecases/reject_order_use_case.dart';
 import '../../../data/models/reject_order_model.dart';
+import '../../../domain/usecases/get_order_details_use_case.dart';
+import '../../../data/models/get_order_details_model.dart';
 
 part 'orders_event.dart';
 part 'orders_state.dart';
 
 @injectable
 class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
+  final GetOrderDetailsUseCase getOrderDetailsUseCase;
   final RejectOrderUseCase rejectOrderUseCase;
   final AcceptOrderUseCase acceptOrderUseCase;
   final GetOrdersUseCase getOrdersUseCase;
   OrdersBloc(
     this.getOrdersUseCase,
     this.acceptOrderUseCase,
-    this.rejectOrderUseCase,) : super(OrdersState()) {
+    this.rejectOrderUseCase,
+    this.getOrderDetailsUseCase,) : super(OrdersState()) {
     
   
     on<GetOrdersEvent>(_getOrders, transformer: droppableProMax());
     on<AcceptOrderEvent>(_acceptOrder);
-    on<RejectOrderEvent>(_rejectOrder);}
+    on<RejectOrderEvent>(_rejectOrder);
+    on<GetOrderDetailsEvent>(_getOrderDetails);}
 
 
   EventTransformer<T> droppableProMax<T extends EventWithReload>() {
@@ -82,6 +87,22 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
       emit(state.copyWith(
         rejectOrderStatus: BlocStatus.success,
         rejectOrder: r,
+      ));
+    });
+  }
+
+  FutureOr<void> _getOrderDetails(GetOrderDetailsEvent event, Emitter<OrdersState> emit) async {
+    emit(state.copyWith(orderDetailsStatus: BlocStatus.loading));
+    final res = await getOrderDetailsUseCase(event.params);
+    res.fold((l) {
+      emit(state.copyWith(
+        orderDetailsStatus: BlocStatus.failed,
+        errorMessage: l.message,
+      ));
+    }, (r) {
+      emit(state.copyWith(
+        orderDetailsStatus: BlocStatus.success,
+        orderDetails: r,
       ));
     });
   }}

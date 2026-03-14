@@ -15,12 +15,15 @@ import '../../../domain/usecases/get_daily_count_use_case.dart';
 import '../../../data/models/get_daily_count_model.dart';
 import '../../../domain/usecases/accept_order_use_case.dart';
 import '../../../data/models/accept_order_model.dart';
+import '../../../domain/usecases/get_performance_report_use_case.dart';
+import '../../../data/models/get_performance_report_model.dart';
 
 part 'home_event.dart';
 part 'home_state.dart';
 
 @injectable
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
+  final GetPerformanceReportUseCase getPerformanceReportUseCase;
   final AcceptOrderUseCase acceptOrderUseCase;
   final GetDailyCountUseCase getDailyCountUseCase;
   final RejectOrderUseCase rejectOrderUseCase;
@@ -33,7 +36,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     this.getPreparingOrdersUseCase,
     this.rejectOrderUseCase,
     this.getDailyCountUseCase,
-    this.acceptOrderUseCase,) : super(HomeState()) {
+    this.acceptOrderUseCase,
+    this.getPerformanceReportUseCase,) : super(HomeState()) {
     
   
     on<GetDashboardOverviewEvent>(_getDashboardOverview);
@@ -41,7 +45,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     on<GetPreparingOrdersEvent>(_getPreparingOrders, transformer: droppableProMax());
     on<RejectOrderEvent>(_rejectOrder);
     on<GetDailyCountEvent>(_getDailyCount);
-    on<AcceptOrderEvent>(_acceptOrder);}
+    on<AcceptOrderEvent>(_acceptOrder);
+    on<GetPerformanceReportEvent>(_getPerformanceReport);}
 
 
   FutureOr<void> _getDashboardOverview(GetDashboardOverviewEvent event, Emitter<HomeState> emit) async {
@@ -148,6 +153,22 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       emit(state.copyWith(
         acceptOrderStatus: BlocStatus.success,
         acceptOrder: r,
+      ));
+    });
+  }
+
+  FutureOr<void> _getPerformanceReport(GetPerformanceReportEvent event, Emitter<HomeState> emit) async {
+    emit(state.copyWith(performanceReportStatus: BlocStatus.loading));
+    final res = await getPerformanceReportUseCase(event.params);
+    res.fold((l) {
+      emit(state.copyWith(
+        performanceReportStatus: BlocStatus.failed,
+        errorMessage: l.message,
+      ));
+    }, (r) {
+      emit(state.copyWith(
+        performanceReportStatus: BlocStatus.success,
+        performanceReport: r,
       ));
     });
   }}

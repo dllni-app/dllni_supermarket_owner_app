@@ -16,6 +16,8 @@ import '../../domain/usecases/get_product_from_image_use_case.dart';
 import '../models/get_product_from_image_model.dart';
 import '../../domain/usecases/get_product_from_text_use_case.dart';
 import '../models/get_product_from_text_model.dart';
+import '../../domain/usecases/add_product_use_case.dart';
+import '../models/add_product_model.dart';
 
 @LazySingleton(as: ProductsRepo)
 class ProductsRepoImpl with HandlingException implements ProductsRepo {
@@ -66,5 +68,12 @@ class ProductsRepoImpl with HandlingException implements ProductsRepo {
   DataResponse<GetProductFromTextModel> getProductFromText(GetProductFromTextParams params) {
     return wrapHandlingException(
       tryCall: () => productsRemoteDataSource.getProductFromText(params),
+    );
+  }
+
+  @override
+  DataResponse<AddProductModel> addProduct(AddProductParams params) {
+    return wrapHandlingException(
+      tryCall: () => productsRemoteDataSource.addProduct(params),
     );
   }}

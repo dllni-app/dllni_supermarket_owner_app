@@ -108,14 +108,17 @@ class _ProductCardState extends State<ProductCard> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            AppText(
-                              widget.product.name ?? "",
-                              scrollText: true,
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                                height: 1.25,
-                                color: Color(0xFF202020),
+                            Expanded(
+                              child: AppText(
+                                widget.product.name ?? "",
+                                // scrollText: true,
+                                textAlign: TextAlign.start,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                  height: 1.25,
+                                  color: Color(0xFF202020),
+                                ),
                               ),
                             ),
                             Icon(Icons.more_vert, size: 16, color: Colors.grey),

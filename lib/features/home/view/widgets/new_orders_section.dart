@@ -151,7 +151,7 @@ class NewOrderCard extends StatelessWidget {
 
   String get delay {
     final Duration diffDate = DateTime.now().difference(
-      DateTime.parse(order.updatedAt!),
+      DateTime.parse(order.createdAt!),
     );
     if (diffDate.inDays != 0) return "${diffDate.inDays} يوم";
     if (diffDate.inHours != 0) return "${diffDate.inHours} ساعة";
@@ -200,7 +200,7 @@ class NewOrderCard extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     AppText(
-                      "عبدالله المحمد",
+                      "عميل السوبرماركت",
                       style: TextStyle(
                         color: Color(0xE52F2B3D),
                         fontSize: 14,
@@ -263,13 +263,20 @@ class NewOrderCard extends StatelessWidget {
               ),
               child: Column(
                 spacing: 12,
-                children: [
-                  _RequirementRow(label: "1- سيتي كورن ( نكهة الحار و الحلو )"),
-                  _RequirementRow(label: "2- سطل لبن بقر"),
-                  _RequirementRow(label: "4- علبة كاتشب العجمي (حار) * 2"),
-                  _RequirementRow(label: "3- كيس كريم توم العجمي * 2"),
-                  _RequirementRow(label: "5- كيس مخلل الأزرق * 2"),
-                ],
+                children: List.generate(
+                  order.items!.length,
+                  (index) => _RequirementRow(
+                    label: "${index + 1}- ${order.items![index]}",
+                  ),
+                ),
+
+                // [
+                //   _RequirementRow(label: "1- سيتي كورن ( نكهة الحار و الحلو )"),
+                //   _RequirementRow(label: "2- سطل لبن بقر"),
+                //   _RequirementRow(label: "4- علبة كاتشب العجمي (حار) * 2"),
+                //   _RequirementRow(label: "3- كيس كريم توم العجمي * 2"),
+                //   _RequirementRow(label: "5- كيس مخلل الأزرق * 2"),
+                // ],
               ),
             ),
             Row(
@@ -359,7 +366,7 @@ class NewOrderCardOld extends StatelessWidget {
 
   String get delay {
     final Duration diffDate = DateTime.now().difference(
-      DateTime.parse(order.updatedAt!),
+      DateTime.parse(order.createdAt!),
     );
     if (diffDate.inDays != 0) return "${diffDate.inDays} يوم";
     if (diffDate.inHours != 0) return "${diffDate.inHours} ساعة";

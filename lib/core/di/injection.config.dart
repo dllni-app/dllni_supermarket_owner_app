@@ -30,6 +30,8 @@ import '../../features/home/domain/usecases/get_dashboard_overview_use_case.dart
     as _i393;
 import '../../features/home/domain/usecases/get_new_orders_use_case.dart'
     as _i856;
+import '../../features/home/domain/usecases/get_performance_report_use_case.dart'
+    as _i826;
 import '../../features/home/domain/usecases/get_preparing_orders_use_case.dart'
     as _i963;
 import '../../features/home/domain/usecases/reject_order_use_case.dart'
@@ -41,6 +43,12 @@ import '../../features/inventory/data/source/inventory_remote_data_source.dart'
     as _i543;
 import '../../features/inventory/domain/repository/inventory_repo.dart'
     as _i1071;
+import '../../features/inventory/domain/usecases/get_hourly_count_use_case.dart'
+    as _i767;
+import '../../features/inventory/domain/usecases/get_products_use_case.dart'
+    as _i132;
+import '../../features/inventory/domain/usecases/update_product_amount_use_case.dart'
+    as _i169;
 import '../../features/inventory/view/manager/bloc/inventory_bloc.dart'
     as _i784;
 import '../../features/orders/data/repository/orders_repo_impl.dart' as _i849;
@@ -49,6 +57,8 @@ import '../../features/orders/data/source/orders_remote_data_source.dart'
 import '../../features/orders/domain/repository/orders_repo.dart' as _i132;
 import '../../features/orders/domain/usecases/accept_order_use_case.dart'
     as _i420;
+import '../../features/orders/domain/usecases/get_order_details_use_case.dart'
+    as _i384;
 import '../../features/orders/domain/usecases/get_orders_use_case.dart'
     as _i1013;
 import '../../features/orders/domain/usecases/reject_order_use_case.dart'
@@ -59,6 +69,8 @@ import '../../features/products/data/repository/products_repo_impl.dart'
 import '../../features/products/data/source/products_remote_data_source.dart'
     as _i811;
 import '../../features/products/domain/repository/products_repo.dart' as _i466;
+import '../../features/products/domain/usecases/add_product_use_case.dart'
+    as _i363;
 import '../../features/products/domain/usecases/get_categories_use_case.dart'
     as _i862;
 import '../../features/products/domain/usecases/get_low_stock_use_case.dart'
@@ -87,12 +99,8 @@ _i174.GetIt $initGetIt(
 }) {
   final gh = _i526.GetItHelper(getIt, environment, environmentFilter);
   final injectableModule = _$InjectableModule();
-  gh.factory<_i784.InventoryBloc>(() => _i784.InventoryBloc());
   gh.factory<_i821.ProfileBloc>(() => _i821.ProfileBloc());
   gh.singleton<_i960.DioNetwork>(() => injectableModule.dio);
-  gh.lazySingleton<_i543.InventoryRemoteDataSource>(
-    () => _i543.InventoryRemoteDataSource(),
-  );
   gh.lazySingleton<_i502.ProfileRemoteDataSource>(
     () => _i502.ProfileRemoteDataSource(),
   );
@@ -102,18 +110,28 @@ _i174.GetIt $initGetIt(
   gh.lazySingleton<_i557.HomeRemoteDataSource>(
     () => _i557.HomeRemoteDataSource(dioNetwork: gh<_i497.DioNetwork>()),
   );
-  gh.lazySingleton<_i1071.InventoryRepo>(() => _i821.InventoryRepoImpl());
   gh.lazySingleton<_i275.ProfileRepo>(() => _i265.ProfileRepoImpl());
+  gh.lazySingleton<_i543.InventoryRemoteDataSource>(
+    () => _i543.InventoryRemoteDataSource(dioNetwork: gh<_i960.DioNetwork>()),
+  );
   gh.lazySingleton<_i702.OrdersRemoteDataSource>(
     () => _i702.OrdersRemoteDataSource(dioNetwork: gh<_i960.DioNetwork>()),
   );
   gh.lazySingleton<_i811.ProductsRemoteDataSource>(
     () => _i811.ProductsRemoteDataSource(dioNetwork: gh<_i960.DioNetwork>()),
   );
+  gh.lazySingleton<_i1071.InventoryRepo>(
+    () => _i821.InventoryRepoImpl(
+      inventoryRemoteDataSource: gh<_i543.InventoryRemoteDataSource>(),
+    ),
+  );
   gh.lazySingleton<_i466.ProductsRepo>(
     () => _i99.ProductsRepoImpl(
       productsRemoteDataSource: gh<_i811.ProductsRemoteDataSource>(),
     ),
+  );
+  gh.lazySingleton<_i363.AddProductUseCase>(
+    () => _i363.AddProductUseCase(products: gh<_i466.ProductsRepo>()),
   );
   gh.lazySingleton<_i862.GetCategoriesUseCase>(
     () => _i862.GetCategoriesUseCase(products: gh<_i466.ProductsRepo>()),
@@ -151,16 +169,6 @@ _i174.GetIt $initGetIt(
       homeRemoteDataSource: gh<_i557.HomeRemoteDataSource>(),
     ),
   );
-  gh.lazySingleton<_i420.AcceptOrderUseCase>(
-    () => _i420.AcceptOrderUseCase(orders: gh<_i132.OrdersRepo>()),
-  );
-  gh.lazySingleton<_i1013.GetOrdersUseCase>(
-    () => _i1013.GetOrdersUseCase(orders: gh<_i132.OrdersRepo>()),
-  );
-  gh.lazySingleton<_i194.RejectOrderUseCase>(
-    () => _i194.RejectOrderUseCase(orders: gh<_i132.OrdersRepo>()),
-  );
-  gh.factory<_i958.AuthBloc>(() => _i958.AuthBloc(gh<_i37.LoginUseCase>()));
   gh.factory<_i113.ProductsBloc>(
     () => _i113.ProductsBloc(
       gh<_i846.GetProductsUseCase>(),
@@ -169,8 +177,39 @@ _i174.GetIt $initGetIt(
       gh<_i862.GetCategoriesUseCase>(),
       gh<_i989.GetProductFromImageUseCase>(),
       gh<_i143.GetProductFromTextUseCase>(),
+      gh<_i363.AddProductUseCase>(),
     ),
   );
+  gh.lazySingleton<_i767.GetHourlyCountUseCase>(
+    () => _i767.GetHourlyCountUseCase(inventory: gh<_i1071.InventoryRepo>()),
+  );
+  gh.lazySingleton<_i132.GetProductsUseCase>(
+    () => _i132.GetProductsUseCase(inventory: gh<_i1071.InventoryRepo>()),
+  );
+  gh.lazySingleton<_i169.UpdateProductAmountUseCase>(
+    () =>
+        _i169.UpdateProductAmountUseCase(inventory: gh<_i1071.InventoryRepo>()),
+  );
+  gh.lazySingleton<_i420.AcceptOrderUseCase>(
+    () => _i420.AcceptOrderUseCase(orders: gh<_i132.OrdersRepo>()),
+  );
+  gh.lazySingleton<_i384.GetOrderDetailsUseCase>(
+    () => _i384.GetOrderDetailsUseCase(orders: gh<_i132.OrdersRepo>()),
+  );
+  gh.lazySingleton<_i1013.GetOrdersUseCase>(
+    () => _i1013.GetOrdersUseCase(orders: gh<_i132.OrdersRepo>()),
+  );
+  gh.lazySingleton<_i194.RejectOrderUseCase>(
+    () => _i194.RejectOrderUseCase(orders: gh<_i132.OrdersRepo>()),
+  );
+  gh.factory<_i784.InventoryBloc>(
+    () => _i784.InventoryBloc(
+      gh<_i132.GetProductsUseCase>(),
+      gh<_i169.UpdateProductAmountUseCase>(),
+      gh<_i767.GetHourlyCountUseCase>(),
+    ),
+  );
+  gh.factory<_i958.AuthBloc>(() => _i958.AuthBloc(gh<_i37.LoginUseCase>()));
   gh.lazySingleton<_i982.AcceptOrderUseCase>(
     () => _i982.AcceptOrderUseCase(home: gh<_i396.HomeRepo>()),
   );
@@ -183,6 +222,9 @@ _i174.GetIt $initGetIt(
   gh.lazySingleton<_i856.GetNewOrdersUseCase>(
     () => _i856.GetNewOrdersUseCase(home: gh<_i396.HomeRepo>()),
   );
+  gh.lazySingleton<_i826.GetPerformanceReportUseCase>(
+    () => _i826.GetPerformanceReportUseCase(home: gh<_i396.HomeRepo>()),
+  );
   gh.lazySingleton<_i963.GetPreparingOrdersUseCase>(
     () => _i963.GetPreparingOrdersUseCase(home: gh<_i396.HomeRepo>()),
   );
@@ -194,6 +236,7 @@ _i174.GetIt $initGetIt(
       gh<_i1013.GetOrdersUseCase>(),
       gh<_i420.AcceptOrderUseCase>(),
       gh<_i194.RejectOrderUseCase>(),
+      gh<_i384.GetOrderDetailsUseCase>(),
     ),
   );
   gh.factory<_i648.HomeBloc>(
@@ -204,6 +247,7 @@ _i174.GetIt $initGetIt(
       gh<_i501.RejectOrderUseCase>(),
       gh<_i557.GetDailyCountUseCase>(),
       gh<_i982.AcceptOrderUseCase>(),
+      gh<_i826.GetPerformanceReportUseCase>(),
     ),
   );
   return getIt;

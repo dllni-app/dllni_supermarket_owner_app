@@ -13,6 +13,8 @@ import '../models/get_product_from_image_model.dart';
 import '../../domain/usecases/get_product_from_image_use_case.dart';
 import '../models/get_product_from_text_model.dart';
 import '../../domain/usecases/get_product_from_text_use_case.dart';
+import '../models/add_product_model.dart';
+import '../../domain/usecases/add_product_use_case.dart';
 
 @lazySingleton
 class ProductsRemoteDataSource with HandlingApiManager {
@@ -79,10 +81,27 @@ class ProductsRemoteDataSource with HandlingApiManager {
     );
   }
 
-
-  Future<GetProductFromTextModel> getProductFromText(GetProductFromTextParams params) {
+  Future<GetProductFromTextModel> getProductFromText(
+    GetProductFromTextParams params,
+  ) {
     return wrapHandlingApi(
-      tryCall: () => dioNetwork.postData(endPoint: '/api/v1/sm-products/ai/generate-image', data: params.getBody(), params: params.getParams()),
+      tryCall: () => dioNetwork.postData(
+        endPoint: '/api/v1/sm-products/ai/generate-image',
+        data: params.getBody(),
+        params: params.getParams(),
+      ),
       jsonConvert: getProductFromTextModelFromJson,
     );
-  }}
+  }
+
+  Future<AddProductModel> addProduct(AddProductParams params) {
+    return wrapHandlingApi(
+      tryCall: () => dioNetwork.postData(
+        endPoint: '/api/v1/sm-products',
+        data: params.getBody(),
+        params: params.getParams(),
+      ),
+      jsonConvert: addProductModelFromJson,
+    );
+  }
+}

@@ -5,25 +5,10 @@ import 'package:toastification/toastification.dart';
 
 import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_shadows.dart';
+import '../../../products/view/screens/add_product_menu_screen.dart';
 
 class QuickActionsSection extends StatelessWidget {
   const QuickActionsSection({super.key});
-
-  final List<String> labels = const [
-    "إضافة يدوية",
-    "المسح الضوئي للباركود",
-    "رفع ملف إكسل",
-    "البحث في الكتالوج المركزي",
-    "قائمة جاهزة للإضافة",
-  ];
-  final List<IconData> icons = const [
-    FontAwesomeIcons.plus,
-    FontAwesomeIcons.expand,
-    FontAwesomeIcons.fileExcel,
-    FontAwesomeIcons.magnifyingGlass,
-    FontAwesomeIcons.tableList,
-  ];
-  final List<double> widths = const [133, 152, 137, 148, 127];
 
   @override
   Widget build(BuildContext context) {
@@ -44,21 +29,66 @@ class QuickActionsSection extends StatelessWidget {
           height: 67,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
-            padding: EdgeInsets.all(10),
+            padding: EdgeInsets.symmetric(vertical: 10),
             itemBuilder: (context, index) => QuickActionChip(
-              label: labels[index],
-              icon: icons[index],
-              onTap: () {
-                AppToast.showToast(
-                  context: context,
-                  message: "قيد التطوير",
-                  type: ToastificationType.info,
-                );
-              },
-              width: widths[index],
+              item: [
+                QuickActionChipItem(
+                  width: 133,
+                  label: "إضافة يدوية",
+                  icon: FontAwesomeIcons.plus,
+                  onTap: () {
+                    context.pushRoute("/products/new_product/details");
+                  },
+                ),
+                QuickActionChipItem(
+                  width: 152,
+                  label: "المسح الضوئي للباركود",
+                  icon: FontAwesomeIcons.expand,
+                  onTap: () {
+                    AppToast.showToast(
+                      context: context,
+                      message: "قيد التطوير",
+                      type: ToastificationType.info,
+                    );
+                  },
+                ),
+                QuickActionChipItem(
+                  width: 137,
+                  label: "رفع ملف إكسل",
+                  icon: FontAwesomeIcons.fileExcel,
+                  onTap: () {
+                    context.pushRoute(
+                      "/products/new_product/menu",
+                      arguments: UploadFileType.file,
+                    );
+                  },
+                ),
+                QuickActionChipItem(
+                  width: 148,
+                  label: "البحث في الكتالوج المركزي",
+                  icon: FontAwesomeIcons.magnifyingGlass,
+                  onTap: () {
+                    context.pushRoute(
+                      "/products/new_product/menu",
+                      arguments: UploadFileType.image,
+                    );
+                  },
+                ),
+                QuickActionChipItem(
+                  width: 148,
+                  label: "تقارير الأداء",
+                  icon: FontAwesomeIcons.newspaper,
+                  onTap: () {
+                    context.pushRoute(
+                      "/performance_report",
+                      arguments: UploadFileType.image,
+                    );
+                  },
+                ),
+              ][index],
             ),
             separatorBuilder: (_, _) => SizedBox(width: 8),
-            itemCount: labels.length,
+            itemCount: 5,
           ),
         ),
       ],
@@ -66,27 +96,32 @@ class QuickActionsSection extends StatelessWidget {
   }
 }
 
-class QuickActionChip extends StatelessWidget {
-  const QuickActionChip({
-    super.key,
-    required this.label,
-    required this.icon,
-    required this.onTap,
-    required this.width,
-  });
-
+class QuickActionChipItem {
+  final double width;
   final String label;
   final IconData icon;
   final void Function() onTap;
-  final double width;
+
+  QuickActionChipItem({
+    required this.width,
+    required this.label,
+    required this.icon,
+    required this.onTap,
+  });
+}
+
+class QuickActionChip extends StatelessWidget {
+  const QuickActionChip({super.key, required this.item});
+
+  final QuickActionChipItem item;
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: onTap,
+      onTap: item.onTap,
       borderRadius: BorderRadius.all(Radius.circular(23)),
       child: Container(
-        width: width,
+        width: item.width,
         height: 47,
         padding: EdgeInsets.fromLTRB(20, 3, 3, 3),
         decoration: BoxDecoration(
@@ -98,12 +133,12 @@ class QuickActionChip extends StatelessWidget {
             CircleAvatar(
               radius: 21.5,
               backgroundColor: AppColors.accent,
-              child: Icon(icon, size: 18, color: AppColors.white),
+              child: Icon(item.icon, size: 18, color: AppColors.white),
             ),
             SizedBox(width: 10),
             Flexible(
               child: AppText(
-                label,
+                item.label,
                 style: TextStyle(
                   color: AppColors.accent,
                   fontSize: 10,

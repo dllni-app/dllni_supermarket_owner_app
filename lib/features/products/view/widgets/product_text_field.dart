@@ -3,12 +3,15 @@ import 'package:dllni_supermarket_owner_app/core/extensions/date_time_extensions
 import 'package:flutter/material.dart';
 
 import '../../../../core/themes/app_colors.dart';
+import '../../../../core/themes/app_gradients.dart';
+import '../../../../core/themes/app_shadows.dart';
 
-class ProductTextField extends StatelessWidget {
-  const ProductTextField({
+class AppTextField extends StatelessWidget {
+  const AppTextField({
     super.key,
     required this.title,
     this.hintText,
+    this.onChanged,
     this.controller,
     this.readOnly = false,
     this.maxLines = 1,
@@ -21,14 +24,16 @@ class ProductTextField extends StatelessWidget {
   final String? hintText;
   final int? maxLines;
   final bool readOnly;
-  final TextEditingController? controller;
   final TextInputType keyboardType;
   final Widget? suffixIcon;
+  final void Function(String value)? onChanged;
+  final TextEditingController? controller;
   @override
   Widget build(BuildContext context) {
     return Column(
       spacing: 8,
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
         Text.rich(
           TextSpan(
@@ -57,6 +62,7 @@ class ProductTextField extends StatelessWidget {
         TextField(
           maxLines: maxLines,
           readOnly: readOnly,
+          onChanged: onChanged,
           controller: controller,
           keyboardType: keyboardType,
           onTapOutside: (_) => FocusScope.of(context).unfocus(),
@@ -165,8 +171,8 @@ class ProductMenuField<T> extends StatelessWidget {
   }
 }
 
-class ProductDatePicker extends StatefulWidget {
-  const ProductDatePicker({
+class AppDatePicker extends StatefulWidget {
+  const AppDatePicker({
     super.key,
     required this.title,
     this.isRequired = false,
@@ -176,10 +182,10 @@ class ProductDatePicker extends StatefulWidget {
   final bool isRequired;
   final void Function(DateTime expiredDate) onDateChanged;
   @override
-  State<ProductDatePicker> createState() => _ProductDatePickerState();
+  State<AppDatePicker> createState() => _AppDatePickerState();
 }
 
-class _ProductDatePickerState extends State<ProductDatePicker> {
+class _AppDatePickerState extends State<AppDatePicker> {
   DateTime? expiredDate;
   @override
   Widget build(BuildContext context) {
@@ -271,6 +277,165 @@ class _ProductDatePickerState extends State<ProductDatePicker> {
           ),
         ),
       ],
+    );
+  }
+}
+
+class ProductUnit extends StatefulWidget {
+  const ProductUnit({super.key, required this.onChanged});
+  final void Function(String unit) onChanged;
+  @override
+  State<ProductUnit> createState() => _ProductUnitState();
+}
+
+class _ProductUnitState extends State<ProductUnit> {
+  String? unit;
+  late TextEditingController controller;
+  @override
+  void initState() {
+    controller = TextEditingController();
+
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text.rich(
+          TextSpan(
+            text: "وحدة القياس",
+            children: [
+              TextSpan(
+                text: "*",
+                style: TextStyle(
+                  color: Color(0xFFEF4444),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  height: 1.42,
+                ),
+              ),
+            ],
+          ),
+          style: TextStyle(
+            color: Color(0xFF374151),
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            height: 1.42,
+          ),
+        ),
+        SizedBox(height: 8),
+        Row(
+          spacing: 8,
+          children: [
+            Expanded(
+              child: GestureDetector(
+                onTap: () {
+                  if (unit == "كغ") return;
+                  unit = "كغ";
+                  controller.clear();
+                  setState(() {});
+                  widget.onChanged(unit!);
+                },
+                child: _ProductUnitChip(unit: unit, value: "كغ"),
+              ),
+            ),
+            Expanded(
+              child: GestureDetector(
+                onTap: () {
+                  if (unit == "لتر") return;
+                  unit = "لتر";
+                  controller.clear();
+                  setState(() {});
+                  widget.onChanged(unit!);
+                },
+                child: _ProductUnitChip(unit: unit, value: "لتر"),
+              ),
+            ),
+            Expanded(
+              child: GestureDetector(
+                onTap: () {
+                  if (unit == "قطعة") return;
+                  unit = "قطعة";
+                  controller.clear();
+                  setState(() {});
+                  widget.onChanged(unit!);
+                },
+                child: _ProductUnitChip(unit: unit, value: "قطعة"),
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 8),
+        TextField(
+          controller: controller,
+          onChanged: (value) {
+            if (unit == "كغ" || unit == "لتر" || unit == "قطعة") {
+              unit = value;
+              setState(() {});
+            } else {
+              unit = value;
+            }
+            widget.onChanged(unit!);
+          },
+          onTapOutside: (_) => FocusScope.of(context).unfocus(),
+          style: TextStyle(color: Color(0xB22F2B3D), fontSize: 14),
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Color(0xFFF9FAFB),
+            hintText: "أو اكتب وحدة مخصصة",
+            hintStyle: TextStyle(color: Color(0xFF9CA3AF), fontSize: 14),
+            border: OutlineInputBorder(
+              borderSide: BorderSide(color: Color(0xFFE5E7EB)),
+              borderRadius: BorderRadius.all(Radius.circular(16)),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: Color(0xFFE5E7EB)),
+              borderRadius: BorderRadius.all(Radius.circular(16)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: Color(0xFFE5E7EB)),
+              borderRadius: BorderRadius.all(Radius.circular(16)),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ProductUnitChip extends StatelessWidget {
+  const _ProductUnitChip({required this.unit, required this.value});
+  final String? unit;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 9, horizontal: 16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(100)),
+        color: unit == value ? null : AppColors.white,
+        gradient: unit == value ? AppGradients.gradient : null,
+        border: unit != value ? Border.all(color: Color(0xFFE5E7EB)) : null,
+        boxShadow: [AppShadows.shadow],
+      ),
+      child: AppText(
+        value,
+        style: TextStyle(
+          color: unit == value ? AppColors.white : Color(0xFF4B5563),
+          fontSize: 14,
+          fontWeight: unit == value ? FontWeight.w700 : FontWeight.w500,
+          height: 1.42,
+        ),
+      ),
     );
   }
 }

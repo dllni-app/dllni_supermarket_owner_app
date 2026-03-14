@@ -11,6 +11,8 @@ import '../manager/bloc/orders_bloc.dart';
 import '../widgets/order_card.dart';
 import '../widgets/orders_app_bar.dart';
 import '../widgets/orders_tab_bar.dart';
+import '../widgets/sheets/accept_order_sheet.dart';
+import '../widgets/sheets/reject_order_sheet.dart';
 
 class OrdersScreen extends StatefulWidget {
   const OrdersScreen({super.key});
@@ -229,6 +231,45 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                             "ready_for_pickup"
                                       ? OrderStatus.readyForPickup
                                       : OrderStatus.completed,
+                                  onAcceptTap: () {
+                                    showModalBottomSheet(
+                                      context: context,
+                                      isScrollControlled: true,
+                                      backgroundColor: Colors.transparent,
+                                      builder: (_) => BlocProvider.value(
+                                        value: context.read<OrdersBloc>(),
+                                        child: AcceptOrderBottomSheet(
+                                          status: selectedStatus,
+                                          orderId:
+                                              state.orders!.list[index].id!,
+                                          orderNumber: state
+                                              .orders!
+                                              .list[index]
+                                              .orderNumber!,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  onRejectTap: () {
+                                    showModalBottomSheet(
+                                      context: context,
+                                      isScrollControlled: true,
+                                      backgroundColor: Colors.transparent,
+                                      builder: (_) => BlocProvider.value(
+                                        value: context.read<OrdersBloc>(),
+                                        child: RejectOrderBottomSheet(
+                                          status: selectedStatus,
+                                          orderId:
+                                              state.orders!.list[index].id!,
+                                          orderNumber: state
+                                              .orders!
+                                              .list[index]
+                                              .orderNumber!,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  onViewDetailsTap: () {},
                                 );
                               },
                               separatorBuilder: (context, index) =>

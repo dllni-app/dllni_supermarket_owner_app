@@ -259,6 +259,7 @@ class GetOrdersModelDataItem {
   dynamic cancellationReason;
   String? createdAt;
   String? updatedAt;
+  List<String>? items;
 
   GetOrdersModelDataItem({
     this.id,
@@ -284,6 +285,7 @@ class GetOrdersModelDataItem {
     this.cancellationReason,
     this.createdAt,
     this.updatedAt,
+    this.items
   });
 
   factory GetOrdersModelDataItem.fromJson(Map<String, dynamic> json) {
@@ -311,6 +313,11 @@ class GetOrdersModelDataItem {
       cancellationReason: _asDynamic(json['cancellationReason']),
       createdAt: _asString(json['createdAt']),
       updatedAt: _asString(json['updatedAt']),
+      items: json["items"] is! List
+          ? []
+          : (json["items"] as List)
+                .map<String>((element) => element["productName"])
+                .toList(),
     );
   }
 

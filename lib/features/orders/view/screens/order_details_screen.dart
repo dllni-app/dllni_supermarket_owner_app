@@ -1,37 +1,156 @@
 import 'package:common_package/common_package.dart';
+import 'package:dllni_supermarket_owner_app/core/widgets/failure_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:intl/intl.dart';
+import 'package:shimmer/shimmer.dart';
+import 'package:toastification/toastification.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
+import '../../../../core/di/injection.dart';
 import '../../../../core/themes/app_colors.dart';
 import '../../../../core/themes/app_shadows.dart';
 import '../../../../core/utils/app_images.dart';
+import '../../data/models/get_order_details_model.dart';
+import '../../domain/usecases/get_order_details_use_case.dart';
+import '../manager/bloc/orders_bloc.dart';
 import '../widgets/order_details_app_bar.dart';
 
+@AutoRoutePage(path: "/orders/order_details")
 class OrderDetailsScreen extends StatelessWidget {
-  const OrderDetailsScreen({super.key});
+  const OrderDetailsScreen({super.key, required this.orderId});
+  final int orderId;
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => getIt<OrdersBloc>()
+        ..add(
+          GetOrderDetailsEvent(params: GetOrderDetailsParams(orderId: orderId)),
+        ),
+      child: Scaffold(
+        backgroundColor: AppColors.white,
+        body: Column(
+          children: [
+            OrderDetailsAppBar(title: "تفاصيل الطلب", productId: "122345678"),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.all(24),
+                child: BlocConsumer<OrdersBloc, OrdersState>(
+                  listener: (context, state) {},
+                  buildWhen: (previous, current) =>
+                      previous.orderDetailsStatus != current.orderDetailsStatus,
+                  builder: (context, state) {
+                    if (state.orderDetailsStatus == BlocStatus.loading) {
+                      return OrderDetailsLoading();
+                    } else if (state.orderDetailsStatus == BlocStatus.failed) {
+                      return SizedBox(
+                        width: context.width,
+                        height: 250,
+                        child: Center(
+                          child: FailureWidget(
+                            message: state.errorMessage.toString(),
+                          ),
+                        ),
+                      );
+                    } else if (state.orderDetailsStatus == BlocStatus.success) {
+                      DateTime dateTime = DateTime.parse(
+                        state.orderDetails!.data!.createdAt!,
+                      );
+                      String formattedTime = DateFormat.jm('ar_DZ')
+                          .format(dateTime)
+                          .replaceAll('مساءً', 'م')
+                          .replaceAll('صباحاً', 'ص');
+                      return Column(
+                        children: [
+                          _OrderStatusCard(
+                            time: "12 دقيقة",
+                            createdAt: formattedTime,
+                            expectedTime: state
+                                .orderDetails!
+                                .data!
+                                .pickupScheduledFor
+                                .toString(),
+                          ),
+                          SizedBox(height: 13),
+                          _CustomerCard(
+                            customer: state.orderDetails!.data!.customer!,
+                          ),
+                          SizedBox(height: 13),
+                          _OrderDetailsCard(
+                            orderItems: List.generate(
+                              state.orderDetails?.data?.items?.length ?? 0,
+                              (index) =>
+                                  state.orderDetails!.data!.items![index],
+                            ),
+                          ),
+                          SizedBox(height: 13),
+                          _BillCard(
+                            price: state.orderDetails!.data!.subtotal
+                                .toString(),
+                            discount: state.orderDetails!.data!.discountAmount
+                                .toString(),
+                            fees: state.orderDetails!.data!.serviceFee
+                                .toString(),
+                            totalPrice: state.orderDetails!.data!.totalAmount
+                                .toString(),
+                          ),
+                        ],
+                      );
+                    }
+                    return SizedBox();
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class OrderDetailsLoading extends StatelessWidget {
+  const OrderDetailsLoading({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.white,
-      body: Column(
+    return Shimmer.fromColors(
+      baseColor: Colors.grey.shade300,
+      highlightColor: Colors.grey.shade100,
+      child: Column(
         children: [
-          OrderDetailsAppBar(title: "تفاصيل الطلب", productId: "122345678"),
-          Expanded(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.all(24),
-              child: Column(
-                children: const [
-                  _OrderStatusCard(),
-                  SizedBox(height: 13),
-                  _CustomerCard(),
-                  SizedBox(height: 13),
-                  _OrderDetailsCard(),
-                  SizedBox(height: 13),
-                  _BillCard(price: 76.00, discount: 8.50),
-                ],
-              ),
+          _OrderStatusCard(
+            time: "12 دقيقة",
+            createdAt: "2021",
+            expectedTime: "25 دقيقة",
+          ),
+          SizedBox(height: 13),
+          _CustomerCard(customer: GetOrderDetailsModelDataCustomer()),
+          SizedBox(height: 13),
+          _OrderDetailsCard(
+            orderItems: List.generate(
+              2,
+              (_) => GetOrderDetailsModelDataItemsItem.fromJson({
+                "id": 29,
+                "orderId": 10,
+                "productId": 3,
+                "quantity": 2,
+                "unitPrice": "0.00",
+                "totalPrice": "0.00",
+                "productName": "دجاج طازج كامل",
+                "createdAt": "2026-03-13 11:51:36",
+                "updatedAt": "2026-03-13 11:51:36",
+              }),
             ),
+          ),
+          SizedBox(height: 13),
+          _BillCard(
+            price: "76.00",
+            discount: "8.50",
+            fees: "8.50",
+            totalPrice: "10.35",
           ),
         ],
       ),
@@ -40,9 +159,16 @@ class OrderDetailsScreen extends StatelessWidget {
 }
 
 class _BillCard extends StatelessWidget {
-  const _BillCard({required this.price, this.discount = 0});
-  final num price;
-  final num discount;
+  const _BillCard({
+    required this.price,
+    required this.discount,
+    required this.fees,
+    required this.totalPrice,
+  });
+  final String price;
+  final String discount;
+  final String fees;
+  final String totalPrice;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -79,7 +205,7 @@ class _BillCard extends StatelessWidget {
                 ),
               ),
               AppText(
-                "${price.toStringAsFixed(2)} ل.س",
+                "$price ل.س",
                 style: TextStyle(
                   color: Color(0xFF111827),
                   fontSize: 14,
@@ -90,31 +216,53 @@ class _BillCard extends StatelessWidget {
             ],
           ),
           SizedBox(height: 10),
-          if (discount > 0) ...[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                AppText(
-                  "الخصم",
-                  style: TextStyle(
-                    color: Color(0xFF4B5563),
-                    fontSize: 14,
-                    height: 1.42,
-                  ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              AppText(
+                "الخصم",
+                style: TextStyle(
+                  color: Color(0xFF4B5563),
+                  fontSize: 14,
+                  height: 1.42,
                 ),
-                AppText(
-                  "- ${discount.toStringAsFixed(2)} ل.س",
-                  style: TextStyle(
-                    color: Color(0xFF16A34A),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    height: 1.42,
-                  ),
+              ),
+              AppText(
+                "- $discount ل.س",
+                style: TextStyle(
+                  color: Color(0xFF16A34A),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  height: 1.42,
                 ),
-              ],
-            ),
-            SizedBox(height: 10),
-          ],
+              ),
+            ],
+          ),
+          SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              AppText(
+                "تكلفة الخدمة",
+                style: TextStyle(
+                  color: Color(0xFF4B5563),
+                  fontSize: 14,
+                  height: 1.42,
+                ),
+              ),
+              AppText(
+                "+ $fees ل.س",
+                style: TextStyle(
+                  color: Color(0xFFEF4444),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  height: 1.42,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 10),
+
           Container(
             padding: EdgeInsets.only(top: 10),
             decoration: BoxDecoration(
@@ -133,7 +281,7 @@ class _BillCard extends StatelessWidget {
                   ),
                 ),
                 AppText(
-                  "${(price - discount).toStringAsFixed(2)} ل.س",
+                  "$totalPrice ل.س",
                   style: TextStyle(
                     color: Color(0xFF111827),
                     fontSize: 16,
@@ -184,7 +332,8 @@ class _BillCard extends StatelessWidget {
 }
 
 class _OrderDetailsCard extends StatelessWidget {
-  const _OrderDetailsCard();
+  const _OrderDetailsCard({required this.orderItems});
+  final List<GetOrderDetailsModelDataItemsItem> orderItems;
 
   @override
   Widget build(BuildContext context) {
@@ -203,7 +352,7 @@ class _OrderDetailsCard extends StatelessWidget {
           Row(
             children: [
               AppText(
-                "معلومات الزبون",
+                "تفاصيل الطلب",
                 style: TextStyle(
                   color: Color(0xFF111827),
                   fontSize: 14,
@@ -213,7 +362,7 @@ class _OrderDetailsCard extends StatelessWidget {
               ),
               Spacer(),
               AppText(
-                "4 منتجات",
+                "${orderItems.length} منتجات",
                 style: TextStyle(
                   color: Color(0xFF6B7280),
                   fontSize: 12,
@@ -227,35 +376,46 @@ class _OrderDetailsCard extends StatelessWidget {
           ListView.separated(
             shrinkWrap: true,
             physics: NeverScrollableScrollPhysics(),
-            itemBuilder: (_, index) => [
-              _ProductDetails(
-                imageUrl: AppImages.burgerImage,
-                name: "كرتونة مياه 1.5 لتر",
-                count: 2,
-                price: 5000,
-              ),
-              _ProductDetails(
-                imageUrl: AppImages.burgerImage,
-                name: "كرتونة عصير ليمون",
-                count: 1,
-                price: 3000,
-              ),
-              _ProductDetails(
-                imageUrl: AppImages.burgerImage,
-                name: "كرتونة عصير برتقال",
-                count: 1,
-                price: 3000,
-              ),
-              _ProductDetails(
-                isLast: true,
-                imageUrl: AppImages.burgerImage,
-                name: "كرتونة عصير رمان",
-                count: 1,
-                price: 3000,
-              ),
-            ][index],
+            itemBuilder: (_, index) => orderItems
+                .map(
+                  (orderItem) => _ProductDetails(
+                    imageUrl: AppImages.burgerImage,
+                    name: orderItem.productName.toString(),
+                    count: orderItem.quantity ?? 0,
+                    price: orderItem.totalPrice.toString(),
+                    isLast: index == orderItems.length - 1,
+                  ),
+                )
+                .toList()[index],
+            // [
+            //   _ProductDetails(
+            //     imageUrl: AppImages.burgerImage,
+            //     name: "كرتونة مياه 1.5 لتر",
+            //     count: 2,
+            //     price: 5000,
+            //   ),
+            //   _ProductDetails(
+            //     imageUrl: AppImages.burgerImage,
+            //     name: "كرتونة عصير ليمون",
+            //     count: 1,
+            //     price: 3000,
+            //   ),
+            //   _ProductDetails(
+            //     imageUrl: AppImages.burgerImage,
+            //     name: "كرتونة عصير برتقال",
+            //     count: 1,
+            //     price: 3000,
+            //   ),
+            //   _ProductDetails(
+            //     isLast: true,
+            //     imageUrl: AppImages.burgerImage,
+            //     name: "كرتونة عصير رمان",
+            //     count: 1,
+            //     price: 3000,
+            //   ),
+            // ][index],
             separatorBuilder: (_, _) => SizedBox(height: 12),
-            itemCount: 4,
+            itemCount: orderItems.length,
           ),
         ],
       ),
@@ -275,7 +435,7 @@ class _ProductDetails extends StatelessWidget {
   final String imageUrl;
   final String name;
   final int count;
-  final num price;
+  final String price;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -342,7 +502,8 @@ class _ProductDetails extends StatelessWidget {
 }
 
 class _CustomerCard extends StatelessWidget {
-  const _CustomerCard();
+  const _CustomerCard({required this.customer});
+  final GetOrderDetailsModelDataCustomer customer;
 
   @override
   Widget build(BuildContext context) {
@@ -403,7 +564,7 @@ class _CustomerCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     AppText(
-                      "أحمد محمد العلي",
+                      customer.name.toString(), //"أحمد محمد العلي",
                       style: TextStyle(
                         color: Color(0xFF111827),
                         fontSize: 14,
@@ -422,7 +583,7 @@ class _CustomerCard extends StatelessWidget {
                         ),
                         SizedBox(width: 4),
                         AppText(
-                          "09501234567",
+                          customer.phone.toString(), //"09501234567",
                           style: TextStyle(
                             color: Color(0xFF6B7280),
                             fontSize: 12,
@@ -464,7 +625,19 @@ class _CustomerCard extends StatelessWidget {
           ),
           SizedBox(height: 16),
           InkWell(
-            onTap: () {},
+            onTap: () async {
+              if (await canLaunchUrlString("tel:${customer.phone}") &&
+                  context.mounted) {
+                AppToast.showToast(
+                  context: context,
+                  message: "رقم الهاتف غير صالح",
+                  type: ToastificationType.warning,
+                );
+                return;
+              }
+              launchUrlString("tel:${customer.phone}");
+              Clipboard.setData(ClipboardData(text: customer.phone));
+            },
             borderRadius: BorderRadius.all(Radius.circular(12)),
             child: Container(
               width: context.width,
@@ -503,7 +676,15 @@ class _CustomerCard extends StatelessWidget {
 }
 
 class _OrderStatusCard extends StatelessWidget {
-  const _OrderStatusCard({super.key});
+  const _OrderStatusCard({
+    super.key,
+    required this.time,
+    required this.createdAt,
+    required this.expectedTime,
+  });
+  final String time;
+  final String createdAt;
+  final String expectedTime;
 
   @override
   Widget build(BuildContext context) {
@@ -573,7 +754,7 @@ class _OrderStatusCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(100),
                 ),
                 child: AppText(
-                  "12 دقيقة",
+                  time,
                   style: TextStyle(
                     color: AppColors.white,
                     fontSize: 12,
@@ -591,19 +772,19 @@ class _OrderStatusCard extends StatelessWidget {
               Expanded(
                 child: _TimeOrderOverlay(
                   title: "وقت الاستلام",
-                  subtitle: "03:45 م",
+                  subtitle: createdAt,
                 ),
               ),
               SizedBox(width: 8),
               Expanded(
                 child: _TimeOrderOverlay(
                   title: "الوقت المتوقع",
-                  subtitle: "25 دقيقة",
+                  subtitle: expectedTime,
                 ),
               ),
               SizedBox(width: 8),
               Expanded(
-                child: _TimeOrderOverlay(title: "منذ", subtitle: "12 دقيقة"),
+                child: _TimeOrderOverlay(title: "منذ", subtitle: time),
               ),
               SizedBox(width: 2),
             ],

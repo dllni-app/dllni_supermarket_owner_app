@@ -1,6 +1,8 @@
 part of 'orders_bloc.dart';
 
 class OrdersState {
+  BlocStatus? orderDetailsStatus;
+  GetOrderDetailsModel? orderDetails;
   BlocStatus? rejectOrderStatus;
   RejectOrderModel? rejectOrder;
   BlocStatus? acceptOrderStatus;
@@ -15,6 +17,8 @@ class OrdersState {
     this.acceptOrderStatus,
     this.rejectOrder,
     this.rejectOrderStatus,
+    this.orderDetails,
+    this.orderDetailsStatus,
   });
 
   OrdersState copyWith({
@@ -24,6 +28,8 @@ class OrdersState {
     BlocStatus? acceptOrderStatus,
     RejectOrderModel? rejectOrder,
     BlocStatus? rejectOrderStatus,
+    GetOrderDetailsModel? orderDetails,
+    BlocStatus? orderDetailsStatus,
   }) => OrdersState(
     errorMessage: errorMessage ?? this.errorMessage,
     orders: orders ?? this.orders,
@@ -31,5 +37,7 @@ class OrdersState {
     acceptOrderStatus: acceptOrderStatus ?? this.acceptOrderStatus,
     rejectOrder: rejectOrder ?? this.rejectOrder,
     rejectOrderStatus: rejectOrderStatus ?? this.rejectOrderStatus,
+    orderDetails: orderDetails ?? this.orderDetails,
+    orderDetailsStatus: orderDetailsStatus ?? this.orderDetailsStatus,
   );
 }

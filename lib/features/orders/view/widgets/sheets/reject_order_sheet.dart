@@ -17,7 +17,9 @@ class RejectOrderBottomSheet extends StatefulWidget {
     super.key,
     required this.orderId,
     required this.orderNumber,
+    required this.status,
   });
+  final String? status;
   final int orderId;
   final String orderNumber;
 
@@ -266,7 +268,10 @@ class _RejectOrderBottomSheetState extends State<RejectOrderBottomSheet> {
                   type: ToastificationType.success,
                 );
                 context.read<OrdersBloc>().add(
-                  GetOrdersEvent(isReload: true, params: GetOrdersParams()),
+                  GetOrdersEvent(
+                    isReload: true,
+                    params: GetOrdersParams(status: widget.status),
+                  ),
                 );
                 context.pop();
               }

@@ -4,9 +4,10 @@ import '../models/get_orders_model.dart';
 import '../../domain/usecases/get_orders_use_case.dart';
 import '../models/accept_order_model.dart';
 import '../../domain/usecases/accept_order_use_case.dart';
-import 'package:common_package/helpers/api_handler.dart';
 import '../models/reject_order_model.dart';
 import '../../domain/usecases/reject_order_use_case.dart';
+import '../models/get_order_details_model.dart';
+import '../../domain/usecases/get_order_details_use_case.dart';
 
 @lazySingleton
 class OrdersRemoteDataSource with HandlingApiManager {
@@ -36,10 +37,25 @@ class OrdersRemoteDataSource with HandlingApiManager {
     );
   }
 
-
   Future<RejectOrderModel> rejectOrder(RejectOrderParams params) {
     return wrapHandlingApi(
-      tryCall: () => dioNetwork.postData(endPoint: '/api/v1/store-owner/orders/{order}/reject', data: params.getBody(), params: params.getParams()),
+      tryCall: () => dioNetwork.postData(
+        endPoint: '/api/v1/store-owner/orders/{order}/reject',
+        data: params.getBody(),
+        params: params.getParams(),
+      ),
       jsonConvert: rejectOrderModelFromJson,
     );
-  }}
+  }
+
+  Future<GetOrderDetailsModel> getOrderDetails(GetOrderDetailsParams params) {
+    return wrapHandlingApi(
+      tryCall: () => dioNetwork.getData(
+        endPoint: '/api/v1/sm-orders/${params.orderId}',
+        params: params.getParams(),
+        data: params.getBody().isEmpty ? null : params.getBody(),
+      ),
+      jsonConvert: getOrderDetailsModelFromJson,
+    );
+  }
+}
