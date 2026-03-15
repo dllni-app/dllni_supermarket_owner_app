@@ -105,7 +105,7 @@ class AppSimpleAppBarWithSearch extends StatelessWidget {
 }
 
 class _FilterButton extends StatelessWidget {
-  const _FilterButton({super.key, required this.onTap});
+  const _FilterButton({required this.onTap});
   final void Function() onTap;
 
   @override

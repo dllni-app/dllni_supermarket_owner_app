@@ -9,7 +9,8 @@ import '../overview_state_card.dart';
 import '../selling_indicator.dart';
 
 class OverviewSectionLoading extends StatelessWidget {
-  const OverviewSectionLoading({super.key});
+  const OverviewSectionLoading({super.key, this.showQuickPoints = true});
+  final bool showQuickPoints;
 
   @override
   Widget build(BuildContext context) {
@@ -92,38 +93,39 @@ class OverviewSectionLoading extends StatelessWidget {
               ],
             ),
           ),
-          Row(
-            spacing: 12,
-            children: [
-              Expanded(
-                child: OverviewStatCard(
-                  backgroundColor: const Color(0x333B82F6),
-                  foregroundColor: const Color(0xFF60A5FA),
-                  icon: FontAwesomeIcons.receipt,
-                  label: "طلبات جديدة",
-                  value: 24,
+          if (showQuickPoints)
+            Row(
+              spacing: 12,
+              children: [
+                Expanded(
+                  child: OverviewStatCard(
+                    backgroundColor: const Color(0x333B82F6),
+                    foregroundColor: const Color(0xFF60A5FA),
+                    icon: FontAwesomeIcons.receipt,
+                    label: "طلبات جديدة",
+                    value: 24,
+                  ),
                 ),
-              ),
-              Expanded(
-                child: OverviewStatCard(
-                  backgroundColor: const Color(0x33F97316),
-                  foregroundColor: const Color(0xFFFB923C),
-                  icon: FontAwesomeIcons.fireBurner,
-                  label: "قيد التحضير",
-                  value: 8,
+                Expanded(
+                  child: OverviewStatCard(
+                    backgroundColor: const Color(0x33F97316),
+                    foregroundColor: const Color(0xFFFB923C),
+                    icon: FontAwesomeIcons.fireBurner,
+                    label: "قيد التحضير",
+                    value: 8,
+                  ),
                 ),
-              ),
-              Expanded(
-                child: OverviewStatCard(
-                  backgroundColor: const Color(0x3322C55E),
-                  foregroundColor: const Color(0xFF4ADE80),
-                  icon: FontAwesomeIcons.checkDouble,
-                  label: "مكتمل",
-                  value: 156,
+                Expanded(
+                  child: OverviewStatCard(
+                    backgroundColor: const Color(0x3322C55E),
+                    foregroundColor: const Color(0xFF4ADE80),
+                    icon: FontAwesomeIcons.checkDouble,
+                    label: "مكتمل",
+                    value: 156,
+                  ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
         ],
       ),
     );

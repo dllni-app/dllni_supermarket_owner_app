@@ -1,8 +1,16 @@
 import 'package:common_package/common_package.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../core/themes/app_shadows.dart';
+
 class CouponsFilterCard extends StatefulWidget {
-  const CouponsFilterCard({super.key});
+  const CouponsFilterCard({
+    super.key,
+    required this.onSearchChanged,
+    required this.onTabChanged,
+  });
+  final void Function(String value) onSearchChanged;
+  final void Function(int index) onTabChanged;
 
   @override
   State<CouponsFilterCard> createState() => _CouponsFilterCardState();
@@ -11,9 +19,13 @@ class CouponsFilterCard extends StatefulWidget {
 class _CouponsFilterCardState extends State<CouponsFilterCard> {
   int selectedIndex = 0;
 
-  List<Color> colors = [Color(0xff10B981), Color(0xffF59E0B), Color(0xff9CA3AF)];
+  List<Color> colors = [
+    Color(0xff10B981),
+    Color(0xffF59E0B),
+    Color(0xff9CA3AF),
+  ];
 
-  List<String> title = ['الكل', 'نشط', 'معطل', 'منتهي'];
+  List<String> titles = ['الكل', 'نشط', 'معطل', 'منتهي'];
 
   @override
   Widget build(BuildContext context) {
@@ -21,21 +33,30 @@ class _CouponsFilterCardState extends State<CouponsFilterCard> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         color: context.onPrimary,
-        boxShadow: [BoxShadow(color: Colors.black.withAlpha(6), offset: Offset(0, 1), blurRadius: 2)],
-        border: Border.all(color: Color(0xffF3F4F6), width: 1),
+        boxShadow: [AppShadows.shadow],
+        border: Border.all(color: Color(0xffF3F4F6)),
       ),
       margin: EdgeInsetsDirectional.symmetric(horizontal: 24),
       padding: EdgeInsetsDirectional.all(16),
       child: Column(
         children: [
           TextFormField(
-            style: TextStyle(color: Color(0xff2F2B3D), fontSize: 14, fontWeight: FontWeight.w400),
+            onFieldSubmitted: widget.onSearchChanged,
+            style: TextStyle(
+              color: Color(0xff2F2B3D),
+              fontSize: 14,
+              fontWeight: FontWeight.w400,
+            ),
             decoration: InputDecoration(
               filled: true,
               fillColor: Color(0xffF9FAFB),
               prefixIcon: Icon(Icons.search, color: Color(0xff9CA3AF)),
               hintText: 'ابحث عن عرض...',
-              hintStyle: TextStyle(color: Color(0xff9CA3AF), fontSize: 14, fontWeight: FontWeight.w400),
+              hintStyle: TextStyle(
+                color: Color(0xff9CA3AF),
+                fontSize: 14,
+                fontWeight: FontWeight.w400,
+              ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
                 borderSide: BorderSide(color: Color(0xffE5E7EB), width: 1),
@@ -52,56 +73,81 @@ class _CouponsFilterCardState extends State<CouponsFilterCard> {
           ),
           SizedBox(height: 12),
           SizedBox(
-            height: 50,
-            child: SingleChildScrollView(
+            height: 36,
+            child: ListView.separated(
+              padding: EdgeInsets.zero,
               scrollDirection: Axis.horizontal,
-              child: Row(
-                spacing: 8,
-                children: List.generate(
-                  4,
-                      (i) => InkWell(
-                    onTap: () {
-                      setState(() {
-                        selectedIndex = i;
-                      });
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(50),
-                        color: selectedIndex == i ? Color(0xff064E3B) : Color(0xffF3F4F6),
+              itemCount: titles.length,
+              itemBuilder: (context, index) => InkWell(
+                onTap: () {
+                  if (selectedIndex == index) return;
+                  widget.onTabChanged(index);
+                  selectedIndex = index;
+                  setState(() {});
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(50),
+                    color: selectedIndex == index
+                        ? Color(0xff064E3B)
+                        : Color(0xffF3F4F6),
+                  ),
+                  padding: EdgeInsetsDirectional.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
+                  ),
+                  child: Row(
+                    children: [
+                      index == 0
+                          ? SizedBox.shrink()
+                          : CircleAvatar(
+                              radius: 4,
+                              backgroundColor: colors[index - 1],
+                            ),
+                      index == 0 ? SizedBox.shrink() : SizedBox(width: 6),
+                      AppText(
+                        titles[index],
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                          height: 1.33,
+                          color: index == selectedIndex
+                              ? context.onPrimary
+                              : Color(0xff374151),
+                        ),
                       ),
-                      padding: EdgeInsetsDirectional.symmetric(horizontal: 16, vertical: 14),
-                      child: Row(
-                        children: [
-                          i == 0 ? SizedBox.shrink() : CircleAvatar(radius: 5, backgroundColor: colors[i - 1]),
-                          i == 0 ? SizedBox.shrink() : SizedBox(width: 6),
-                          AppText.labelLarge(
-                            title[i],
-                            fontWeight: FontWeight.bold,
-                            color: i == selectedIndex ? context.onPrimary : Color(0xff374151),
-                          ),
-                        ],
-                      ),
-                    ),
+                    ],
                   ),
                 ),
               ),
+              separatorBuilder: (context, index) => SizedBox(width: 8),
             ),
           ),
           SizedBox(height: 12),
-          Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Color(0xffE5E7EB), width: 1),
-            ),
-            padding: EdgeInsetsDirectional.symmetric(vertical: 11),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.filter_alt_rounded, color: Color(0xff374151), size: 14),
-                SizedBox(width: 8),
-                AppText.bodyMedium('فلترة حسب التاريخ', color: Color(0xff374151), fontWeight: FontWeight.bold),
-              ],
+          InkWell(
+            onTap: () {},
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Color(0xffE5E7EB), width: 1),
+              ),
+              padding: EdgeInsetsDirectional.symmetric(vertical: 11),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.filter_alt_rounded,
+                    color: Color(0xff374151),
+                    size: 14,
+                  ),
+                  SizedBox(width: 8),
+                  AppText.bodyMedium(
+                    'فلترة حسب التاريخ',
+                    color: Color(0xff374151),
+                    fontWeight: FontWeight.bold,
+                  ),
+                ],
+              ),
             ),
           ),
         ],

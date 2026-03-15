@@ -2,12 +2,10 @@ import 'package:common_package/common_package.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-class PeriodData {
-  String? from;
-  String? to;
-
-  PeriodData({this.from, this.to});
-}
+import '../../../../core/themes/app_colors.dart';
+import '../../../../core/themes/app_shadows.dart';
+import '../../../../core/utils/app_pickers.dart';
+import '../../data/models/get_store_hours_model.dart';
 
 class WorkingTimeCard extends StatefulWidget {
   const WorkingTimeCard({
@@ -16,12 +14,20 @@ class WorkingTimeCard extends StatefulWidget {
     required this.dayNameEn,
     required this.isToday,
     required this.dayIndex,
+    required this.periods,
+    required this.addedPeriods,
+    required this.updatedPeriods,
+    required this.deletedPeriods,
   });
 
   final String dayName;
   final String dayNameEn;
   final bool isToday;
   final int dayIndex;
+  final List<GetStoreHoursModelDataItem> periods;
+  final List<GetStoreHoursModelDataItem> addedPeriods;
+  final List<GetStoreHoursModelDataItem> updatedPeriods;
+  final List<GetStoreHoursModelDataItem> deletedPeriods;
 
   @override
   State<WorkingTimeCard> createState() => _WorkingTimeCardState();
@@ -56,25 +62,69 @@ class _WorkingTimeCardState extends State<WorkingTimeCard> {
   ];
 
   late bool isEnabled;
-  late List<PeriodData> periodsList;
+  late List<GetStoreHoursModelDataItem> periodsList;
 
   @override
   void initState() {
     super.initState();
-    isEnabled = true;
-    periodsList = [];
+    periodsList = [...widget.periods];
+    isEnabled = periodsList.where((period) => period.isClosed == true).isEmpty;
+  }
+
+  void _openCloseDay(bool value) {
+    for (int i = 0; i < widget.periods.length; i++) {
+      final bool isExistsInUpdated = widget.updatedPeriods
+          .where((period) => period.id == widget.periods[i].id)
+          .isNotEmpty;
+      final bool isExistsInDeleted = widget.deletedPeriods
+          .where((period) => period.id == widget.periods[i].id)
+          .isNotEmpty;
+      if (!isExistsInUpdated &&
+          !isExistsInDeleted &&
+          widget.periods[i].isClosed != value) {
+        widget.updatedPeriods.add(widget.periods[i]);
+        widget.updatedPeriods.last.isClosed = value;
+      } else if (widget.periods[i].isClosed == value) {
+        widget.updatedPeriods.removeWhere(
+          (period) => period.id == widget.periods[i].id,
+        );
+      }
+    }
+    for (int i = 0; i < widget.addedPeriods.length; i++) {
+      widget.addedPeriods[i].isClosed = value;
+    }
+    for (int i = 0; i < widget.updatedPeriods.length; i++) {
+      widget.updatedPeriods[i].isClosed = value;
+    }
+    print(widget.addedPeriods.length);
+    print(widget.updatedPeriods.length);
   }
 
   void _addPeriod() {
     if (periodsList.length < 24) {
       setState(() {
-        periodsList.add(PeriodData());
+        periodsList.add(GetStoreHoursModelDataItem());
+        widget.addedPeriods.add(GetStoreHoursModelDataItem());
       });
     }
   }
 
   void _deletePeriod(int index) {
     if (periodsList.isNotEmpty) {
+      if (periodsList[index].id != null) {
+        print(widget.deletedPeriods.length);
+        widget.updatedPeriods.removeWhere(
+          (period) => periodsList[index].id == period.id,
+        );
+        widget.deletedPeriods.add(periodsList[index]);
+        print(widget.deletedPeriods.length);
+      } else {
+        widget.addedPeriods.removeWhere(
+          (period) =>
+              period.opensAt == periodsList[index].opensAt &&
+              period.closesAt == periodsList[index].closesAt,
+        );
+      }
       setState(() {
         periodsList.removeAt(index);
       });
@@ -82,29 +132,48 @@ class _WorkingTimeCardState extends State<WorkingTimeCard> {
   }
 
   void _updatePeriod(int index, String? from, String? to) {
+    print("update Time");
+    if (periodsList[index].id == null) {
+      widget.addedPeriods.removeWhere(
+        (period) =>
+            period.opensAt == periodsList[index].opensAt &&
+            period.closesAt == periodsList[index].closesAt,
+      );
+    }
     setState(() {
-      periodsList[index].from = from;
-      periodsList[index].to = to;
+      periodsList[index].opensAt = from;
+      periodsList[index].closesAt = to;
     });
+    if (periodsList[index].id != null) {
+      print(widget.updatedPeriods.length);
+      widget.updatedPeriods.removeWhere(
+        (period) => periodsList[index].id == period.id,
+      );
+      widget.updatedPeriods.add(periodsList[index]);
+      print(widget.updatedPeriods.length);
+      print("exists");
+    } else {
+      widget.addedPeriods.add(periodsList[index]);
+      print("not exists");
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final cardColor = widget.isToday
-        ? const Color(0xffE6F4EF)
-        : context.onPrimary;
-    final borderColor = widget.isToday
-        ? const Color(0xff1FAF7A)
-        : Colors.transparent;
-
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: cardColor,
-        borderRadius: BorderRadius.circular(24),
-        border: widget.isToday
-            ? Border.all(color: borderColor, width: 1)
+        color: widget.isToday ? null : AppColors.white,
+        gradient: widget.isToday
+            ? LinearGradient(
+                colors: [Color(0xFFECFDF5), Color(0xFFD1FAE5)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              )
             : null,
+        borderRadius: BorderRadius.circular(16),
+        border: widget.isToday ? Border.all(color: Color(0xFFF3F4F6)) : null,
+        boxShadow: [AppShadows.shadow],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -121,19 +190,23 @@ class _WorkingTimeCardState extends State<WorkingTimeCard> {
                       color: widget.isToday && isEnabled
                           ? Color(0xff10B981)
                           : isEnabled
-                          ? const Color(0xffE6F4EF)
-                          : context.surface,
+                          ? const Color(0x1A1E2A78)
+                          : Color(0xFFE5E7EB),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Center(
                       child: Icon(
-                        isEnabled
-                            ? FontAwesomeIcons.calendar
+                        isEnabled && widget.isToday
+                            ? FontAwesomeIcons.solidCalendarCheck
+                            : isEnabled
+                            ? FontAwesomeIcons.calendarDay
                             : Icons.door_front_door,
-                        color: isEnabled
-                            ? Color(0xff064E3B)
-                            : Colors.grey.shade600,
-                        size: 24,
+                        color: isEnabled && widget.isToday
+                            ? AppColors.white
+                            : isEnabled
+                            ? AppColors.primary
+                            : Color(0xFF9CA3AF),
+                        size: isEnabled ? 18 : 22,
                       ),
                     ),
                   ),
@@ -145,7 +218,12 @@ class _WorkingTimeCardState extends State<WorkingTimeCard> {
                         children: [
                           Row(
                             children: [
+                              AppText.bodyMedium(
+                                widget.dayName,
+                                fontWeight: FontWeight.bold,
+                              ),
                               if (!isEnabled) ...[
+                                const SizedBox(width: 8),
                                 Container(
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 8,
@@ -155,18 +233,17 @@ class _WorkingTimeCardState extends State<WorkingTimeCard> {
                                     color: Colors.grey.shade200,
                                     borderRadius: BorderRadius.circular(12),
                                   ),
-                                  child: AppText.labelSmall(
+                                  child: AppText(
                                     'مغلق',
-                                    color: Colors.grey.shade700,
-                                    fontWeight: FontWeight.w600,
+                                    style: TextStyle(
+                                      color: Colors.grey.shade700,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
+                                      height: 1.5,
+                                    ),
                                   ),
                                 ),
-                                const SizedBox(width: 8),
                               ],
-                              AppText.bodyMedium(
-                                widget.dayName,
-                                fontWeight: FontWeight.bold,
-                              ),
                               if (widget.isToday && isEnabled) ...[
                                 const SizedBox(width: 8),
                                 Container(
@@ -175,13 +252,17 @@ class _WorkingTimeCardState extends State<WorkingTimeCard> {
                                     vertical: 2,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xff1FAF7A),
-                                    borderRadius: BorderRadius.circular(12),
+                                    color: const Color(0x2B24B364),
+                                    borderRadius: BorderRadius.circular(100),
                                   ),
-                                  child: AppText.labelSmall(
+                                  child: AppText(
                                     'اليوم',
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w600,
+                                    style: TextStyle(
+                                      color: Color(0xFF10B981),
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w700,
+                                      height: 1.5,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -203,6 +284,8 @@ class _WorkingTimeCardState extends State<WorkingTimeCard> {
                 activeTrackColor: const Color(0xff1FAF7A),
                 inactiveTrackColor: const Color(0xffD1D5DB),
                 onChanged: (value) {
+                  /// [!value] because when it is false means [isClose = true]
+                  _openCloseDay(!value);
                   setState(() {
                     isEnabled = value;
                   });
@@ -221,8 +304,8 @@ class _WorkingTimeCardState extends State<WorkingTimeCard> {
                   child: PeriodCard(
                     periodIndex: index,
                     periodName: periods[index],
-                    from: period.from,
-                    to: period.to,
+                    from: period.opensAt,
+                    to: period.closesAt,
                     onDelete: () => _deletePeriod(index),
                     onTimeChanged: (from, to) => _updatePeriod(index, from, to),
                     isDeletable: index > 0,
@@ -235,14 +318,15 @@ class _WorkingTimeCardState extends State<WorkingTimeCard> {
               onTap: periodsList.length < 24 ? _addPeriod : null,
               child: Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 14),
+                padding: const EdgeInsets.symmetric(vertical: 11),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(18),
+                  borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: periodsList.length < 24
-                        ? const Color(0xff1FAF7A)
+                        ? const Color(0x361E2A78)
                         : Colors.grey,
                   ),
+                  color: Color(0x0F1E2A78),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -250,7 +334,7 @@ class _WorkingTimeCardState extends State<WorkingTimeCard> {
                     Icon(
                       Icons.add,
                       color: periodsList.length < 24
-                          ? const Color(0xff1FAF7A)
+                          ? AppColors.primary
                           : Colors.grey,
                     ),
                     const SizedBox(width: 8),
@@ -258,9 +342,11 @@ class _WorkingTimeCardState extends State<WorkingTimeCard> {
                       "إضافة فترة",
                       style: TextStyle(
                         color: periodsList.length < 24
-                            ? const Color(0xff1FAF7A)
+                            ? AppColors.primary
                             : Colors.grey,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                        height: 1.42,
                       ),
                     ),
                   ],
@@ -277,6 +363,7 @@ class _WorkingTimeCardState extends State<WorkingTimeCard> {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
                     Icons.nights_stay,
@@ -421,17 +508,18 @@ class _PeriodCardState extends State<PeriodCard> {
         TextFormField(
           controller: controller,
           readOnly: true,
+          textDirection: TextDirection.ltr,
           style: TextStyle(
             color: Color(0xff1F2937),
             fontSize: 14,
             fontWeight: FontWeight.bold,
           ),
           onTap: () async {
-            // final pickedTime = await AppPickers.showAppTimePicker(
-            //   context: context,
-            // );
-            // controller.text = pickedTime;
-            // onChanged(pickedTime);
+            final pickedTime = await AppPickers.showAppTimePicker(
+              context: context,
+            );
+            controller.text = pickedTime;
+            onChanged(pickedTime);
           },
           decoration: InputDecoration(
             filled: true,
@@ -441,7 +529,7 @@ class _PeriodCardState extends State<PeriodCard> {
               vertical: 14,
             ),
             prefixIcon: const Icon(
-              Icons.access_time,
+              Icons.access_time_filled,
               size: 18,
               color: Colors.grey,
             ),
@@ -451,7 +539,7 @@ class _PeriodCardState extends State<PeriodCard> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(color: Color(0xff1FAF7A)),
+              borderSide: BorderSide(color: Colors.grey.shade300),
             ),
           ),
         ),

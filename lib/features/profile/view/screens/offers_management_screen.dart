@@ -6,6 +6,7 @@ import '../widgets/offer_card.dart';
 import '../widgets/offers_filter_card.dart';
 import '../widgets/offers_statistics_grid.dart';
 
+@AutoRoutePage(path: "/offers_management")
 class OffersManagementScreen extends StatelessWidget {
   const OffersManagementScreen({super.key});
 

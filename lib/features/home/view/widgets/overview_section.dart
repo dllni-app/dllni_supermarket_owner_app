@@ -17,7 +17,8 @@ import 'overview_state_card.dart';
 import 'selling_indicator.dart';
 
 class OverviewSection extends StatelessWidget {
-  const OverviewSection({super.key});
+  const OverviewSection({super.key, this.showQuickPoints = true});
+  final bool showQuickPoints;
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +62,9 @@ class OverviewSection extends StatelessWidget {
               current.dashboardOverviewStatus,
           builder: (context, state) {
             return switch (state.dashboardOverviewStatus) {
-              BlocStatus.loading => OverviewSectionLoading(),
+              BlocStatus.loading => OverviewSectionLoading(
+                showQuickPoints: showQuickPoints,
+              ),
               BlocStatus.failed => FailureWidget(
                 message: state.errorMessage ?? "Unknown Error",
                 onRetry: () {
@@ -163,42 +166,47 @@ class OverviewSection extends StatelessWidget {
                       ],
                     ),
                   ),
-                  Row(
-                    spacing: 12,
-                    children: [
-                      Expanded(
-                        child: OverviewStatCard(
-                          backgroundColor: const Color(0x333B82F6),
-                          foregroundColor: const Color(0xFF60A5FA),
-                          icon: FontAwesomeIcons.receipt,
-                          label: "طلبات جديدة",
-                          value: state.dashboardOverview?.data?.newOrders ?? -1,
+                  if (showQuickPoints)
+                    Row(
+                      spacing: 12,
+                      children: [
+                        Expanded(
+                          child: OverviewStatCard(
+                            backgroundColor: const Color(0x333B82F6),
+                            foregroundColor: const Color(0xFF60A5FA),
+                            icon: FontAwesomeIcons.receipt,
+                            label: "طلبات جديدة",
+                            value:
+                                state.dashboardOverview?.data?.newOrders ?? -1,
+                          ),
                         ),
-                      ),
-                      Expanded(
-                        child: OverviewStatCard(
-                          backgroundColor: const Color(0x33F97316),
-                          foregroundColor: const Color(0xFFFB923C),
-                          icon: FontAwesomeIcons.bagShopping,
-                          label: "قيد التحضير",
-                          value:
-                              state.dashboardOverview?.data?.pendingOrders ??
-                              -1,
+                        Expanded(
+                          child: OverviewStatCard(
+                            backgroundColor: const Color(0x33F97316),
+                            foregroundColor: const Color(0xFFFB923C),
+                            icon: FontAwesomeIcons.bagShopping,
+                            label: "قيد التحضير",
+                            value:
+                                state.dashboardOverview?.data?.pendingOrders ??
+                                -1,
+                          ),
                         ),
-                      ),
-                      Expanded(
-                        child: OverviewStatCard(
-                          backgroundColor: const Color(0x3322C55E),
-                          foregroundColor: const Color(0xFF4ADE80),
-                          icon: FontAwesomeIcons.checkDouble,
-                          label: "مكتمل",
-                          value:
-                              state.dashboardOverview?.data?.completedOrders ??
-                              -1,
+                        Expanded(
+                          child: OverviewStatCard(
+                            backgroundColor: const Color(0x3322C55E),
+                            foregroundColor: const Color(0xFF4ADE80),
+                            icon: FontAwesomeIcons.checkDouble,
+                            label: "مكتمل",
+                            value:
+                                state
+                                    .dashboardOverview
+                                    ?.data
+                                    ?.completedOrders ??
+                                -1,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
                 ],
               ),
               _ => SizedBox(),

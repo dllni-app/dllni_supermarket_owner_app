@@ -37,7 +37,9 @@ class HomeScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SizedBox(height: 24),
-                    OverviewSection(),
+                    OverviewSection(
+                      showQuickPoints: false,
+                    ),
                     SizedBox(height: 20),
                     OrdersChartCard(),
                     SizedBox(height: 34),

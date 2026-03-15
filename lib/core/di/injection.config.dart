@@ -88,6 +88,20 @@ import '../../features/profile/data/repository/profile_repo_impl.dart' as _i265;
 import '../../features/profile/data/source/profile_remote_data_source.dart'
     as _i502;
 import '../../features/profile/domain/repository/profile_repo.dart' as _i275;
+import '../../features/profile/domain/usecases/add_store_hours_use_case.dart'
+    as _i167;
+import '../../features/profile/domain/usecases/delete_store_hours_use_case.dart'
+    as _i205;
+import '../../features/profile/domain/usecases/get_coupon_codes_use_case.dart'
+    as _i550;
+import '../../features/profile/domain/usecases/get_store_hours_use_case.dart'
+    as _i261;
+import '../../features/profile/domain/usecases/get_store_profile_use_case.dart'
+    as _i712;
+import '../../features/profile/domain/usecases/update_store_data_use_case.dart'
+    as _i78;
+import '../../features/profile/domain/usecases/update_store_hours_use_case.dart'
+    as _i624;
 import '../../features/profile/view/manager/bloc/profile_bloc.dart' as _i821;
 import 'injection.dart' as _i464;
 
@@ -99,18 +113,13 @@ _i174.GetIt $initGetIt(
 }) {
   final gh = _i526.GetItHelper(getIt, environment, environmentFilter);
   final injectableModule = _$InjectableModule();
-  gh.factory<_i821.ProfileBloc>(() => _i821.ProfileBloc());
   gh.singleton<_i960.DioNetwork>(() => injectableModule.dio);
-  gh.lazySingleton<_i502.ProfileRemoteDataSource>(
-    () => _i502.ProfileRemoteDataSource(),
-  );
   gh.lazySingleton<_i777.AuthRemoteDataSource>(
     () => _i777.AuthRemoteDataSource(dioNetwork: gh<_i497.DioNetwork>()),
   );
   gh.lazySingleton<_i557.HomeRemoteDataSource>(
     () => _i557.HomeRemoteDataSource(dioNetwork: gh<_i497.DioNetwork>()),
   );
-  gh.lazySingleton<_i275.ProfileRepo>(() => _i265.ProfileRepoImpl());
   gh.lazySingleton<_i543.InventoryRemoteDataSource>(
     () => _i543.InventoryRemoteDataSource(dioNetwork: gh<_i960.DioNetwork>()),
   );
@@ -119,6 +128,9 @@ _i174.GetIt $initGetIt(
   );
   gh.lazySingleton<_i811.ProductsRemoteDataSource>(
     () => _i811.ProductsRemoteDataSource(dioNetwork: gh<_i960.DioNetwork>()),
+  );
+  gh.lazySingleton<_i502.ProfileRemoteDataSource>(
+    () => _i502.ProfileRemoteDataSource(dioNetwork: gh<_i960.DioNetwork>()),
   );
   gh.lazySingleton<_i1071.InventoryRepo>(
     () => _i821.InventoryRepoImpl(
@@ -190,6 +202,11 @@ _i174.GetIt $initGetIt(
     () =>
         _i169.UpdateProductAmountUseCase(inventory: gh<_i1071.InventoryRepo>()),
   );
+  gh.lazySingleton<_i275.ProfileRepo>(
+    () => _i265.ProfileRepoImpl(
+      profileRemoteDataSource: gh<_i502.ProfileRemoteDataSource>(),
+    ),
+  );
   gh.lazySingleton<_i420.AcceptOrderUseCase>(
     () => _i420.AcceptOrderUseCase(orders: gh<_i132.OrdersRepo>()),
   );
@@ -210,6 +227,27 @@ _i174.GetIt $initGetIt(
     ),
   );
   gh.factory<_i958.AuthBloc>(() => _i958.AuthBloc(gh<_i37.LoginUseCase>()));
+  gh.lazySingleton<_i167.AddStoreHoursUseCase>(
+    () => _i167.AddStoreHoursUseCase(profile: gh<_i275.ProfileRepo>()),
+  );
+  gh.lazySingleton<_i205.DeleteStoreHoursUseCase>(
+    () => _i205.DeleteStoreHoursUseCase(profile: gh<_i275.ProfileRepo>()),
+  );
+  gh.lazySingleton<_i550.GetCouponCodesUseCase>(
+    () => _i550.GetCouponCodesUseCase(profile: gh<_i275.ProfileRepo>()),
+  );
+  gh.lazySingleton<_i261.GetStoreHoursUseCase>(
+    () => _i261.GetStoreHoursUseCase(profile: gh<_i275.ProfileRepo>()),
+  );
+  gh.lazySingleton<_i712.GetStoreProfileUseCase>(
+    () => _i712.GetStoreProfileUseCase(profile: gh<_i275.ProfileRepo>()),
+  );
+  gh.lazySingleton<_i78.UpdateStoreDataUseCase>(
+    () => _i78.UpdateStoreDataUseCase(profile: gh<_i275.ProfileRepo>()),
+  );
+  gh.lazySingleton<_i624.UpdateStoreHoursUseCase>(
+    () => _i624.UpdateStoreHoursUseCase(profile: gh<_i275.ProfileRepo>()),
+  );
   gh.lazySingleton<_i982.AcceptOrderUseCase>(
     () => _i982.AcceptOrderUseCase(home: gh<_i396.HomeRepo>()),
   );
@@ -230,6 +268,17 @@ _i174.GetIt $initGetIt(
   );
   gh.lazySingleton<_i501.RejectOrderUseCase>(
     () => _i501.RejectOrderUseCase(home: gh<_i396.HomeRepo>()),
+  );
+  gh.factory<_i821.ProfileBloc>(
+    () => _i821.ProfileBloc(
+      gh<_i712.GetStoreProfileUseCase>(),
+      gh<_i78.UpdateStoreDataUseCase>(),
+      gh<_i261.GetStoreHoursUseCase>(),
+      gh<_i167.AddStoreHoursUseCase>(),
+      gh<_i624.UpdateStoreHoursUseCase>(),
+      gh<_i205.DeleteStoreHoursUseCase>(),
+      gh<_i550.GetCouponCodesUseCase>(),
+    ),
   );
   gh.factory<_i305.OrdersBloc>(
     () => _i305.OrdersBloc(

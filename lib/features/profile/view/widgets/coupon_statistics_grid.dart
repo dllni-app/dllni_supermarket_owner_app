@@ -1,15 +1,18 @@
 import 'package:common_package/common_package.dart';
+import 'package:dllni_supermarket_owner_app/core/extensions/num_extensions.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
 
-class CouponsStatisticsGrid extends StatefulWidget {
-  const CouponsStatisticsGrid({super.key});
+class CouponsStatistics extends StatefulWidget {
+  const CouponsStatistics({super.key});
 
   @override
-  State<CouponsStatisticsGrid> createState() => _CouponsStatisticsGridState();
+  State<CouponsStatistics> createState() => _CouponsStatisticsState();
 }
 
-class _CouponsStatisticsGridState extends State<CouponsStatisticsGrid>
+class _CouponsStatisticsState extends State<CouponsStatistics>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _sizeAnimation;
@@ -52,6 +55,8 @@ class _CouponsStatisticsGridState extends State<CouponsStatisticsGrid>
 
   @override
   Widget build(BuildContext context) {
+    const Color green = Color(0xFF0DB458);
+    const Color grey = Color(0xFF9CA3AF);
     List<String> titles = [
       'كوبونات نشطة',
       'كوبونات منتهية',
@@ -115,39 +120,162 @@ class _CouponsStatisticsGridState extends State<CouponsStatisticsGrid>
             axisAlignment: -1.0,
             child: Column(
               children: [
-                SizedBox(height: 16),
-                Row(
-                  spacing: 12,
-                  children: List.generate(
-                    2,
-                    (i) => Expanded(
-                      child: StatePointer(
-                        title: titles[i],
-                        value: 100,
-                        containerBorderColor: i == 0
-                            ? Color(0xff10B981).withAlpha(51)
-                            : Color(0xffE5E7EB),
-                        containerColor: i == 0
-                            ? Color(0xff10B981).withAlpha(25)
-                            : Color(0xffF3F4F6),
-                        icon: i == 0 ? Icons.check_circle : Icons.block,
-                        iconCardColor: i == 0
-                            ? Color(0xff10B981).withAlpha(51)
-                            : Color(0xffE5E7EB),
-                        iconColor: i == 0
-                            ? Color(0xff10B981)
-                            : Color(0xff6B7280),
+                SizedBox(height: 30),
+                SizedBox(
+                  height: 150,
+                  child: BarChart(
+                    BarChartData(
+                      alignment: BarChartAlignment.spaceAround,
+                      maxY: 40,
+                      barTouchData: BarTouchData(enabled: false),
+                      borderData: FlBorderData(show: false),
+                      gridData: FlGridData(
+                        getDrawingHorizontalLine: (value) => FlLine(
+                          color: Color(0xFFF1F1F1),
+                          strokeWidth: 1,
+                          dashArray: [2, 2],
+                        ),
+                        drawVerticalLine: false,
                       ),
+                      titlesData: FlTitlesData(
+                        topTitles: const AxisTitles(sideTitles: SideTitles()),
+                        leftTitles: const AxisTitles(sideTitles: SideTitles()),
+                        rightTitles: AxisTitles(
+                          sideTitles: SideTitles(
+                            showTitles: true,
+                            reservedSize: 30,
+                            // interval: 5,
+                            getTitlesWidget: (value, meta) {
+                              // if (value % 10 != 0 &&
+                              //     value !=
+                              //         maxOrdersEachDay.reduce(max).toDouble()) {
+                              //   return const SizedBox.shrink();
+                              // }
+                              return SideTitleWidget(
+                                meta: meta,
+                                child: Text(
+                                  value.toInt().toString(),
+                                  style: const TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        bottomTitles: AxisTitles(
+                          sideTitles: SideTitles(
+                            showTitles: true,
+                            reservedSize: 30,
+                            getTitlesWidget: (value, meta) {
+                              const days = [
+                                'جمعة',
+                                'خميس',
+                                'أربعاء',
+                                'ثلاثاء',
+                                'اثنين',
+                                'أحد',
+                                'سبت',
+                              ];
+                              if (value.toInt() < 0 ||
+                                  value.toInt() >= days.length) {
+                                return const SizedBox.shrink();
+                              }
+                              return SideTitleWidget(
+                                meta: meta,
+                                space: 8,
+                                child: Text(
+                                  days[value.toInt()],
+                                  style: const TextStyle(
+                                    color: Colors.black87,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                      barGroups: List.generate(7, (index) {
+                        // select the date
+                        // GetDailyCountModelDataItem selectedDay = switch (index +
+                        //   1) {
+                        // 1 => state.dailyCount!.data!.friday!,
+                        // 2 => state.dailyCount!.data!.thursday!,
+                        // 3 => state.dailyCount!.data!.wednesday!,
+                        // 4 => state.dailyCount!.data!.tuesday!,
+                        // 5 => state.dailyCount!.data!.monday!,
+                        // 6 => state.dailyCount!.data!.sunday!,
+                        // 7 => state.dailyCount!.data!.saturday!,
+                        // _ => throw ArgumentError(
+                        //   "incorrect day (out of [1 -> 7] days)",
+                        // ),
+                        // };
+                        return BarChartGroupData(
+                          x: index,
+                          barRods: [
+                            BarChartRodData(
+                              toY: 35,
+                              width: 20,
+                              borderRadius: BorderRadius.vertical(
+                                top: Radius.circular(6),
+                              ),
+                              rodStackItems: [
+                                BarChartRodStackItem(0, 15, green),
+                                BarChartRodStackItem(15, 35, grey),
+                              ],
+                            ),
+                          ],
+                        );
+                      }),
                     ),
                   ),
                 ),
+                const SizedBox(height: 24),
+                Row(
+                  spacing: 8,
+                  children: [
+                    SizedBox(width: 2),
+                    Row(
+                      children: [
+                        CircleAvatar(radius: 4, backgroundColor: green),
+                        const SizedBox(width: 4),
+                        Text(
+                          "كوبونات نشطة",
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        CircleAvatar(radius: 4, backgroundColor: grey),
+                        const SizedBox(width: 4),
+                        Text(
+                          "كوبونات منتهية",
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+
                 SizedBox(height: 12),
                 StatePointer(
                   title: titles[2],
-                  value: 100,
+                  value: 123450.formatWithComma(),
                   containerBorderColor: Color(0xffF59E0B).withAlpha(51),
                   containerColor: Color(0xffF59E0B).withAlpha(25),
-                  icon: Icons.watch_later,
+                  icon: FontAwesomeIcons.database,
                   iconCardColor: Color(0xffF59E0B).withAlpha(51),
                   iconColor: Color(0xffF59E0B),
                 ),
@@ -173,8 +301,8 @@ class StatePointer extends StatelessWidget {
   });
 
   final String title;
-  final int value;
-  final dynamic icon;
+  final String value;
+  final IconData icon;
   final Color containerColor;
   final Color containerBorderColor;
   final Color iconCardColor;
@@ -204,9 +332,7 @@ class StatePointer extends StatelessWidget {
               color: iconCardColor,
             ),
             padding: EdgeInsetsDirectional.all(11),
-            child: icon is IconData
-                ? Icon(icon, color: iconColor, size: 18)
-                : AppImage.asset(icon, size: 18, color: iconColor),
+            child: Icon(icon, color: iconColor, size: 18),
           ),
           SizedBox(width: 8),
           Expanded(
@@ -214,9 +340,14 @@ class StatePointer extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                AppText.displaySmall(
+                AppText(
                   value.toString(),
-                  fontWeight: FontWeight.bold,
+                  style: TextStyle(
+                    color: Color(0xFF111827),
+                    fontSize: 24,
+                    fontWeight: FontWeight.w700,
+                    height: 1.333,
+                  ),
                 ),
                 SizedBox(height: 2),
                 AppText.labelMedium(
