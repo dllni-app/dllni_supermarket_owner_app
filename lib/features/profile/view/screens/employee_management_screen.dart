@@ -1,60 +1,180 @@
 import 'package:common_package/common_package.dart';
 import 'package:dllni_supermarket_owner_app/core/widgets/app_app_bars.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:intl/intl.dart';
+import 'package:shimmer/shimmer.dart';
 
+import '../../../../core/di/injection.dart';
 import '../../../../core/themes/app_colors.dart';
 import '../../../../core/themes/app_shadows.dart';
-import '../../../../core/utils/app_images.dart';
 import '../../../../core/utils/app_svgs.dart';
+import '../../../../core/widgets/failure_widget.dart';
 import '../../../products/view/widgets/big_button_with_icon.dart';
+import '../../data/models/get_store_employees_model.dart';
+import '../../domain/usecases/get_store_employees_use_case.dart';
+import '../manager/bloc/profile_bloc.dart';
+import 'create_new_employee_screen.dart';
 
 @AutoRoutePage(path: "/profile/employees")
-class EmployeeManagementScreen extends StatelessWidget {
+class EmployeeManagementScreen extends StatefulWidget {
   const EmployeeManagementScreen({super.key});
 
+  @override
+  State<EmployeeManagementScreen> createState() =>
+      _EmployeeManagementScreenState();
+}
+
+class _EmployeeManagementScreenState extends State<EmployeeManagementScreen> {
+  String? search;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
-      body: Column(
-        children: [
-          AppSimpleAppBar(title: "إدارة الموظفين"),
-          SizedBox(height: 8),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SizedBox(
-                  width: context.width,
-                  child: BigButtonWithIcon(
-                    icon: AppImage.asset(AppSvgs.add, size: 22),
-                    title: "إضافة موظف جديد",
-                    onPressed: () {
-                      context.pushRoute("/profile/employees/create_employee");
+      body: BlocProvider(
+        create: (context) => getIt<ProfileBloc>()
+          ..add(
+            GetStoreEmployeesEvent(params: GetStoreEmployeesParams(storeId: 1)),
+          ),
+        child: Column(
+          children: [
+            AppSimpleAppBar(title: "إدارة الموظفين"),
+            SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    width: context.width,
+                    child: Builder(
+                      builder: (context) {
+                        return BigButtonWithIcon(
+                          icon: AppImage.asset(AppSvgs.add, size: 22),
+                          title: "إضافة موظف جديد",
+                          onPressed: () async {
+                            final refresh = await context.pushRoute(
+                              "/profile/employees/create_employee",
+                            );
+                            if (refresh is! bool) return;
+                            if (!refresh || !context.mounted) return;
+                            context.read<ProfileBloc>().add(
+                              GetStoreEmployeesEvent(
+                                params: GetStoreEmployeesParams(
+                                  storeId: 1,
+                                  search: search,
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  Builder(
+                    builder: (context) {
+                      return _FilterSection(
+                        onSearchChanged: (value) {
+                          search = value;
+                          context.read<ProfileBloc>().add(
+                            GetStoreEmployeesEvent(
+                              params: GetStoreEmployeesParams(
+                                storeId: 1,
+                                search: search,
+                              ),
+                            ),
+                          );
+                        },
+                        onFilterPressed: () {},
+                        onSortingPressed: () {},
+                      );
                     },
                   ),
-                ),
-                SizedBox(height: 16),
-                _FilterSection(
-                  onSearchChanged: (value) {},
-                  onFilterPressed: () {},
-                  onSortingPressed: () {},
-                ),
-                SizedBox(height: 3),
-              ],
+                  SizedBox(height: 3),
+                ],
+              ),
             ),
-          ),
-          Expanded(
-            child: ListView.separated(
-              padding: EdgeInsets.all(16),
-              itemBuilder: (context, index) => _EmployeeCard(),
-              itemCount: 3,
-              separatorBuilder: (context, index) => SizedBox(height: 13),
+            Expanded(
+              child: BlocBuilder<ProfileBloc, ProfileState>(
+                buildWhen: (previous, current) =>
+                    previous.storeEmployeesStatus !=
+                    current.storeEmployeesStatus,
+                builder: (context, state) {
+                  if (state.storeEmployeesStatus == BlocStatus.loading) {
+                    return EmployeeLoading();
+                  } else if (state.storeEmployeesStatus == BlocStatus.failed) {
+                    return Center(
+                      child: FailureWidget(
+                        message: state.errorMessage.toString(),
+                        onRetry: () {
+                          context.read<ProfileBloc>().add(
+                            GetStoreEmployeesEvent(
+                              params: GetStoreEmployeesParams(
+                                storeId: 1,
+                                search: search,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  } else if (state.storeEmployeesStatus == BlocStatus.success) {
+                    return ListView.separated(
+                      padding: EdgeInsets.all(16),
+                      itemCount:
+                          state.storeEmployees?.data?.employees?.length ?? 0,
+                      itemBuilder: (context, index) => _EmployeeCard(
+                        employee: state.storeEmployees!.data!.employees![index],
+                      ),
+                      separatorBuilder: (context, index) =>
+                          SizedBox(height: 13),
+                    );
+                  }
+
+                  return SizedBox();
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class EmployeeLoading extends StatelessWidget {
+  const EmployeeLoading({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey.shade300,
+      highlightColor: Colors.grey.shade100,
+      child: ListView.separated(
+        padding: EdgeInsets.all(16),
+        itemBuilder: (context, index) => _EmployeeCard(
+          employee: GetStoreEmployeesModelDataEmployeesItem.fromJson({
+            "id": 9,
+            "storeId": 1,
+            "userId": 35,
+            "isActive": true,
+            "user": {
+              "id": 35,
+              "name": "Mohammed Deeb",
+              "email": "jalabmouhamed@gmail.com",
+              "phone": "+963954802408",
+              "profileImageUrl": "http://localhost/storage/1/avatar.png",
+            },
+            "permissionIds": [18, 20],
+            "effectivePermissions": ["coupons.create", "coupons.delete"],
+            "createdAt": "2026-03-16 02:54:52",
+            "updatedAt": "2026-03-16 02:54:52",
+          }),
+        ),
+        itemCount: 3,
+        separatorBuilder: (context, index) => SizedBox(height: 13),
       ),
     );
   }
@@ -89,7 +209,7 @@ class _FilterSection extends StatelessWidget {
               fontWeight: FontWeight.w500,
               fontSize: 14,
             ),
-            onChanged: onSearchChanged,
+            onSubmitted: onSearchChanged,
             decoration: InputDecoration(
               prefixIcon: Padding(
                 padding: const EdgeInsets.only(right: 8),
@@ -198,7 +318,8 @@ class _FilterSection extends StatelessWidget {
 }
 
 class _EmployeeCard extends StatelessWidget {
-  const _EmployeeCard();
+  const _EmployeeCard({required this.employee});
+  final GetStoreEmployeesModelDataEmployeesItem employee;
 
   @override
   Widget build(BuildContext context) {
@@ -215,8 +336,8 @@ class _EmployeeCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              AppImage.asset(
-                AppImages.burgerImage,
+              AppImage.network(
+                employee.user?.profileImageUrl ?? "null",
                 size: 56,
                 borderRadius: BorderRadius.all(Radius.circular(12)),
               ),
@@ -226,7 +347,7 @@ class _EmployeeCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     AppText(
-                      "أحمد محمد العلي",
+                      employee.user?.name ?? "null",
                       style: TextStyle(
                         color: Color(0xFF111827),
                         fontSize: 16,
@@ -237,43 +358,77 @@ class _EmployeeCard extends StatelessWidget {
                     SizedBox(height: 4),
                     Row(
                       children: [
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Color(0x1A10B981),
-                            borderRadius: BorderRadius.all(Radius.circular(8)),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              CircleAvatar(
-                                radius: 3,
-                                backgroundColor: Color(0xFF10B981),
+                        if (employee.isActive ?? false)
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Color(0x1A10B981),
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(8),
                               ),
-                              SizedBox(width: 4),
-                              AppText(
-                                "نشط",
-                                style: TextStyle(
-                                  color: Color(0xFF10B981),
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w700,
-                                  height: 1.333,
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                CircleAvatar(
+                                  radius: 3,
+                                  backgroundColor: Color(0xFF10B981),
                                 ),
+                                SizedBox(width: 4),
+                                AppText(
+                                  "نشط",
+                                  style: TextStyle(
+                                    color: Color(0xFF10B981),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    height: 1.333,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        else
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Color(0x1AF59E0B),
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(8),
                               ),
-                            ],
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                CircleAvatar(
+                                  radius: 3,
+                                  backgroundColor: Color(0xFFF59E0B),
+                                ),
+                                SizedBox(width: 4),
+                                AppText(
+                                  "معطل",
+                                  style: TextStyle(
+                                    color: Color(0xFFF59E0B),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    height: 1.333,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
                         SizedBox(width: 8),
                         Icon(Icons.phone, color: Color(0xFF4B5563), size: 10),
                         SizedBox(width: 4),
                         AppText(
-                          "09512345678",
+                          employee.user?.phone ?? "null",
                           style: TextStyle(
                             color: Color(0xFF4B5563),
-
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
                             height: 1.333,
@@ -310,7 +465,10 @@ class _EmployeeCard extends StatelessWidget {
                     ),
                     Spacer(),
                     AppText(
-                      "20 مارس 2023",
+                      DateFormat.yMMMMd('ar_SA').format(
+                        DateTime.tryParse(employee.createdAt ?? "") ??
+                            DateTime(2025),
+                      ),
                       style: TextStyle(
                         color: Color(0xFF111827),
                         fontWeight: FontWeight.w700,
@@ -321,40 +479,27 @@ class _EmployeeCard extends StatelessWidget {
                   ],
                 ),
                 SizedBox(height: 8),
-                AppText(
-                  "تاريخ الانضمام",
-                  style: TextStyle(
-                    color: Color(0xFF4B5563),
-                    fontSize: 12,
-                    height: 1.333,
-                  ),
-                ),
-                ...[
+                if (employee.effectivePermissions?.isNotEmpty ?? false) ...[
                   AppText(
-                    "تاريخ الانضمام",
+                    "الصلاحيات",
                     style: TextStyle(
-                      color: context.primary,
+                      color: Color(0xFF4B5563),
                       fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      height: 1.6667,
+                      height: 1.333,
                     ),
                   ),
-                  AppText(
-                    "تاريخ الانضمام",
-                    style: TextStyle(
-                      color: context.primary,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      height: 1.6667,
-                    ),
-                  ),
-                  AppText(
-                    "تاريخ الانضمام",
-                    style: TextStyle(
-                      color: context.primary,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      height: 1.6667,
+                  ...List.generate(
+                    employee.effectivePermissions?.length ?? 0,
+                    (index) => AppText(
+                      getPermissionDetails(
+                        employee.effectivePermissions?[index] ?? "null",
+                      ).title,
+                      style: TextStyle(
+                        color: context.primary,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        height: 1.6667,
+                      ),
                     ),
                   ),
                 ],
@@ -363,7 +508,19 @@ class _EmployeeCard extends StatelessWidget {
           ),
           SizedBox(height: 12),
           InkWell(
-            onTap: () {},
+            onTap: () async {
+              final refresh = await context.pushRoute(
+                "/profile/employees/create_employee",
+                arguments: employee,
+              );
+              if (refresh is! bool) return;
+              if (!refresh || !context.mounted) return;
+              context.read<ProfileBloc>().add(
+                GetStoreEmployeesEvent(
+                  params: GetStoreEmployeesParams(storeId: 1),
+                ),
+              );
+            },
             borderRadius: BorderRadius.all(Radius.circular(12)),
             child: Container(
               width: context.width,

@@ -1,6 +1,14 @@
 part of 'profile_bloc.dart';
 
 class ProfileState {
+  BlocStatus? addUpdateStoreEmployeeStatus;
+  AddUpdateStoreEmployeeModel? addUpdateStoreEmployee;
+  BlocStatus? storeEmployeesStatus;
+  GetStoreEmployeesModel? storeEmployees;
+  BlocStatus? offersWeeklySummaryStatus;
+  GetOffersWeeklySummaryModel? offersWeeklySummary;
+  BlocStatus? employeePermissionsStatus;
+  GetEmployeePermissionsModel? employeePermissions;
   PaginationStateModel<GetCouponCodesModelDataItem>? couponCodes;
   BlocStatus? storeHours2Status;
   DeleteStoreHoursModel? storeHours2;
@@ -31,6 +39,14 @@ class ProfileState {
     this.storeHours2,
     this.storeHours2Status,
     this.couponCodes = const PaginationStateModel(perPage: 10),
+    this.employeePermissions,
+    this.employeePermissionsStatus,
+    this.offersWeeklySummary,
+    this.offersWeeklySummaryStatus,
+    this.storeEmployees,
+    this.storeEmployeesStatus,
+    this.addUpdateStoreEmployee,
+    this.addUpdateStoreEmployeeStatus,
   });
 
   ProfileState copyWith({
@@ -48,6 +64,14 @@ class ProfileState {
     UpdateStoreHoursModel? storeHours3,
     BlocStatus? storeHours3Status,
     PaginationStateModel<GetCouponCodesModelDataItem>? couponCodes,
+    GetEmployeePermissionsModel? employeePermissions,
+    BlocStatus? employeePermissionsStatus,
+    GetOffersWeeklySummaryModel? offersWeeklySummary,
+    BlocStatus? offersWeeklySummaryStatus,
+    GetStoreEmployeesModel? storeEmployees,
+    BlocStatus? storeEmployeesStatus,
+    AddUpdateStoreEmployeeModel? addUpdateStoreEmployee,
+    BlocStatus? addUpdateStoreEmployeeStatus,
   }) => ProfileState(
     errorMessage: errorMessage ?? this.errorMessage,
     storeProfile: storeProfile ?? this.storeProfile,
@@ -63,6 +87,17 @@ class ProfileState {
     storeHours3: storeHours3 ?? this.storeHours3,
     storeHours3Status: storeHours3Status ?? this.storeHours3Status,
     couponCodes: couponCodes ?? this.couponCodes,
+    employeePermissions: employeePermissions ?? this.employeePermissions,
+    employeePermissionsStatus:
+        employeePermissionsStatus ?? this.employeePermissionsStatus,
+    offersWeeklySummary: offersWeeklySummary ?? this.offersWeeklySummary,
+    offersWeeklySummaryStatus:
+        offersWeeklySummaryStatus ?? this.offersWeeklySummaryStatus,
+    storeEmployees: storeEmployees ?? this.storeEmployees,
+    storeEmployeesStatus: storeEmployeesStatus ?? this.storeEmployeesStatus,
+    addUpdateStoreEmployee:
+        addUpdateStoreEmployee ?? this.addUpdateStoreEmployee,
+    addUpdateStoreEmployeeStatus:
+        addUpdateStoreEmployeeStatus ?? this.addUpdateStoreEmployeeStatus,
   );
-
 }

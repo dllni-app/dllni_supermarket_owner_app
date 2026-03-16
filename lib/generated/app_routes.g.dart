@@ -18,6 +18,8 @@ import 'package:dllni_supermarket_owner_app/features/profile/view/screens/offers
 import 'package:dllni_supermarket_owner_app/features/profile/view/screens/profile_screen.dart';
 import 'package:dllni_supermarket_owner_app/features/profile/view/screens/working_time_screen.dart';
 
+import '../features/profile/data/models/get_store_employees_model.dart';
+
 class GeneratedAppRoutes {
   static Route<dynamic>? onGenerateRoute(RouteSettings settings) {
     final args = settings.arguments;
@@ -80,16 +82,19 @@ class GeneratedAppRoutes {
           );
         }
         return _errorRoute(settings);
-      case '/couponsmanagement':
+      case '/coupons_management':
         return MaterialPageRoute(
           builder: (_) => CouponsManagementScreen(),
           settings: settings,
         );
       case '/profile/employees/create_employee':
-        return MaterialPageRoute(
-          builder: (_) => CreateNewEmployeeScreen(),
-          settings: settings,
-        );
+        if (args is GetStoreEmployeesModelDataEmployeesItem?) {
+          return MaterialPageRoute(
+            builder: (_) => CreateNewEmployeeScreen(params: args),
+            settings: settings,
+          );
+        }
+        return _errorRoute(settings);
       case '/create_offer':
         return MaterialPageRoute(
           builder: (_) => CreateOfferScreen(),

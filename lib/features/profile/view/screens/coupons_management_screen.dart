@@ -166,8 +166,9 @@ class _CouponsManagementScreenState extends State<CouponsManagementScreen> {
                                           DateTime.now())
                                       .difference(DateTime.now())
                                       .inMilliseconds >
-                                  0)
+                                  0) {
                             return SizedBox();
+                          }
                           return CouponCard(coupon: state.couponCodes![index]);
                         },
                         separatorBuilder: (context, index) {

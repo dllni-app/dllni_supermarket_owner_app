@@ -18,6 +18,14 @@ import '../../domain/usecases/delete_store_hours_use_case.dart';
 import '../models/delete_store_hours_model.dart';
 import '../../domain/usecases/get_coupon_codes_use_case.dart';
 import '../models/get_coupon_codes_model.dart';
+import '../../domain/usecases/get_employee_permissions_use_case.dart';
+import '../models/get_employee_permissions_model.dart';
+import '../../domain/usecases/get_offers_weekly_summary_use_case.dart';
+import '../models/get_offers_weekly_summary_model.dart';
+import '../../domain/usecases/get_store_employees_use_case.dart';
+import '../models/get_store_employees_model.dart';
+import '../../domain/usecases/add_update_store_employee_use_case.dart';
+import '../models/add_update_store_employee_model.dart';
 
 @LazySingleton(as: ProfileRepo)
 class ProfileRepoImpl with HandlingException implements ProfileRepo {
@@ -72,6 +80,34 @@ class ProfileRepoImpl with HandlingException implements ProfileRepo {
   DataResponse<GetCouponCodesModel> getCouponCodes(GetCouponCodesParams params) {
     return wrapHandlingException(
       tryCall: () => profileRemoteDataSource.getCouponCodes(params),
+    );
+  }
+
+  @override
+  DataResponse<GetEmployeePermissionsModel> getEmployeePermissions(GetEmployeePermissionsParams params) {
+    return wrapHandlingException(
+      tryCall: () => profileRemoteDataSource.getEmployeePermissions(params),
+    );
+  }
+
+  @override
+  DataResponse<GetOffersWeeklySummaryModel> getOffersWeeklySummary(GetOffersWeeklySummaryParams params) {
+    return wrapHandlingException(
+      tryCall: () => profileRemoteDataSource.getOffersWeeklySummary(params),
+    );
+  }
+
+  @override
+  DataResponse<GetStoreEmployeesModel> getStoreEmployees(GetStoreEmployeesParams params) {
+    return wrapHandlingException(
+      tryCall: () => profileRemoteDataSource.getStoreEmployees(params),
+    );
+  }
+
+  @override
+  DataResponse<AddUpdateStoreEmployeeModel> addUpdateStoreEmployee(AddUpdateStoreEmployeeParams params) {
+    return wrapHandlingException(
+      tryCall: () => profileRemoteDataSource.addUpdateStoreEmployee(params),
     );
   }}
 

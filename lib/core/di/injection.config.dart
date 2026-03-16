@@ -90,10 +90,18 @@ import '../../features/profile/data/source/profile_remote_data_source.dart'
 import '../../features/profile/domain/repository/profile_repo.dart' as _i275;
 import '../../features/profile/domain/usecases/add_store_hours_use_case.dart'
     as _i167;
+import '../../features/profile/domain/usecases/add_update_store_employee_use_case.dart'
+    as _i127;
 import '../../features/profile/domain/usecases/delete_store_hours_use_case.dart'
     as _i205;
 import '../../features/profile/domain/usecases/get_coupon_codes_use_case.dart'
     as _i550;
+import '../../features/profile/domain/usecases/get_employee_permissions_use_case.dart'
+    as _i189;
+import '../../features/profile/domain/usecases/get_offers_weekly_summary_use_case.dart'
+    as _i860;
+import '../../features/profile/domain/usecases/get_store_employees_use_case.dart'
+    as _i186;
 import '../../features/profile/domain/usecases/get_store_hours_use_case.dart'
     as _i261;
 import '../../features/profile/domain/usecases/get_store_profile_use_case.dart'
@@ -230,11 +238,23 @@ _i174.GetIt $initGetIt(
   gh.lazySingleton<_i167.AddStoreHoursUseCase>(
     () => _i167.AddStoreHoursUseCase(profile: gh<_i275.ProfileRepo>()),
   );
+  gh.lazySingleton<_i127.AddUpdateStoreEmployeeUseCase>(
+    () => _i127.AddUpdateStoreEmployeeUseCase(profile: gh<_i275.ProfileRepo>()),
+  );
   gh.lazySingleton<_i205.DeleteStoreHoursUseCase>(
     () => _i205.DeleteStoreHoursUseCase(profile: gh<_i275.ProfileRepo>()),
   );
   gh.lazySingleton<_i550.GetCouponCodesUseCase>(
     () => _i550.GetCouponCodesUseCase(profile: gh<_i275.ProfileRepo>()),
+  );
+  gh.lazySingleton<_i189.GetEmployeePermissionsUseCase>(
+    () => _i189.GetEmployeePermissionsUseCase(profile: gh<_i275.ProfileRepo>()),
+  );
+  gh.lazySingleton<_i860.GetOffersWeeklySummaryUseCase>(
+    () => _i860.GetOffersWeeklySummaryUseCase(profile: gh<_i275.ProfileRepo>()),
+  );
+  gh.lazySingleton<_i186.GetStoreEmployeesUseCase>(
+    () => _i186.GetStoreEmployeesUseCase(profile: gh<_i275.ProfileRepo>()),
   );
   gh.lazySingleton<_i261.GetStoreHoursUseCase>(
     () => _i261.GetStoreHoursUseCase(profile: gh<_i275.ProfileRepo>()),
@@ -278,6 +298,10 @@ _i174.GetIt $initGetIt(
       gh<_i624.UpdateStoreHoursUseCase>(),
       gh<_i205.DeleteStoreHoursUseCase>(),
       gh<_i550.GetCouponCodesUseCase>(),
+      gh<_i189.GetEmployeePermissionsUseCase>(),
+      gh<_i860.GetOffersWeeklySummaryUseCase>(),
+      gh<_i186.GetStoreEmployeesUseCase>(),
+      gh<_i127.AddUpdateStoreEmployeeUseCase>(),
     ),
   );
   gh.factory<_i305.OrdersBloc>(

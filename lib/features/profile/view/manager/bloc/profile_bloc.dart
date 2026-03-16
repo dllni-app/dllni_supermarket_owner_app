@@ -17,12 +17,24 @@ import '../../../data/models/delete_store_hours_model.dart';
 import 'package:common_package/helpers/droppable_helper.dart';
 import '../../../domain/usecases/get_coupon_codes_use_case.dart';
 import '../../../data/models/get_coupon_codes_model.dart';
+import '../../../domain/usecases/get_employee_permissions_use_case.dart';
+import '../../../data/models/get_employee_permissions_model.dart';
+import '../../../domain/usecases/get_offers_weekly_summary_use_case.dart';
+import '../../../data/models/get_offers_weekly_summary_model.dart';
+import '../../../domain/usecases/get_store_employees_use_case.dart';
+import '../../../data/models/get_store_employees_model.dart';
+import '../../../domain/usecases/add_update_store_employee_use_case.dart';
+import '../../../data/models/add_update_store_employee_model.dart';
 
 part 'profile_event.dart';
 part 'profile_state.dart';
 
 @injectable
 class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
+  final AddUpdateStoreEmployeeUseCase addUpdateStoreEmployeeUseCase;
+  final GetStoreEmployeesUseCase getStoreEmployeesUseCase;
+  final GetOffersWeeklySummaryUseCase getOffersWeeklySummaryUseCase;
+  final GetEmployeePermissionsUseCase getEmployeePermissionsUseCase;
   final GetCouponCodesUseCase getCouponCodesUseCase;
   final DeleteStoreHoursUseCase deleteStoreHoursUseCase;
   final UpdateStoreHoursUseCase updateStoreHoursUseCase;
@@ -37,7 +49,11 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     this.addStoreHoursUseCase,
     this.updateStoreHoursUseCase,
     this.deleteStoreHoursUseCase,
-    this.getCouponCodesUseCase,) : super(ProfileState()) {
+    this.getCouponCodesUseCase,
+    this.getEmployeePermissionsUseCase,
+    this.getOffersWeeklySummaryUseCase,
+    this.getStoreEmployeesUseCase,
+    this.addUpdateStoreEmployeeUseCase,) : super(ProfileState()) {
     
   
     on<GetStoreProfileEvent>(_getStoreProfile);
@@ -46,7 +62,11 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     on<AddStoreHoursEvent>(_addStoreHours);
     on<UpdateStoreHoursEvent>(_updateStoreHours);
     on<DeleteStoreHoursEvent>(_deleteStoreHours);
-    on<GetCouponCodesEvent>(_getCouponCodes, transformer: droppableProMax());}
+    on<GetCouponCodesEvent>(_getCouponCodes, transformer: droppableProMax());
+    on<GetEmployeePermissionsEvent>(_getEmployeePermissions);
+    on<GetOffersWeeklySummaryEvent>(_getOffersWeeklySummary);
+    on<GetStoreEmployeesEvent>(_getStoreEmployees);
+    on<AddUpdateStoreEmployeeEvent>(_addUpdateStoreEmployee);}
 
 
   FutureOr<void> _getStoreProfile(GetStoreProfileEvent event, Emitter<ProfileState> emit) async {
@@ -170,4 +190,68 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         ));
       });
     }
+  }
+
+  FutureOr<void> _getEmployeePermissions(GetEmployeePermissionsEvent event, Emitter<ProfileState> emit) async {
+    emit(state.copyWith(employeePermissionsStatus: BlocStatus.loading));
+    final res = await getEmployeePermissionsUseCase(event.params);
+    res.fold((l) {
+      emit(state.copyWith(
+        employeePermissionsStatus: BlocStatus.failed,
+        errorMessage: l.message,
+      ));
+    }, (r) {
+      emit(state.copyWith(
+        employeePermissionsStatus: BlocStatus.success,
+        employeePermissions: r,
+      ));
+    });
+  }
+
+  FutureOr<void> _getOffersWeeklySummary(GetOffersWeeklySummaryEvent event, Emitter<ProfileState> emit) async {
+    emit(state.copyWith(offersWeeklySummaryStatus: BlocStatus.loading));
+    final res = await getOffersWeeklySummaryUseCase(event.params);
+    res.fold((l) {
+      emit(state.copyWith(
+        offersWeeklySummaryStatus: BlocStatus.failed,
+        errorMessage: l.message,
+      ));
+    }, (r) {
+      emit(state.copyWith(
+        offersWeeklySummaryStatus: BlocStatus.success,
+        offersWeeklySummary: r,
+      ));
+    });
+  }
+
+  FutureOr<void> _getStoreEmployees(GetStoreEmployeesEvent event, Emitter<ProfileState> emit) async {
+    emit(state.copyWith(storeEmployeesStatus: BlocStatus.loading));
+    final res = await getStoreEmployeesUseCase(event.params);
+    res.fold((l) {
+      emit(state.copyWith(
+        storeEmployeesStatus: BlocStatus.failed,
+        errorMessage: l.message,
+      ));
+    }, (r) {
+      emit(state.copyWith(
+        storeEmployeesStatus: BlocStatus.success,
+        storeEmployees: r,
+      ));
+    });
+  }
+
+  FutureOr<void> _addUpdateStoreEmployee(AddUpdateStoreEmployeeEvent event, Emitter<ProfileState> emit) async {
+    emit(state.copyWith(addUpdateStoreEmployeeStatus: BlocStatus.loading));
+    final res = await addUpdateStoreEmployeeUseCase(event.params);
+    res.fold((l) {
+      emit(state.copyWith(
+        addUpdateStoreEmployeeStatus: BlocStatus.failed,
+        errorMessage: l.message,
+      ));
+    }, (r) {
+      emit(state.copyWith(
+        addUpdateStoreEmployeeStatus: BlocStatus.success,
+        addUpdateStoreEmployee: r,
+      ));
+    });
   }}

@@ -1,4 +1,5 @@
 import 'package:common_package/common_package.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
@@ -53,11 +54,13 @@ class _OffersStatisticsGridState extends State<OffersStatisticsGrid>
 
   @override
   Widget build(BuildContext context) {
-    List<String> titles = [
-      'عروض نشطة',
-      'عروض مجدولة',
-      'عروض منتهية',
-      'طلب مستفيد',
+    const Color green = Color(0xFF0DB458);
+    const Color grey = Color(0xFFA3AEED);
+    List<String> titles = ['عروض مجدولة', 'طلبات مستفيدة', 'عروض نشطة'];
+    List<Color> colors = [
+      Color(0xFFF3C9A2),
+      Color(0xFFA3AEED),
+      Color(0xFF0DB458),
     ];
 
     return Container(
@@ -118,58 +121,155 @@ class _OffersStatisticsGridState extends State<OffersStatisticsGrid>
             child: Column(
               children: [
                 SizedBox(height: 16),
-                Row(
-                  spacing: 12,
-                  children: List.generate(
-                    2,
-                    (i) => Expanded(
-                      child: StatePointer(
-                        title: titles[i],
-                        value: 100,
-                        containerBorderColor: i == 0
-                            ? Color(0xff10B981).withAlpha(51)
-                            : Color(0xffF59E0B).withAlpha(51),
-                        containerColor: i == 0
-                            ? Color(0xff10B981).withAlpha(25)
-                            : Color(0xffF59E0B).withAlpha(25),
-                        icon: i == 0
-                            ? FontAwesomeIcons.solidClock
-                            : Icons.watch_later,
-                        iconCardColor: i == 0
-                            ? Color(0xff10B981).withAlpha(51)
-                            : Color(0xffF59E0B).withAlpha(51),
-                        iconColor: i == 0
-                            ? Color(0xff10B981)
-                            : Color(0xffF59E0B),
+                SizedBox(
+                  height: 150,
+                  child: BarChart(
+                    BarChartData(
+                      alignment: BarChartAlignment.spaceAround,
+                      maxY: 40,
+                      barTouchData: BarTouchData(enabled: false),
+                      borderData: FlBorderData(show: false),
+                      gridData: FlGridData(
+                        getDrawingHorizontalLine: (value) => FlLine(
+                          color: Color(0xFFF1F1F1),
+                          strokeWidth: 1,
+                          dashArray: [2, 2],
+                        ),
+                        drawVerticalLine: false,
                       ),
+                      titlesData: FlTitlesData(
+                        topTitles: const AxisTitles(sideTitles: SideTitles()),
+                        leftTitles: const AxisTitles(sideTitles: SideTitles()),
+                        rightTitles: AxisTitles(
+                          sideTitles: SideTitles(
+                            showTitles: true,
+                            reservedSize: 30,
+                            // interval: 5,
+                            getTitlesWidget: (value, meta) {
+                              // if (value % 10 != 0 &&
+                              //     value !=
+                              //         maxOrdersEachDay.reduce(max).toDouble()) {
+                              //   return const SizedBox.shrink();
+                              // }
+                              return SideTitleWidget(
+                                meta: meta,
+                                child: Text(
+                                  value.toInt().toString(),
+                                  style: const TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        bottomTitles: AxisTitles(
+                          sideTitles: SideTitles(
+                            showTitles: true,
+                            reservedSize: 30,
+                            getTitlesWidget: (value, meta) {
+                              const days = [
+                                'جمعة',
+                                'خميس',
+                                'أربعاء',
+                                'ثلاثاء',
+                                'اثنين',
+                                'أحد',
+                                'سبت',
+                              ];
+                              if (value.toInt() < 0 ||
+                                  value.toInt() >= days.length) {
+                                return const SizedBox.shrink();
+                              }
+                              return SideTitleWidget(
+                                meta: meta,
+                                space: 8,
+                                child: Text(
+                                  days[value.toInt()],
+                                  style: const TextStyle(
+                                    color: Colors.black87,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                      barGroups: List.generate(7, (index) {
+                        // select the date
+                        // GetDailyCountModelDataItem selectedDay = switch (index +
+                        //   1) {
+                        // 1 => state.dailyCount!.data!.friday!,
+                        // 2 => state.dailyCount!.data!.thursday!,
+                        // 3 => state.dailyCount!.data!.wednesday!,
+                        // 4 => state.dailyCount!.data!.tuesday!,
+                        // 5 => state.dailyCount!.data!.monday!,
+                        // 6 => state.dailyCount!.data!.sunday!,
+                        // 7 => state.dailyCount!.data!.saturday!,
+                        // _ => throw ArgumentError(
+                        //   "incorrect day (out of [1 -> 7] days)",
+                        // ),
+                        // };
+                        return BarChartGroupData(
+                          x: index,
+                          barRods: [
+                            BarChartRodData(
+                              toY: 35,
+                              width: 20,
+                              borderRadius: BorderRadius.vertical(
+                                top: Radius.circular(6),
+                              ),
+                              rodStackItems: [
+                                BarChartRodStackItem(0, 15, green),
+                                BarChartRodStackItem(15, 35, grey),
+                              ],
+                            ),
+                          ],
+                        );
+                      }),
                     ),
                   ),
                 ),
-                SizedBox(height: 12),
+                const SizedBox(height: 24),
                 Row(
-                  spacing: 12,
-                  children: List.generate(
-                    2,
-                    (i) => Expanded(
-                      child: StatePointer(
-                        title: titles[i + 2],
-                        value: 100,
-                        containerBorderColor: i == 0
-                            ? Color(0xffE5E7EB)
-                            : Color(0xff064E3B).withAlpha(51),
-                        containerColor: i == 0
-                            ? Color(0xffF3F4F6)
-                            : Color(0xff064E3B).withAlpha(25),
-                        icon: i == 0 ? Icons.block : FontAwesomeIcons.receipt,
-                        iconCardColor: i == 0
-                            ? Color(0xffE5E7EB)
-                            : Color(0xff064E3B).withAlpha(51),
-                        iconColor: i == 0
-                            ? Color(0xff6B7280)
-                            : Color(0xff064E3B),
+                  spacing: 8,
+                  children: [
+                    SizedBox(width: 2),
+                    ...List.generate(
+                      3,
+                      (index) => Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 4,
+                            backgroundColor: colors[index],
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            titles[index],
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ),
+                  ],
+                ),
+
+                SizedBox(height: 12),
+                StatePointer(
+                  title: "عروض منتهية",
+                  value: 8,
+                  containerBorderColor: Color(0xffE5E7EB),
+                  containerColor: Color(0xffF3F4F6),
+                  icon: FontAwesomeIcons.ban,
+                  iconCardColor: Color(0xffE5E7EB),
+                  iconColor: Color(0xff6B7280),
                 ),
               ],
             ),

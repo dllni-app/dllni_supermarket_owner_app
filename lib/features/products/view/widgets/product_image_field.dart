@@ -11,9 +11,11 @@ class AppImageField extends StatefulWidget {
     super.key,
     required this.onPickImage,
     required this.title,
+    this.initialNetworkImage,
   });
   final void Function(String imagePath) onPickImage;
   final String title;
+  final String? initialNetworkImage;
   @override
   State<AppImageField> createState() => _AppImageFieldState();
 }
@@ -48,6 +50,13 @@ class _AppImageFieldState extends State<AppImageField> {
                   image: FileImage(File(imagePath!)),
                   fit: BoxFit.cover,
                 ),
+              )
+            else if (widget.initialNetworkImage != null)
+              AppImage.network(
+                widget.initialNetworkImage!,
+                size: 99,
+                fit: BoxFit.cover,
+                borderRadius: BorderRadius.all(Radius.circular(16)),
               ),
             Expanded(
               child: InkWell(

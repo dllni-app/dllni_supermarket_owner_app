@@ -46,3 +46,27 @@ class GetCouponCodesEvent extends ProfileEvent with EventWithReload {
 
   GetCouponCodesEvent({required this.params, this.isReload = false});
 }
+
+class GetEmployeePermissionsEvent extends ProfileEvent {
+  final GetEmployeePermissionsParams params;
+
+  GetEmployeePermissionsEvent({required this.params});
+}
+
+class GetOffersWeeklySummaryEvent extends ProfileEvent {
+  final GetOffersWeeklySummaryParams params;
+
+  GetOffersWeeklySummaryEvent({required this.params});
+}
+
+class GetStoreEmployeesEvent extends ProfileEvent {
+  final GetStoreEmployeesParams params;
+
+  GetStoreEmployeesEvent({required this.params});
+}
+
+class AddUpdateStoreEmployeeEvent extends ProfileEvent {
+  final AddUpdateStoreEmployeeParams params;
+
+  AddUpdateStoreEmployeeEvent({required this.params});
+}
