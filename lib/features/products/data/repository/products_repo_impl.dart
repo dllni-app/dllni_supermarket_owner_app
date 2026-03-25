@@ -18,6 +18,10 @@ import '../../domain/usecases/get_product_from_text_use_case.dart';
 import '../models/get_product_from_text_model.dart';
 import '../../domain/usecases/add_product_use_case.dart';
 import '../models/add_product_model.dart';
+import '../../domain/usecases/update_product_use_case.dart';
+import '../models/update_product_model.dart';
+import '../../domain/usecases/import_products_file_use_case.dart';
+import '../models/import_products_file_model.dart';
 
 @LazySingleton(as: ProductsRepo)
 class ProductsRepoImpl with HandlingException implements ProductsRepo {
@@ -75,5 +79,19 @@ class ProductsRepoImpl with HandlingException implements ProductsRepo {
   DataResponse<AddProductModel> addProduct(AddProductParams params) {
     return wrapHandlingException(
       tryCall: () => productsRemoteDataSource.addProduct(params),
+    );
+  }
+
+  @override
+  DataResponse<UpdateProductModel> updateProduct(UpdateProductParams params) {
+    return wrapHandlingException(
+      tryCall: () => productsRemoteDataSource.updateProduct(params),
+    );
+  }
+
+  @override
+  DataResponse<ImportProductsFileModel> importProductsFile(ImportProductsFileParams params) {
+    return wrapHandlingException(
+      tryCall: () => productsRemoteDataSource.importProductsFile(params),
     );
   }}

@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:flutter/material.dart' as material;
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/themes/app_colors.dart';
@@ -340,6 +341,8 @@ class _EmployeeCard extends StatelessWidget {
                 employee.user?.profileImageUrl ?? "null",
                 size: 56,
                 borderRadius: BorderRadius.all(Radius.circular(12)),
+                failedBuilder: (context) =>
+                    Icon(Icons.error_outline, color: Colors.black),
               ),
               SizedBox(width: 12),
               Expanded(
@@ -425,8 +428,9 @@ class _EmployeeCard extends StatelessWidget {
                         SizedBox(width: 8),
                         Icon(Icons.phone, color: Color(0xFF4B5563), size: 10),
                         SizedBox(width: 4),
-                        AppText(
+                        Text(
                           employee.user?.phone ?? "null",
+                          textDirection: material.TextDirection.ltr,
                           style: TextStyle(
                             color: Color(0xFF4B5563),
                             fontSize: 12,
@@ -479,15 +483,15 @@ class _EmployeeCard extends StatelessWidget {
                   ],
                 ),
                 SizedBox(height: 8),
-                if (employee.effectivePermissions?.isNotEmpty ?? false) ...[
-                  AppText(
-                    "الصلاحيات",
-                    style: TextStyle(
-                      color: Color(0xFF4B5563),
-                      fontSize: 12,
-                      height: 1.333,
-                    ),
+                AppText(
+                  "الصلاحيات",
+                  style: TextStyle(
+                    color: Color(0xFF4B5563),
+                    fontSize: 12,
+                    height: 1.333,
                   ),
+                ),
+                if (employee.effectivePermissions?.isNotEmpty ?? false) ...[
                   ...List.generate(
                     employee.effectivePermissions?.length ?? 0,
                     (index) => AppText(
@@ -502,7 +506,16 @@ class _EmployeeCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                ],
+                ]
+                else AppText(
+                      "لا يوجد صلاحيات محددة",
+                      style: TextStyle(
+                        color: context.primary,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        height: 1.6667,
+                      ),
+                    )
               ],
             ),
           ),

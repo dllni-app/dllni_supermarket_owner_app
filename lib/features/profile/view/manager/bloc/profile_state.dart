@@ -1,6 +1,16 @@
 part of 'profile_bloc.dart';
 
 class ProfileState {
+  BlocStatus? addOfferStatus;
+  AddOfferModel? addOffer;
+  BlocStatus? couponWeekAnalysisStatus;
+  GetCouponWeekAnalysisModel? couponWeekAnalysis;
+  BlocStatus? addCouponCodeStatus;
+  AddCouponCodeModel? addCouponCode;
+  BlocStatus? productsCountStatus;
+  GetProductsCountModel? productsCount;
+  PaginationStateModel<GetProductsModelDataItem>? products;
+  PaginationStateModel<GetOfferCodesModelDataItem>? offerCodes;
   BlocStatus? addUpdateStoreEmployeeStatus;
   AddUpdateStoreEmployeeModel? addUpdateStoreEmployee;
   BlocStatus? storeEmployeesStatus;
@@ -47,6 +57,16 @@ class ProfileState {
     this.storeEmployeesStatus,
     this.addUpdateStoreEmployee,
     this.addUpdateStoreEmployeeStatus,
+    this.offerCodes = const PaginationStateModel(perPage: 10),
+    this.products = const PaginationStateModel(perPage: 10),
+    this.productsCount,
+    this.productsCountStatus,
+    this.addCouponCode,
+    this.addCouponCodeStatus,
+    this.couponWeekAnalysis,
+    this.couponWeekAnalysisStatus,
+    this.addOffer,
+    this.addOfferStatus,
   });
 
   ProfileState copyWith({
@@ -72,6 +92,16 @@ class ProfileState {
     BlocStatus? storeEmployeesStatus,
     AddUpdateStoreEmployeeModel? addUpdateStoreEmployee,
     BlocStatus? addUpdateStoreEmployeeStatus,
+    PaginationStateModel<GetOfferCodesModelDataItem>? offerCodes,
+    PaginationStateModel<GetProductsModelDataItem>? products,
+    GetProductsCountModel? productsCount,
+    BlocStatus? productsCountStatus,
+    AddCouponCodeModel? addCouponCode,
+    BlocStatus? addCouponCodeStatus,
+    GetCouponWeekAnalysisModel? couponWeekAnalysis,
+    BlocStatus? couponWeekAnalysisStatus,
+    AddOfferModel? addOffer,
+    BlocStatus? addOfferStatus,
   }) => ProfileState(
     errorMessage: errorMessage ?? this.errorMessage,
     storeProfile: storeProfile ?? this.storeProfile,
@@ -99,5 +129,16 @@ class ProfileState {
         addUpdateStoreEmployee ?? this.addUpdateStoreEmployee,
     addUpdateStoreEmployeeStatus:
         addUpdateStoreEmployeeStatus ?? this.addUpdateStoreEmployeeStatus,
+    offerCodes: offerCodes ?? this.offerCodes,
+    products: products ?? this.products,
+    productsCount: productsCount ?? this.productsCount,
+    productsCountStatus: productsCountStatus ?? this.productsCountStatus,
+    addCouponCode: addCouponCode ?? this.addCouponCode,
+    addCouponCodeStatus: addCouponCodeStatus ?? this.addCouponCodeStatus,
+    couponWeekAnalysis: couponWeekAnalysis ?? this.couponWeekAnalysis,
+    couponWeekAnalysisStatus:
+        couponWeekAnalysisStatus ?? this.couponWeekAnalysisStatus,
+    addOffer: addOffer ?? this.addOffer,
+    addOfferStatus: addOfferStatus ?? this.addOfferStatus,
   );
 }

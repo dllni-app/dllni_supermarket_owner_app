@@ -1,5 +1,6 @@
 import 'package:common_package/common_package.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../features/products/view/widgets/arrow_back_button.dart';
 import '../themes/app_colors.dart';
@@ -10,6 +11,12 @@ class AppSimpleAppBar extends StatelessWidget {
   final String title;
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+      ),
+    );
     final width = MediaQuery.sizeOf(context).width;
     return Container(
       width: width,
@@ -50,10 +57,23 @@ class AppSimpleAppBar extends StatelessWidget {
 }
 
 class AppSimpleAppBarWithSearch extends StatelessWidget {
-  const AppSimpleAppBarWithSearch({super.key, required this.title});
+  const AppSimpleAppBarWithSearch({
+    super.key,
+    required this.title,
+    required this.onSearchChanged,
+    required this.onFilterTap,
+  });
   final String title;
+  final void Function(String value) onSearchChanged;
+  final void Function() onFilterTap;
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+      ),
+    );
     return Container(
       width: context.width,
       padding: EdgeInsets.fromLTRB(
@@ -91,11 +111,11 @@ class AppSimpleAppBarWithSearch extends StatelessWidget {
               Expanded(
                 child: _SearchField(
                   hintText: "ابحث عن وجبة، مشروب...",
-                  onChanged: (value) {},
+                  onChanged: onSearchChanged,
                 ),
               ),
               SizedBox(width: 12),
-              _FilterButton(onTap: () {}),
+              _FilterButton(onTap: onFilterTap),
             ],
           ),
         ],
@@ -175,7 +195,7 @@ class _SearchField extends StatelessWidget {
           borderRadius: BorderRadius.all(Radius.circular(24)),
         ),
       ),
-      onChanged: onChanged,
+      onSubmitted: onChanged,
     );
   }
 }

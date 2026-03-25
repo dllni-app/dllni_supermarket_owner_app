@@ -1,5 +1,6 @@
 import 'package:common_package/common_package.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../../core/themes/app_colors.dart';
 
@@ -10,6 +11,12 @@ class MoreAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+      ),
+    );
     return Container(
       width: context.width,
       padding: EdgeInsets.fromLTRB(

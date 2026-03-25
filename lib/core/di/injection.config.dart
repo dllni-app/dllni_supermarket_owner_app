@@ -81,13 +81,21 @@ import '../../features/products/domain/usecases/get_product_from_text_use_case.d
     as _i143;
 import '../../features/products/domain/usecases/get_products_use_case.dart'
     as _i846;
+import '../../features/products/domain/usecases/import_products_file_use_case.dart'
+    as _i342;
 import '../../features/products/domain/usecases/total_producst_count_use_case.dart'
     as _i119;
+import '../../features/products/domain/usecases/update_product_use_case.dart'
+    as _i796;
 import '../../features/products/view/manager/bloc/products_bloc.dart' as _i113;
 import '../../features/profile/data/repository/profile_repo_impl.dart' as _i265;
 import '../../features/profile/data/source/profile_remote_data_source.dart'
     as _i502;
 import '../../features/profile/domain/repository/profile_repo.dart' as _i275;
+import '../../features/profile/domain/usecases/add_coupon_code_use_case.dart'
+    as _i40;
+import '../../features/profile/domain/usecases/add_offer_use_case.dart'
+    as _i242;
 import '../../features/profile/domain/usecases/add_store_hours_use_case.dart'
     as _i167;
 import '../../features/profile/domain/usecases/add_update_store_employee_use_case.dart'
@@ -96,10 +104,18 @@ import '../../features/profile/domain/usecases/delete_store_hours_use_case.dart'
     as _i205;
 import '../../features/profile/domain/usecases/get_coupon_codes_use_case.dart'
     as _i550;
+import '../../features/profile/domain/usecases/get_coupon_week_analysis_use_case.dart'
+    as _i622;
 import '../../features/profile/domain/usecases/get_employee_permissions_use_case.dart'
     as _i189;
+import '../../features/profile/domain/usecases/get_offer_codes_use_case.dart'
+    as _i290;
 import '../../features/profile/domain/usecases/get_offers_weekly_summary_use_case.dart'
     as _i860;
+import '../../features/profile/domain/usecases/get_products_count_use_case.dart'
+    as _i14;
+import '../../features/profile/domain/usecases/get_products_use_case.dart'
+    as _i555;
 import '../../features/profile/domain/usecases/get_store_employees_use_case.dart'
     as _i186;
 import '../../features/profile/domain/usecases/get_store_hours_use_case.dart'
@@ -168,8 +184,14 @@ _i174.GetIt $initGetIt(
   gh.lazySingleton<_i846.GetProductsUseCase>(
     () => _i846.GetProductsUseCase(products: gh<_i466.ProductsRepo>()),
   );
+  gh.lazySingleton<_i342.ImportProductsFileUseCase>(
+    () => _i342.ImportProductsFileUseCase(products: gh<_i466.ProductsRepo>()),
+  );
   gh.lazySingleton<_i119.TotalProducstCountUseCase>(
     () => _i119.TotalProducstCountUseCase(products: gh<_i466.ProductsRepo>()),
+  );
+  gh.lazySingleton<_i796.UpdateProductUseCase>(
+    () => _i796.UpdateProductUseCase(products: gh<_i466.ProductsRepo>()),
   );
   gh.lazySingleton<_i132.OrdersRepo>(
     () => _i849.OrdersRepoImpl(
@@ -187,17 +209,6 @@ _i174.GetIt $initGetIt(
   gh.lazySingleton<_i396.HomeRepo>(
     () => _i1013.HomeRepoImpl(
       homeRemoteDataSource: gh<_i557.HomeRemoteDataSource>(),
-    ),
-  );
-  gh.factory<_i113.ProductsBloc>(
-    () => _i113.ProductsBloc(
-      gh<_i846.GetProductsUseCase>(),
-      gh<_i348.GetLowStockUseCase>(),
-      gh<_i119.TotalProducstCountUseCase>(),
-      gh<_i862.GetCategoriesUseCase>(),
-      gh<_i989.GetProductFromImageUseCase>(),
-      gh<_i143.GetProductFromTextUseCase>(),
-      gh<_i363.AddProductUseCase>(),
     ),
   );
   gh.lazySingleton<_i767.GetHourlyCountUseCase>(
@@ -235,6 +246,12 @@ _i174.GetIt $initGetIt(
     ),
   );
   gh.factory<_i958.AuthBloc>(() => _i958.AuthBloc(gh<_i37.LoginUseCase>()));
+  gh.lazySingleton<_i40.AddCouponCodeUseCase>(
+    () => _i40.AddCouponCodeUseCase(profile: gh<_i275.ProfileRepo>()),
+  );
+  gh.lazySingleton<_i242.AddOfferUseCase>(
+    () => _i242.AddOfferUseCase(profile: gh<_i275.ProfileRepo>()),
+  );
   gh.lazySingleton<_i167.AddStoreHoursUseCase>(
     () => _i167.AddStoreHoursUseCase(profile: gh<_i275.ProfileRepo>()),
   );
@@ -247,11 +264,23 @@ _i174.GetIt $initGetIt(
   gh.lazySingleton<_i550.GetCouponCodesUseCase>(
     () => _i550.GetCouponCodesUseCase(profile: gh<_i275.ProfileRepo>()),
   );
+  gh.lazySingleton<_i622.GetCouponWeekAnalysisUseCase>(
+    () => _i622.GetCouponWeekAnalysisUseCase(profile: gh<_i275.ProfileRepo>()),
+  );
   gh.lazySingleton<_i189.GetEmployeePermissionsUseCase>(
     () => _i189.GetEmployeePermissionsUseCase(profile: gh<_i275.ProfileRepo>()),
   );
+  gh.lazySingleton<_i290.GetOfferCodesUseCase>(
+    () => _i290.GetOfferCodesUseCase(profile: gh<_i275.ProfileRepo>()),
+  );
   gh.lazySingleton<_i860.GetOffersWeeklySummaryUseCase>(
     () => _i860.GetOffersWeeklySummaryUseCase(profile: gh<_i275.ProfileRepo>()),
+  );
+  gh.lazySingleton<_i14.GetProductsCountUseCase>(
+    () => _i14.GetProductsCountUseCase(profile: gh<_i275.ProfileRepo>()),
+  );
+  gh.lazySingleton<_i555.GetProductsUseCase>(
+    () => _i555.GetProductsUseCase(profile: gh<_i275.ProfileRepo>()),
   );
   gh.lazySingleton<_i186.GetStoreEmployeesUseCase>(
     () => _i186.GetStoreEmployeesUseCase(profile: gh<_i275.ProfileRepo>()),
@@ -289,6 +318,27 @@ _i174.GetIt $initGetIt(
   gh.lazySingleton<_i501.RejectOrderUseCase>(
     () => _i501.RejectOrderUseCase(home: gh<_i396.HomeRepo>()),
   );
+  gh.factory<_i113.ProductsBloc>(
+    () => _i113.ProductsBloc(
+      gh<_i846.GetProductsUseCase>(),
+      gh<_i348.GetLowStockUseCase>(),
+      gh<_i119.TotalProducstCountUseCase>(),
+      gh<_i862.GetCategoriesUseCase>(),
+      gh<_i989.GetProductFromImageUseCase>(),
+      gh<_i143.GetProductFromTextUseCase>(),
+      gh<_i363.AddProductUseCase>(),
+      gh<_i796.UpdateProductUseCase>(),
+      gh<_i342.ImportProductsFileUseCase>(),
+    ),
+  );
+  gh.factory<_i305.OrdersBloc>(
+    () => _i305.OrdersBloc(
+      gh<_i1013.GetOrdersUseCase>(),
+      gh<_i420.AcceptOrderUseCase>(),
+      gh<_i194.RejectOrderUseCase>(),
+      gh<_i384.GetOrderDetailsUseCase>(),
+    ),
+  );
   gh.factory<_i821.ProfileBloc>(
     () => _i821.ProfileBloc(
       gh<_i712.GetStoreProfileUseCase>(),
@@ -302,14 +352,12 @@ _i174.GetIt $initGetIt(
       gh<_i860.GetOffersWeeklySummaryUseCase>(),
       gh<_i186.GetStoreEmployeesUseCase>(),
       gh<_i127.AddUpdateStoreEmployeeUseCase>(),
-    ),
-  );
-  gh.factory<_i305.OrdersBloc>(
-    () => _i305.OrdersBloc(
-      gh<_i1013.GetOrdersUseCase>(),
-      gh<_i420.AcceptOrderUseCase>(),
-      gh<_i194.RejectOrderUseCase>(),
-      gh<_i384.GetOrderDetailsUseCase>(),
+      gh<_i290.GetOfferCodesUseCase>(),
+      gh<_i555.GetProductsUseCase>(),
+      gh<_i14.GetProductsCountUseCase>(),
+      gh<_i40.AddCouponCodeUseCase>(),
+      gh<_i622.GetCouponWeekAnalysisUseCase>(),
+      gh<_i242.AddOfferUseCase>(),
     ),
   );
   gh.factory<_i648.HomeBloc>(

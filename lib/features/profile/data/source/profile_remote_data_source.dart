@@ -23,6 +23,18 @@ import '../models/get_store_hours_model.dart';
 import '../models/get_store_profile_model.dart';
 import '../models/update_store_data_model.dart';
 import '../models/update_store_hours_model.dart';
+import '../models/get_offer_codes_model.dart';
+import '../../domain/usecases/get_offer_codes_use_case.dart';
+import '../models/get_products_model.dart';
+import '../../domain/usecases/get_products_use_case.dart';
+import '../models/get_products_count_model.dart';
+import '../../domain/usecases/get_products_count_use_case.dart';
+import '../models/add_coupon_code_model.dart';
+import '../../domain/usecases/add_coupon_code_use_case.dart';
+import '../models/get_coupon_week_analysis_model.dart';
+import '../../domain/usecases/get_coupon_week_analysis_use_case.dart';
+import '../models/add_offer_model.dart';
+import '../../domain/usecases/add_offer_use_case.dart';
 
 @lazySingleton
 class ProfileRemoteDataSource with HandlingApiManager {
@@ -166,6 +178,76 @@ class ProfileRemoteDataSource with HandlingApiManager {
               params: params.getParams(),
             ),
       jsonConvert: addUpdateStoreEmployeeModelFromJson,
+    );
+  }
+
+  Future<GetOfferCodesModel> getOfferCodes(GetOfferCodesParams params) {
+    return wrapHandlingApi(
+      tryCall: () => dioNetwork.getData(
+        endPoint: '/api/v1/sm-offers',
+        params: params.getParams(),
+        data: params.getBody().isEmpty ? null : params.getBody(),
+      ),
+      jsonConvert: getOfferCodesModelFromJson,
+    );
+  }
+
+  Future<GetProductsModel> getProducts(GetProductsParams params) {
+    return wrapHandlingApi(
+      tryCall: () => dioNetwork.getData(
+        endPoint: '/api/v1/sm-products',
+        params: params.getParams(),
+        data: params.getBody().isEmpty ? null : params.getBody(),
+      ),
+      jsonConvert: getProductsModelFromJson,
+    );
+  }
+
+  Future<GetProductsCountModel> getProductsCount(
+    GetProductsCountParams params,
+  ) {
+    return wrapHandlingApi(
+      tryCall: () => dioNetwork.getData(
+        endPoint: '/api/v1/sm-products/available-count',
+        params: params.getParams(),
+        data: params.getBody().isEmpty ? null : params.getBody(),
+      ),
+      jsonConvert: getProductsCountModelFromJson,
+    );
+  }
+
+  Future<AddCouponCodeModel> addCouponCode(AddCouponCodeParams params) {
+    return wrapHandlingApi(
+      tryCall: () => dioNetwork.postData(
+        endPoint: '/api/v1/sm-coupons',
+        data: params.getBody(),
+        params: params.getParams(),
+      ),
+      jsonConvert: addCouponCodeModelFromJson,
+    );
+  }
+
+  Future<GetCouponWeekAnalysisModel> getCouponWeekAnalysis(
+    GetCouponWeekAnalysisParams params,
+  ) {
+    return wrapHandlingApi(
+      tryCall: () => dioNetwork.getData(
+        endPoint: '/api/v1/sm-coupons/weekly-analysis',
+        params: params.getParams(),
+        data: params.getBody().isEmpty ? null : params.getBody(),
+      ),
+      jsonConvert: getCouponWeekAnalysisModelFromJson,
+    );
+  }
+
+  Future<AddOfferModel> addOffer(AddOfferParams params) {
+    return wrapHandlingApi(
+      tryCall: () => dioNetwork.postData(
+        endPoint: '/api/v1/sm-offers',
+        data: params.getBody(),
+        params: params.getParams(),
+      ),
+      jsonConvert: addOfferModelFromJson,
     );
   }
 }

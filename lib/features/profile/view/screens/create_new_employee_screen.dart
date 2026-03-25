@@ -17,7 +17,6 @@ import '../../../../core/widgets/app_buttons.dart';
 import '../../../../core/widgets/app_switch.dart';
 import '../../../products/view/widgets/product_text_field.dart';
 import '../../data/models/get_store_employees_model.dart';
-import '../../domain/usecases/get_store_employees_use_case.dart';
 import '../manager/bloc/profile_bloc.dart';
 
 @AutoRoutePage(path: "/profile/employees/create_employee")

@@ -25,12 +25,30 @@ import '../../../domain/usecases/get_store_employees_use_case.dart';
 import '../../../data/models/get_store_employees_model.dart';
 import '../../../domain/usecases/add_update_store_employee_use_case.dart';
 import '../../../data/models/add_update_store_employee_model.dart';
+import '../../../domain/usecases/get_offer_codes_use_case.dart';
+import '../../../data/models/get_offer_codes_model.dart';
+import '../../../domain/usecases/get_products_use_case.dart';
+import '../../../data/models/get_products_model.dart';
+import '../../../domain/usecases/get_products_count_use_case.dart';
+import '../../../data/models/get_products_count_model.dart';
+import '../../../domain/usecases/add_coupon_code_use_case.dart';
+import '../../../data/models/add_coupon_code_model.dart';
+import '../../../domain/usecases/get_coupon_week_analysis_use_case.dart';
+import '../../../data/models/get_coupon_week_analysis_model.dart';
+import '../../../domain/usecases/add_offer_use_case.dart';
+import '../../../data/models/add_offer_model.dart';
 
 part 'profile_event.dart';
 part 'profile_state.dart';
 
 @injectable
 class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
+  final AddOfferUseCase addOfferUseCase;
+  final GetCouponWeekAnalysisUseCase getCouponWeekAnalysisUseCase;
+  final AddCouponCodeUseCase addCouponCodeUseCase;
+  final GetProductsCountUseCase getProductsCountUseCase;
+  final GetProductsUseCase getProductsUseCase;
+  final GetOfferCodesUseCase getOfferCodesUseCase;
   final AddUpdateStoreEmployeeUseCase addUpdateStoreEmployeeUseCase;
   final GetStoreEmployeesUseCase getStoreEmployeesUseCase;
   final GetOffersWeeklySummaryUseCase getOffersWeeklySummaryUseCase;
@@ -53,7 +71,13 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     this.getEmployeePermissionsUseCase,
     this.getOffersWeeklySummaryUseCase,
     this.getStoreEmployeesUseCase,
-    this.addUpdateStoreEmployeeUseCase,) : super(ProfileState()) {
+    this.addUpdateStoreEmployeeUseCase,
+    this.getOfferCodesUseCase,
+    this.getProductsUseCase,
+    this.getProductsCountUseCase,
+    this.addCouponCodeUseCase,
+    this.getCouponWeekAnalysisUseCase,
+    this.addOfferUseCase,) : super(ProfileState()) {
     
   
     on<GetStoreProfileEvent>(_getStoreProfile);
@@ -66,7 +90,13 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     on<GetEmployeePermissionsEvent>(_getEmployeePermissions);
     on<GetOffersWeeklySummaryEvent>(_getOffersWeeklySummary);
     on<GetStoreEmployeesEvent>(_getStoreEmployees);
-    on<AddUpdateStoreEmployeeEvent>(_addUpdateStoreEmployee);}
+    on<AddUpdateStoreEmployeeEvent>(_addUpdateStoreEmployee);
+    on<GetOfferCodesEvent>(_getOfferCodes, transformer: droppableProMax());
+    on<GetProductsEvent>(_getProducts, transformer: droppableProMax());
+    on<GetProductsCountEvent>(_getProductsCount);
+    on<AddCouponCodeEvent>(_addCouponCode);
+    on<GetCouponWeekAnalysisEvent>(_getCouponWeekAnalysis);
+    on<AddOfferEvent>(_addOffer);}
 
 
   FutureOr<void> _getStoreProfile(GetStoreProfileEvent event, Emitter<ProfileState> emit) async {
@@ -252,6 +282,108 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       emit(state.copyWith(
         addUpdateStoreEmployeeStatus: BlocStatus.success,
         addUpdateStoreEmployee: r,
+      ));
+    });
+  }
+
+  FutureOr<void> _getOfferCodes(GetOfferCodesEvent event, Emitter<ProfileState> emit) async {
+    if (!state.offerCodes!.isEndPage || event.isReload) {
+      emit(state.copyWith(
+        offerCodes: state.offerCodes!.setLoading(isReload: event.isReload),
+      ));
+      final res = await getOfferCodesUseCase(event.params);
+      res.fold((l) {
+        emit(state.copyWith(
+          offerCodes: state.offerCodes!.setFaild(errorMessage: l.message),
+          errorMessage: l.message,
+        ));
+      }, (r) {
+        emit(state.copyWith(
+          offerCodes: state.offerCodes!.setSuccess(data: r.data!),
+        ));
+      });
+    }
+  }
+
+  FutureOr<void> _getProducts(GetProductsEvent event, Emitter<ProfileState> emit) async {
+    if (!state.products!.isEndPage || event.isReload) {
+      emit(state.copyWith(
+        products: state.products!.setLoading(isReload: event.isReload),
+      ));
+      final res = await getProductsUseCase(event.params);
+      res.fold((l) {
+        emit(state.copyWith(
+          products: state.products!.setFaild(errorMessage: l.message),
+          errorMessage: l.message,
+        ));
+      }, (r) {
+        emit(state.copyWith(
+          products: state.products!.setSuccess(data: r.data!),
+        ));
+      });
+    }
+  }
+
+  FutureOr<void> _getProductsCount(GetProductsCountEvent event, Emitter<ProfileState> emit) async {
+    emit(state.copyWith(productsCountStatus: BlocStatus.loading));
+    final res = await getProductsCountUseCase(event.params);
+    res.fold((l) {
+      emit(state.copyWith(
+        productsCountStatus: BlocStatus.failed,
+        errorMessage: l.message,
+      ));
+    }, (r) {
+      emit(state.copyWith(
+        productsCountStatus: BlocStatus.success,
+        productsCount: r,
+      ));
+    });
+  }
+
+  FutureOr<void> _addCouponCode(AddCouponCodeEvent event, Emitter<ProfileState> emit) async {
+    emit(state.copyWith(addCouponCodeStatus: BlocStatus.loading));
+    final res = await addCouponCodeUseCase(event.params);
+    res.fold((l) {
+      emit(state.copyWith(
+        addCouponCodeStatus: BlocStatus.failed,
+        errorMessage: l.message,
+      ));
+    }, (r) {
+      emit(state.copyWith(
+        addCouponCodeStatus: BlocStatus.success,
+        addCouponCode: r,
+      ));
+    });
+  }
+
+  FutureOr<void> _getCouponWeekAnalysis(GetCouponWeekAnalysisEvent event, Emitter<ProfileState> emit) async {
+    emit(state.copyWith(couponWeekAnalysisStatus: BlocStatus.loading));
+    final res = await getCouponWeekAnalysisUseCase(event.params);
+    res.fold((l) {
+      emit(state.copyWith(
+        couponWeekAnalysisStatus: BlocStatus.failed,
+        errorMessage: l.message,
+      ));
+    }, (r) {
+      emit(state.copyWith(
+        couponWeekAnalysisStatus: BlocStatus.success,
+        couponWeekAnalysis: r,
+      ));
+    });
+  }
+
+  FutureOr<void> _addOffer(AddOfferEvent event, Emitter<ProfileState> emit) async {
+    emit(state.copyWith(addOfferStatus: BlocStatus.loading));
+    final res = await addOfferUseCase(event.params);
+    res.fold((l) {
+      emit(state.copyWith(
+        addOfferStatus: BlocStatus.failed,
+        errorMessage: l.message,
+      ));
+    }, (r) {
+      emit(state.copyWith(
+        addOfferStatus: BlocStatus.success,
+        addOffer: r,
       ));
     });
   }}

@@ -2,7 +2,6 @@ import 'dart:math';
 
 import 'package:common_package/common_package.dart';
 import 'package:dllni_supermarket_owner_app/core/extensions/num_extensions.dart';
-import 'package:dllni_supermarket_owner_app/features/profile/domain/usecases/get_offers_weekly_summary_use_case.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,18 +9,19 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
 import 'package:shimmer/shimmer.dart';
 
+import '../../../../core/themes/app_colors.dart';
 import '../../../../core/widgets/failure_widget.dart';
-import '../../data/models/get_offers_weekly_summary_model.dart';
+import '../../domain/usecases/get_coupon_week_analysis_use_case.dart';
 import '../manager/bloc/profile_bloc.dart';
 
-class OffersStatisticsGrid extends StatefulWidget {
-  const OffersStatisticsGrid({super.key});
+class CouponsStatistics extends StatefulWidget {
+  const CouponsStatistics({super.key});
 
   @override
-  State<OffersStatisticsGrid> createState() => _OffersStatisticsGridState();
+  State<CouponsStatistics> createState() => _CouponsStatisticsState();
 }
 
-class _OffersStatisticsGridState extends State<OffersStatisticsGrid>
+class _CouponsStatisticsState extends State<CouponsStatistics>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _sizeAnimation;
@@ -65,15 +65,7 @@ class _OffersStatisticsGridState extends State<OffersStatisticsGrid>
   @override
   Widget build(BuildContext context) {
     const Color green = Color(0xFF0DB458);
-    const Color grey = Color(0xFFA3AEED);
-    const Color yellow = Color(0xFFF3C9A2);
-    List<String> titles = ['عروض مجدولة', 'طلبات مستفيدة', 'عروض نشطة'];
-    List<Color> colors = [
-      Color(0xFFF3C9A2),
-      Color(0xFFA3AEED),
-      Color(0xFF0DB458),
-    ];
-
+    const Color grey = Color(0xFF9CA3AF);
     return Container(
       decoration: BoxDecoration(
         color: context.onPrimary,
@@ -131,30 +123,30 @@ class _OffersStatisticsGridState extends State<OffersStatisticsGrid>
             axisAlignment: -1.0,
             child: BlocBuilder<ProfileBloc, ProfileState>(
               buildWhen: (previous, current) =>
-                  previous.offersWeeklySummaryStatus !=
-                  current.offersWeeklySummaryStatus,
+                  previous.couponWeekAnalysisStatus !=
+                  current.couponWeekAnalysisStatus,
               builder: (context, state) {
-                if (state.offersWeeklySummaryStatus == BlocStatus.loading) {
-                  return StatisticsLoading();
-                } else if (state.offersWeeklySummaryStatus ==
+                if (state.couponWeekAnalysisStatus == BlocStatus.loading) {
+                  return CouponStatisticsLoading();
+                } else if (state.couponWeekAnalysisStatus ==
                     BlocStatus.failed) {
                   return Center(
                     child: FailureWidget(
                       message: state.errorMessage.toString(),
                       onRetry: () {
                         context.read<ProfileBloc>().add(
-                          GetOffersWeeklySummaryEvent(
-                            params: GetOffersWeeklySummaryParams(storeId: 1),
+                          GetCouponWeekAnalysisEvent(
+                            params: GetCouponWeekAnalysisParams(storeId: 1),
                           ),
                         );
                       },
                     ),
                   );
-                } else if (state.offersWeeklySummaryStatus ==
+                } else if (state.couponWeekAnalysisStatus ==
                     BlocStatus.success) {
                   return Column(
                     children: [
-                      SizedBox(height: 16),
+                      SizedBox(height: 30),
                       SizedBox(
                         height: 150,
                         child: BarChart(
@@ -238,25 +230,47 @@ class _OffersStatisticsGridState extends State<OffersStatisticsGrid>
                             ),
                             barGroups: List.generate(7, (index) {
                               // select the date
-                              GetOffersWeeklySummaryModelDataSeriesItem
-                              selectedDay = state
-                                  .offersWeeklySummary!
-                                  .data!
-                                  .series![index];
-                              final double scheduledOffers =
-                                  selectedDay.scheduledOffers?.toDouble() ?? 0;
-                              final double ordersUsedOffers =
-                                  selectedDay.ordersUsedOffers?.toDouble() ?? 0;
-                              final double activeOffers =
-                                  selectedDay.activeOffers?.toDouble() ?? 0;
-
+                              final selectedDay = switch (index + 1) {
+                                1 =>
+                                  state.couponWeekAnalysis?.data?.days
+                                      ?.where((element) => element.day == "Fri")
+                                      .firstOrNull,
+                                2 =>
+                                  state.couponWeekAnalysis?.data?.days
+                                      ?.where((element) => element.day == "Thu")
+                                      .firstOrNull,
+                                3 =>
+                                  state.couponWeekAnalysis?.data?.days
+                                      ?.where((element) => element.day == "Wed")
+                                      .firstOrNull,
+                                4 =>
+                                  state.couponWeekAnalysis?.data?.days
+                                      ?.where((element) => element.day == "Tue")
+                                      .firstOrNull,
+                                5 =>
+                                  state.couponWeekAnalysis?.data?.days
+                                      ?.where((element) => element.day == "Mon")
+                                      .firstOrNull,
+                                6 =>
+                                  state.couponWeekAnalysis?.data?.days
+                                      ?.where((element) => element.day == "Sun")
+                                      .firstOrNull,
+                                7 =>
+                                  state.couponWeekAnalysis?.data?.days
+                                      ?.where((element) => element.day == "Sat")
+                                      .firstOrNull,
+                                _ => null,
+                              };
                               return BarChartGroupData(
                                 x: index,
                                 barRods: [
                                   BarChartRodData(
                                     toY: max(
-                                      activeOffers,
-                                      max(ordersUsedOffers, scheduledOffers),
+                                      selectedDay?.activeCoupons?.toDouble() ??
+                                          0,
+                                      selectedDay?.inactiveCoupons
+                                              ?.toDouble() ??
+                                          0,
                                     ),
                                     width: 20,
                                     borderRadius: BorderRadius.vertical(
@@ -265,17 +279,21 @@ class _OffersStatisticsGridState extends State<OffersStatisticsGrid>
                                     rodStackItems: [
                                       BarChartRodStackItem(
                                         0,
-                                        activeOffers,
+                                        selectedDay?.inactiveCoupons
+                                                ?.toDouble() ??
+                                            5,
                                         green,
                                       ),
                                       BarChartRodStackItem(
-                                        activeOffers,
-                                        scheduledOffers,
-                                        yellow,
-                                      ),
-                                      BarChartRodStackItem(
-                                        scheduledOffers,
-                                        ordersUsedOffers,
+                                        (selectedDay?.inactiveCoupons
+                                                ?.toDouble() ??
+                                            5),
+                                        (selectedDay?.inactiveCoupons
+                                                    ?.toDouble() ??
+                                                5) +
+                                            (selectedDay?.activeCoupons
+                                                    ?.toDouble() ??
+                                                5),
                                         grey,
                                       ),
                                     ],
@@ -291,41 +309,51 @@ class _OffersStatisticsGridState extends State<OffersStatisticsGrid>
                         spacing: 8,
                         children: [
                           SizedBox(width: 2),
-                          ...List.generate(
-                            3,
-                            (index) => Row(
-                              children: [
-                                CircleAvatar(
-                                  radius: 4,
-                                  backgroundColor: colors[index],
+                          Row(
+                            children: [
+                              CircleAvatar(radius: 4, backgroundColor: green),
+                              const SizedBox(width: 4),
+                              Text(
+                                "كوبونات نشطة",
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black,
                                 ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  titles[index],
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.black,
-                                  ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              CircleAvatar(radius: 4, backgroundColor: grey),
+                              const SizedBox(width: 4),
+                              Text(
+                                "كوبونات منتهية",
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black,
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
-
                       SizedBox(height: 12),
                       StatePointer(
-                        title: "عروض منتهية",
+                        title: 'إجمالي الخصومات (ل.س)',
                         value:
-                            state.offersWeeklySummary!.data?.totals?.endedOffers
+                            state
+                                .couponWeekAnalysis
+                                ?.data
+                                ?.totalUsedDiscountAmount
                                 ?.formatWithComma() ??
-                            "",
-                        containerBorderColor: Color(0xffE5E7EB),
-                        containerColor: Color(0xffF3F4F6),
-                        icon: FontAwesomeIcons.ban,
-                        iconCardColor: Color(0xffE5E7EB),
-                        iconColor: Color(0xff6B7280),
+                            "0",
+                        containerBorderColor: Color(0xffF59E0B).withAlpha(51),
+                        containerColor: Color(0xffF59E0B).withAlpha(25),
+                        icon: FontAwesomeIcons.database,
+                        iconCardColor: Color(0xffF59E0B).withAlpha(51),
+                        iconColor: Color(0xffF59E0B),
                       ),
                     ],
                   );
@@ -340,38 +368,23 @@ class _OffersStatisticsGridState extends State<OffersStatisticsGrid>
   }
 }
 
-class StatisticsLoading extends StatelessWidget {
-  const StatisticsLoading({super.key});
+class CouponStatisticsLoading extends StatelessWidget {
+  const CouponStatisticsLoading({super.key});
 
   @override
   Widget build(BuildContext context) {
-    const Color green = Color(0xFF0DB458);
-    const Color grey = Color(0xFFA3AEED);
-    List<String> titles = ['عروض مجدولة', 'طلبات مستفيدة', 'عروض نشطة'];
-    List<Color> colors = [
-      Color(0xFFF3C9A2),
-      Color(0xFFA3AEED),
-      Color(0xFF0DB458),
-    ];
     return Shimmer.fromColors(
-      baseColor: Colors.grey.shade300,
-      highlightColor: Colors.grey.shade100,
+      baseColor: Colors.grey.shade100,
+      highlightColor: Colors.grey.shade300,
       child: Column(
         children: [
-          SizedBox(height: 16),
+          SizedBox(height: 30),
           Container(
-            height: 150,
             width: context.width,
+            height: 150,
             decoration: BoxDecoration(
-              color: context.onPrimary,
-              borderRadius: BorderRadius.circular(24),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withAlpha(5),
-                  offset: Offset(0, 2),
-                  blurRadius: 10,
-                ),
-              ],
+              color: AppColors.white,
+              borderRadius: BorderRadius.all(Radius.circular(12)),
             ),
           ),
           const SizedBox(height: 24),
@@ -379,35 +392,45 @@ class StatisticsLoading extends StatelessWidget {
             spacing: 8,
             children: [
               SizedBox(width: 2),
-              ...List.generate(
-                3,
-                (index) => Row(
-                  children: [
-                    CircleAvatar(radius: 4, backgroundColor: colors[index]),
-                    const SizedBox(width: 4),
-                    Text(
-                      titles[index],
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black,
-                      ),
+              Row(
+                children: [
+                  CircleAvatar(radius: 4, backgroundColor: AppColors.white),
+                  const SizedBox(width: 4),
+                  Text(
+                    "كوبونات نشطة",
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black,
                     ),
-                  ],
-                ),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  CircleAvatar(radius: 4, backgroundColor: AppColors.white),
+                  const SizedBox(width: 4),
+                  Text(
+                    "كوبونات منتهية",
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-
           SizedBox(height: 12),
           StatePointer(
-            title: "عروض منتهية",
-            value: "8",
-            containerBorderColor: Color(0xffE5E7EB),
-            containerColor: Color(0xffF3F4F6),
-            icon: FontAwesomeIcons.ban,
-            iconCardColor: Color(0xffE5E7EB),
-            iconColor: Color(0xff6B7280),
+            title: 'إجمالي الخصومات (ل.س)',
+            value: 123450.formatWithComma(),
+            containerBorderColor: Color(0xffF59E0B).withAlpha(51),
+            containerColor: Color(0xffF59E0B).withAlpha(25),
+            icon: FontAwesomeIcons.database,
+            iconCardColor: Color(0xffF59E0B).withAlpha(51),
+            iconColor: Color(0xffF59E0B),
           ),
         ],
       ),
@@ -467,9 +490,14 @@ class StatePointer extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                AppText.displaySmall(
+                AppText(
                   value.toString(),
-                  fontWeight: FontWeight.bold,
+                  style: TextStyle(
+                    color: Color(0xFF111827),
+                    fontSize: 24,
+                    fontWeight: FontWeight.w700,
+                    height: 1.333,
+                  ),
                 ),
                 SizedBox(height: 2),
                 AppText.labelMedium(
@@ -485,13 +513,3 @@ class StatePointer extends StatelessWidget {
     );
   }
 }
-
-const Map<String, String> daysMap = {
-  'monday': 'الاثنين',
-  'tuesday': 'الثلاثاء',
-  'wednesday': 'الأربعاء',
-  'thursday': 'الخميس',
-  'friday': 'الجمعة',
-  'saturday': 'السبت',
-  'sunday': 'الأحد',
-};

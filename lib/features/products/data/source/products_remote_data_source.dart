@@ -15,6 +15,10 @@ import '../models/get_product_from_text_model.dart';
 import '../../domain/usecases/get_product_from_text_use_case.dart';
 import '../models/add_product_model.dart';
 import '../../domain/usecases/add_product_use_case.dart';
+import '../models/update_product_model.dart';
+import '../../domain/usecases/update_product_use_case.dart';
+import '../models/import_products_file_model.dart';
+import '../../domain/usecases/import_products_file_use_case.dart';
 
 @lazySingleton
 class ProductsRemoteDataSource with HandlingApiManager {
@@ -104,4 +108,22 @@ class ProductsRemoteDataSource with HandlingApiManager {
       jsonConvert: addProductModelFromJson,
     );
   }
-}
+
+  Future<UpdateProductModel> updateProduct(UpdateProductParams params) {
+    return wrapHandlingApi(
+      tryCall: () => dioNetwork.putData(
+        endPoint: '/api/v1/store-owner/products/${params.productId}',
+        data: params.getBody(),
+        params: params.getParams(),
+      ),
+      jsonConvert: updateProductModelFromJson,
+    );
+  }
+
+
+  Future<ImportProductsFileModel> importProductsFile(ImportProductsFileParams params) {
+    return wrapHandlingApi(
+      tryCall: () => dioNetwork.postData(endPoint: '/api/v1/sm-products/import', data: params.getBody(), params: params.getParams()),
+      jsonConvert: importProductsFileModelFromJson,
+    );
+  }}

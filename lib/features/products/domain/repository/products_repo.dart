@@ -14,6 +14,10 @@ import '../usecases/get_product_from_text_use_case.dart';
 import '../../data/models/get_product_from_text_model.dart';
 import '../usecases/add_product_use_case.dart';
 import '../../data/models/add_product_model.dart';
+import '../usecases/update_product_use_case.dart';
+import '../../data/models/update_product_model.dart';
+import '../usecases/import_products_file_use_case.dart';
+import '../../data/models/import_products_file_model.dart';
 
 abstract class ProductsRepo {
   DataResponse<GetProductsModel> getProducts(GetProductsParams params);
@@ -32,4 +36,8 @@ abstract class ProductsRepo {
   DataResponse<GetProductFromTextModel> getProductFromText(GetProductFromTextParams params);
 
   DataResponse<AddProductModel> addProduct(AddProductParams params);
+
+  DataResponse<UpdateProductModel> updateProduct(UpdateProductParams params);
+
+  DataResponse<ImportProductsFileModel> importProductsFile(ImportProductsFileParams params);
 }

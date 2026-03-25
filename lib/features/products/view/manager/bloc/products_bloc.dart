@@ -19,12 +19,18 @@ import '../../../domain/usecases/get_product_from_text_use_case.dart';
 import '../../../data/models/get_product_from_text_model.dart';
 import '../../../domain/usecases/add_product_use_case.dart';
 import '../../../data/models/add_product_model.dart';
+import '../../../domain/usecases/update_product_use_case.dart';
+import '../../../data/models/update_product_model.dart';
+import '../../../domain/usecases/import_products_file_use_case.dart';
+import '../../../data/models/import_products_file_model.dart';
 
 part 'products_event.dart';
 part 'products_state.dart';
 
 @injectable
 class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
+  final ImportProductsFileUseCase importProductsFileUseCase;
+  final UpdateProductUseCase updateProductUseCase;
   final AddProductUseCase addProductUseCase;
   final GetProductFromTextUseCase getProductFromTextUseCase;
   final GetProductFromImageUseCase getProductFromImageUseCase;
@@ -39,14 +45,18 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
     this.getCategoriesUseCase,
     this.getProductFromImageUseCase,
     this.getProductFromTextUseCase,
-    this.addProductUseCase,) : super(ProductsState()) {
+    this.addProductUseCase,
+    this.updateProductUseCase,
+    this.importProductsFileUseCase,) : super(ProductsState()) {
     on<GetProductsEvent>(_getProducts, transformer: droppableProMax());
     on<GetLowStockEvent>(_getLowStock);
     on<TotalProductsCountEvent>(_totalProducstCount);
     on<GetCategoriesEvent>(_getCategories);
     on<GetProductFromImageEvent>(_getProductFromImage);
     on<GetProductFromTextEvent>(_getProductFromText);
-    on<AddProductEvent>(_addProduct);}
+    on<AddProductEvent>(_addProduct);
+    on<UpdateProductEvent>(_updateProduct);
+    on<ImportProductsFileEvent>(_importProductsFile);}
 
   EventTransformer<T> droppableProMax<T extends EventWithReload>() {
     return (events, mapper) {
@@ -191,6 +201,38 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
       emit(state.copyWith(
         addProductStatus: BlocStatus.success,
         addProduct: r,
+      ));
+    });
+  }
+
+  FutureOr<void> _updateProduct(UpdateProductEvent event, Emitter<ProductsState> emit) async {
+    emit(state.copyWith(productStatus: BlocStatus.loading));
+    final res = await updateProductUseCase(event.params);
+    res.fold((l) {
+      emit(state.copyWith(
+        productStatus: BlocStatus.failed,
+        errorMessage: l.message,
+      ));
+    }, (r) {
+      emit(state.copyWith(
+        productStatus: BlocStatus.success,
+        product: r,
+      ));
+    });
+  }
+
+  FutureOr<void> _importProductsFile(ImportProductsFileEvent event, Emitter<ProductsState> emit) async {
+    emit(state.copyWith(importProductsFileStatus: BlocStatus.loading));
+    final res = await importProductsFileUseCase(event.params);
+    res.fold((l) {
+      emit(state.copyWith(
+        importProductsFileStatus: BlocStatus.failed,
+        errorMessage: l.message,
+      ));
+    }, (r) {
+      emit(state.copyWith(
+        importProductsFileStatus: BlocStatus.success,
+        importProductsFile: r,
       ));
     });
   }}

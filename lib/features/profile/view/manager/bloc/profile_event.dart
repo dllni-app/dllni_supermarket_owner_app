@@ -70,3 +70,45 @@ class AddUpdateStoreEmployeeEvent extends ProfileEvent {
 
   AddUpdateStoreEmployeeEvent({required this.params});
 }
+
+class GetOfferCodesEvent extends ProfileEvent with EventWithReload {
+  final GetOfferCodesParams params;
+
+  @override
+  final bool isReload;
+
+  GetOfferCodesEvent({required this.params, this.isReload = false});
+}
+
+class GetProductsEvent extends ProfileEvent with EventWithReload {
+  final GetProductsParams params;
+
+  @override
+  final bool isReload;
+
+  GetProductsEvent({required this.params, this.isReload = false});
+}
+
+class GetProductsCountEvent extends ProfileEvent {
+  final GetProductsCountParams params;
+
+  GetProductsCountEvent({required this.params});
+}
+
+class AddCouponCodeEvent extends ProfileEvent {
+  final AddCouponCodeParams params;
+
+  AddCouponCodeEvent({required this.params});
+}
+
+class GetCouponWeekAnalysisEvent extends ProfileEvent {
+  final GetCouponWeekAnalysisParams params;
+
+  GetCouponWeekAnalysisEvent({required this.params});
+}
+
+class AddOfferEvent extends ProfileEvent {
+  final AddOfferParams params;
+
+  AddOfferEvent({required this.params});
+}

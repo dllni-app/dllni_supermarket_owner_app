@@ -11,6 +11,7 @@ import 'package:dllni_supermarket_owner_app/features/products/view/screens/add_p
 import 'package:dllni_supermarket_owner_app/features/products/view/screens/add_product_details_screen.dart';
 import 'package:dllni_supermarket_owner_app/features/products/view/screens/add_product_menu_screen.dart';
 import 'package:dllni_supermarket_owner_app/features/profile/view/screens/coupons_management_screen.dart';
+import 'package:dllni_supermarket_owner_app/features/profile/view/screens/create_coupon_screen.dart';
 import 'package:dllni_supermarket_owner_app/features/profile/view/screens/create_new_employee_screen.dart';
 import 'package:dllni_supermarket_owner_app/features/profile/view/screens/create_offer_screen.dart';
 import 'package:dllni_supermarket_owner_app/features/profile/view/screens/employee_management_screen.dart';
@@ -85,6 +86,11 @@ class GeneratedAppRoutes {
       case '/coupons_management':
         return MaterialPageRoute(
           builder: (_) => CouponsManagementScreen(),
+          settings: settings,
+        );
+      case '/coupons_management/new':
+        return MaterialPageRoute(
+          builder: (_) => CreateCouponScreen(),
           settings: settings,
         );
       case '/profile/employees/create_employee':

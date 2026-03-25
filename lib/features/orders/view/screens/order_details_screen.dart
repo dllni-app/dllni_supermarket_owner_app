@@ -677,7 +677,6 @@ class _CustomerCard extends StatelessWidget {
 
 class _OrderStatusCard extends StatelessWidget {
   const _OrderStatusCard({
-    super.key,
     required this.time,
     required this.createdAt,
     required this.expectedTime,

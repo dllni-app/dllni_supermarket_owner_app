@@ -59,7 +59,6 @@ class _OrdersTabBarState extends State<OrdersTabBar> {
 
 class _CategoryChip extends StatelessWidget {
   const _CategoryChip({
-    super.key,
     required this.item,
     required this.isSelected,
   });

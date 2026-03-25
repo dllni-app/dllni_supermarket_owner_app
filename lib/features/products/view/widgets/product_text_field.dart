@@ -246,6 +246,7 @@ class _AppDatePickerState extends State<AppDatePicker> {
                   );
                   if (date == null) return;
                   expiredDate = date;
+                  widget.onDateChanged(date);
                   setState(() {});
                 },
                 child: Padding(

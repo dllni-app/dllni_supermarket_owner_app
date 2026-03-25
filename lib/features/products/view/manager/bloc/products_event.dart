@@ -46,3 +46,15 @@ class AddProductEvent extends ProductsEvent {
 
   AddProductEvent({required this.params});
 }
+
+class UpdateProductEvent extends ProductsEvent {
+  final UpdateProductParams params;
+
+  UpdateProductEvent({required this.params});
+}
+
+class ImportProductsFileEvent extends ProductsEvent {
+  final ImportProductsFileParams params;
+
+  ImportProductsFileEvent({required this.params});
+}

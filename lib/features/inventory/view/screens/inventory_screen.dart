@@ -42,7 +42,11 @@ class _InventoryScreenState extends State<InventoryScreen> {
       child: Scaffold(
         body: Column(
           children: [
-            AppSimpleAppBarWithSearch(title: "المخزون"),
+            AppSimpleAppBarWithSearch(
+              title: "المخزون",
+              onSearchChanged: (value) {},
+              onFilterTap: () {},
+            ),
             Expanded(
               child: SingleChildScrollView(
                 child: Column(
@@ -73,13 +77,13 @@ class _InventoryScreenState extends State<InventoryScreen> {
                                   current.hourlyCountStatus,
                               builder: (context, state) {
                                 if (state.hourlyCountStatus ==
-                                    BlocStatus.loading)
+                                    BlocStatus.loading) {
                                   return Shimmer.fromColors(
                                     baseColor: Colors.grey.shade100,
                                     highlightColor: Colors.grey.shade300,
                                     child: SizedBox(),
                                   );
-                                else if (state.hourlyCountStatus ==
+                                } else if (state.hourlyCountStatus ==
                                     BlocStatus.failed) {
                                   return Center(
                                     child: FailureWidget(

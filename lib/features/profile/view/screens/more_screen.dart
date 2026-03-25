@@ -2,6 +2,7 @@ import 'package:common_package/common_package.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:toastification/toastification.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../home/domain/usecases/get_daily_count_use_case.dart';
@@ -131,13 +132,12 @@ class MoreScreen extends StatelessWidget {
                             title: 'الكوبونات',
                             subtitle: 'ادارة اكواد الخصم',
                             onTap: () {
-                              context.pushRoute('/couponsmanagement');
+                              context.pushRoute('/coupons_management');
                             },
                           ),
                         ],
                       ),
                     ),
-
                     SizedBox(height: 16),
                     SectionTitle(title: 'الموظفون والسجل'),
                     SizedBox(height: 16),
@@ -183,7 +183,11 @@ class MoreScreen extends StatelessWidget {
                             title: 'سجل نشاط الموظفين',
                             subtitle: 'متابعة نشاط الفريق',
                             onTap: () {
-                              // context.pushRoute('/couponsmanagement');
+                              AppToast.showToast(
+                                context: context,
+                                message: "هذه الميزة غير متوفرة حالياً",
+                                type: ToastificationType.info,
+                              );
                             },
                           ),
                         ],
@@ -213,7 +217,13 @@ class MoreScreen extends StatelessWidget {
                             icon: FontAwesomeIcons.headset,
                             title: 'الدعم الفني',
                             subtitle: 'تواصل مع فريق الدعم',
-                            onTap: () {},
+                            onTap: () {
+                              AppToast.showToast(
+                                context: context,
+                                message: "هذه الميزة غير متوفرة حالياً",
+                                type: ToastificationType.info,
+                              );
+                            },
                           ),
                         ],
                       ),

@@ -1,6 +1,4 @@
 import 'package:common_package/common_package.dart';
-import 'package:dllni_supermarket_owner_app/features/profile/data/models/get_coupon_codes_model.dart';
-import 'package:dllni_supermarket_owner_app/features/profile/domain/usecases/get_coupon_codes_use_case.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shimmer/shimmer.dart';
@@ -8,10 +6,14 @@ import 'package:shimmer/shimmer.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/widgets/app_app_bars.dart';
 import '../../../../core/widgets/failure_widget.dart';
+import '../../data/models/get_coupon_codes_model.dart';
+import '../../domain/usecases/get_coupon_codes_use_case.dart';
+import '../../domain/usecases/get_coupon_week_analysis_use_case.dart';
 import '../manager/bloc/profile_bloc.dart';
 import '../widgets/coupon_card.dart';
-import '../widgets/coupon_statistics_grid.dart';
+import '../widgets/coupon_statistics.dart';
 import '../widgets/coupons_filter_card.dart';
+import 'create_coupon_screen.dart';
 
 @AutoRoutePage(path: "/coupons_management")
 class CouponsManagementScreen extends StatefulWidget {
@@ -30,36 +32,57 @@ class _CouponsManagementScreenState extends State<CouponsManagementScreen> {
     return Scaffold(
       body: BlocProvider(
         create: (context) => getIt<ProfileBloc>()
-          ..add(GetCouponCodesEvent(params: GetCouponCodesParams(storeId: 1))),
+          ..add(GetCouponCodesEvent(params: GetCouponCodesParams(storeId: 1)))
+          ..add(
+            GetCouponWeekAnalysisEvent(
+              params: GetCouponWeekAnalysisParams(storeId: 1),
+            ),
+          ),
         child: Column(
           children: [
             AppSimpleAppBar(title: "الكوبونات"),
             SizedBox(height: 16),
             Padding(
               padding: EdgeInsetsDirectional.symmetric(horizontal: 24),
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(24),
-                  color: context.primaryContainer,
-                ),
-                width: context.width,
-                padding: EdgeInsetsDirectional.symmetric(vertical: 11),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.add_circle,
-                      color: context.onPrimaryContainer,
-                      size: 22,
+              child: Builder(
+                builder: (context) {
+                  return InkWell(
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => BlocProvider.value(
+                            value: context.read<ProfileBloc>(),
+                            child: CreateCouponScreen(),
+                          ),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(24),
+                        color: context.primaryContainer,
+                      ),
+                      width: context.width,
+                      padding: EdgeInsetsDirectional.symmetric(vertical: 11),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.add_circle,
+                            color: context.onPrimaryContainer,
+                            size: 22,
+                          ),
+                          SizedBox(width: 8),
+                          AppText.labelLarge(
+                            'إنشاء كوبون جديد',
+                            color: context.onPrimaryContainer,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ],
+                      ),
                     ),
-                    SizedBox(width: 8),
-                    AppText.labelLarge(
-                      'إنشاء كوبون جديد',
-                      color: context.onPrimaryContainer,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ],
-                ),
+                  );
+                },
               ),
             ),
             SizedBox(height: 16),
@@ -107,7 +130,27 @@ class _CouponsManagementScreenState extends State<CouponsManagementScreen> {
             ),
             SizedBox(height: 16),
             Expanded(
-              child: BlocBuilder<ProfileBloc, ProfileState>(
+              child: BlocConsumer<ProfileBloc, ProfileState>(
+                listenWhen: (previous, current) =>
+                    previous.addCouponCodeStatus != current.addCouponCodeStatus,
+                listener: (context, state) {
+                  if (state.addCouponCodeStatus == BlocStatus.success) {
+                    context.read<ProfileBloc>().add(
+                      GetCouponCodesEvent(
+                        isReload: true,
+                        params: GetCouponCodesParams(
+                          storeId: 1,
+                          search: search,
+                          isActive: selectedTab == 1
+                              ? true
+                              : selectedTab == 2
+                              ? false
+                              : null,
+                        ),
+                      ),
+                    );
+                  }
+                },
                 buildWhen: (previous, current) =>
                     previous.couponCodes != current.couponCodes,
                 builder: (context, state) {
@@ -181,8 +224,9 @@ class _CouponsManagementScreenState extends State<CouponsManagementScreen> {
                                           DateTime.now())
                                       .difference(DateTime.now())
                                       .inMilliseconds >
-                                  0)
+                                  0) {
                             return SizedBox();
+                          }
                           return SizedBox(height: 16);
                         },
                         itemCount: state.couponCodes!.listLength(1),

@@ -32,6 +32,7 @@ class ProductsScreen extends StatefulWidget {
 
 class _ProductsScreenState extends State<ProductsScreen> {
   int? selectedCategoryId;
+  String? search;
   @override
   void initState() {
     SystemChrome.setSystemUIOverlayStyle(
@@ -54,7 +55,28 @@ class _ProductsScreenState extends State<ProductsScreen> {
       child: Scaffold(
         body: Column(
           children: [
-            AppSimpleAppBarWithSearch(title: "المنتجات"),
+            Builder(
+              builder: (context) {
+                print("rebuild appsimpleappbarwithsearch");
+                return AppSimpleAppBarWithSearch(
+                  title: "المنتجات",
+                  onSearchChanged: (value) {
+                    search = value;
+                    context.read<ProductsBloc>().add(
+                      GetProductsEvent(
+                        isReload: true,
+                        params: GetProductsParams(
+                          page: 1,
+                          categoryId: selectedCategoryId,
+                          search: search,
+                        ),
+                      ),
+                    );
+                  },
+                  onFilterTap: () {},
+                );
+              },
+            ),
             Expanded(
               child: Column(
                 children: [
@@ -96,14 +118,6 @@ class _ProductsScreenState extends State<ProductsScreen> {
                             },
                           ),
                         ),
-
-                        // Expanded(
-                        //   child: StatePointer(
-                        //     isCritical: true,
-                        //     title: "منخفض المخزون",
-                        //     value: 4,
-                        //   ),
-                        // ),
                         BlocBuilder<ProductsBloc, ProductsState>(
                           buildWhen: (previous, current) =>
                               previous.lowStockStatus != current.lowStockStatus,
@@ -185,6 +199,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                                   params: GetProductsParams(
                                     page: 1,
                                     categoryId: selectedCategoryId,
+                                    search: search,
                                   ),
                                 ),
                               );
@@ -198,8 +213,6 @@ class _ProductsScreenState extends State<ProductsScreen> {
                       }
                     },
                   ),
-
-                  // TODO: uncomment this block when you start link with api
                   Expanded(
                     child: BlocBuilder<ProductsBloc, ProductsState>(
                       buildWhen: (previous, current) =>
@@ -208,7 +221,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                         return state.products!.builder(
                           loadingWidget: ProductsLoading(),
                           emptyWidget: AppText.labelMedium(
-                            'لا يوجد مهام',
+                            'لا يوجد منتجات',
                             fontWeight: FontWeight.w400,
                           ),
                           successWidget: () {
@@ -248,6 +261,14 @@ class _ProductsScreenState extends State<ProductsScreen> {
                               itemCount: state.products!.listLength(1),
                             );
                           },
+                          failedWidget: Center(child: FailureWidget(message: state.errorMessage.toString(),onRetry: () {
+                            context.read<ProductsBloc>().add(
+                              GetProductsEvent(
+                                params: GetProductsParams(categoryId: selectedCategoryId, search: search),
+                                isReload: true,
+                              ),
+                            );
+                          },),),
                           onTapRetry: () {
                             context.read<ProductsBloc>().add(
                               GetProductsEvent(
