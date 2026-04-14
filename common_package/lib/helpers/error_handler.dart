@@ -61,6 +61,8 @@ class ErrorHandler implements Exception {
             return ServerFailure(message: ErrorMessageModel.fromJson(error.response?.data).statusMessage, statusCode: ResponseCode.badContent);
           case ResponseCode.badRequestServer:
             return ServerFailure(message: ErrorMessageModel.fromJson(error.response?.data).statusMessage, statusCode: ResponseCode.badRequestServer);
+          case ResponseCode.unAuthorized:
+            return UnauthenticatedFailure(message: ResponseMessage.unAuthorized.tr());
           default:
             return ServerFailure(
               message: error.response?.data["message"].toString() ?? error.response?.data["errors"]?.toString() ?? '',
