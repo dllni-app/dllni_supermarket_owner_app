@@ -18,6 +18,10 @@ import '../../domain/usecases/accept_order_use_case.dart';
 import '../models/accept_order_model.dart';
 import '../../domain/usecases/get_performance_report_use_case.dart';
 import '../models/get_performance_report_model.dart';
+import '../../domain/usecases/fetch_notifications_use_case.dart';
+import '../models/fetch_notifications_model.dart';
+import '../../domain/usecases/make_read_all_notifications_use_case.dart';
+import '../models/make_read_all_notifications_model.dart';
 
 @LazySingleton(as: HomeRepo)
 class HomeRepoImpl with HandlingException implements HomeRepo {
@@ -71,6 +75,21 @@ class HomeRepoImpl with HandlingException implements HomeRepo {
   DataResponse<GetPerformanceReportModel> getPerformanceReport(GetPerformanceReportParams params) {
     return wrapHandlingException(
       tryCall: () => homeRemoteDataSource.getPerformanceReport(params),
+    );
+  }
+
+
+  @override
+  DataResponse<FetchNotificationsModel> fetchNotifications(FetchNotificationsParams params) {
+    return wrapHandlingException(
+      tryCall: () => homeRemoteDataSource.fetchNotifications(params),
+    );
+  }
+
+  @override
+  DataResponse<MakeReadAllNotificationsModel> makeReadAllNotifications(MakeReadAllNotificationsParams params) {
+    return wrapHandlingException(
+      tryCall: () => homeRemoteDataSource.makeReadAllNotifications(params),
     );
   }}
 

@@ -17,12 +17,18 @@ import '../../../domain/usecases/accept_order_use_case.dart';
 import '../../../data/models/accept_order_model.dart';
 import '../../../domain/usecases/get_performance_report_use_case.dart';
 import '../../../data/models/get_performance_report_model.dart';
+import '../../../domain/usecases/fetch_notifications_use_case.dart';
+import '../../../data/models/fetch_notifications_model.dart';
+import '../../../domain/usecases/make_read_all_notifications_use_case.dart';
+import '../../../data/models/make_read_all_notifications_model.dart';
 
 part 'home_event.dart';
 part 'home_state.dart';
 
 @injectable
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
+  final MakeReadAllNotificationsUseCase makeReadAllNotificationsUseCase;
+  final FetchNotificationsUseCase fetchNotificationsUseCase;
   final GetPerformanceReportUseCase getPerformanceReportUseCase;
   final AcceptOrderUseCase acceptOrderUseCase;
   final GetDailyCountUseCase getDailyCountUseCase;
@@ -37,7 +43,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     this.rejectOrderUseCase,
     this.getDailyCountUseCase,
     this.acceptOrderUseCase,
-    this.getPerformanceReportUseCase,) : super(HomeState()) {
+    this.getPerformanceReportUseCase,
+    this.fetchNotificationsUseCase,
+    this.makeReadAllNotificationsUseCase,) : super(HomeState()) {
     
   
     on<GetDashboardOverviewEvent>(_getDashboardOverview);
@@ -46,7 +54,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     on<RejectOrderEvent>(_rejectOrder);
     on<GetDailyCountEvent>(_getDailyCount);
     on<AcceptOrderEvent>(_acceptOrder);
-    on<GetPerformanceReportEvent>(_getPerformanceReport);}
+    on<GetPerformanceReportEvent>(_getPerformanceReport);
+    on<FetchNotificationsEvent>(_fetchNotifications, transformer: droppableProMax());
+    on<MakeReadAllNotificationsEvent>(_makeReadAllNotifications);}
 
 
   FutureOr<void> _getDashboardOverview(GetDashboardOverviewEvent event, Emitter<HomeState> emit) async {
@@ -169,6 +179,43 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       emit(state.copyWith(
         performanceReportStatus: BlocStatus.success,
         performanceReport: r,
+      ));
+    });
+  }
+
+ 
+
+  FutureOr<void> _fetchNotifications(FetchNotificationsEvent event, Emitter<HomeState> emit) async {
+    if (!state.notifications!.isEndPage || event.isReload) {
+      emit(state.copyWith(
+        notifications: state.notifications!.setLoading(isReload: event.isReload),
+      ));
+      final res = await fetchNotificationsUseCase(event.params);
+      res.fold((l) {
+        emit(state.copyWith(
+          notifications: state.notifications!.setFaild(errorMessage: l.message),
+          errorMessage: l.message,
+        ));
+      }, (r) {
+        emit(state.copyWith(
+          notifications: state.notifications!.setSuccess(data: r.data!),
+        ));
+      });
+    }
+  }
+
+  FutureOr<void> _makeReadAllNotifications(MakeReadAllNotificationsEvent event, Emitter<HomeState> emit) async {
+    emit(state.copyWith(makeReadAllNotificationsStatus: BlocStatus.loading));
+    final res = await makeReadAllNotificationsUseCase(event.params);
+    res.fold((l) {
+      emit(state.copyWith(
+        makeReadAllNotificationsStatus: BlocStatus.failed,
+        errorMessage: l.message,
+      ));
+    }, (r) {
+      emit(state.copyWith(
+        makeReadAllNotificationsStatus: BlocStatus.success,
+        makeReadAllNotifications: r,
       ));
     });
   }}

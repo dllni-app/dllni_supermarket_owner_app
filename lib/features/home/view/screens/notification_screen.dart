@@ -1,9 +1,15 @@
 // --- 1. The Data Model (Pro Tip: Always separate data from UI) ---
 import 'package:common_package/common_package.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/di/injection.dart';
 import '../../../../core/themes/app_colors.dart';
 import '../../../../core/widgets/app_app_bars.dart';
+import '../../../../core/widgets/failure_widget.dart';
+import '../../domain/usecases/fetch_notifications_use_case.dart';
+import '../../domain/usecases/make_read_all_notifications_use_case.dart';
+import '../manager/bloc/home_bloc.dart';
 import '../widgets/notification_tab_bar.dart';
 
 class NotificationItem {
@@ -12,7 +18,7 @@ class NotificationItem {
   final String time;
   final String tag;
   final Color themeColor;
-  final IconData icon;
+  final String icon;
   final bool isNew;
 
   NotificationItem({
@@ -39,7 +45,7 @@ class NotificationsScreen extends StatelessWidget {
         time: "منذ دقيقتين",
         tag: "طلب جديد",
         themeColor: Colors.teal,
-        icon: Icons.receipt_long,
+        icon: "Icons.receipt_long",
         isNew: true,
       ),
       NotificationItem(
@@ -48,7 +54,7 @@ class NotificationsScreen extends StatelessWidget {
         time: "منذ ساعة",
         tag: "تنبيه عرض",
         themeColor: Colors.orange,
-        icon: Icons.local_offer,
+        icon: "Icons.local_offer",
       ),
       NotificationItem(
         title: "تم تسليم الطلب #4518",
@@ -56,145 +62,169 @@ class NotificationsScreen extends StatelessWidget {
         time: "منذ ساعتين",
         tag: "طلب مكتمل",
         themeColor: Colors.green,
-        icon: Icons.check_circle,
+        icon: "Icons.check_circle",
       ),
     ];
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F7F9),
-      body: Column(
-        children: [
-          AppSimpleAppBar(title: "الإشعارات"),
-          SizedBox(height: 16),
-          NotificationsTabBar(
-            items: [
-              NotificationsTabBarItem(title: "الكل", icon: null, count: 24),
-              NotificationsTabBarItem(
-                title: "الطلبات",
-                icon: Icons.receipt_long,
-                count: 8,
-              ),
-              NotificationsTabBarItem(
-                title: "العروض",
-                icon: Icons.local_offer,
-                count: 5,
-              ),
-              NotificationsTabBarItem(
-                title: "التحديثات",
-                icon: Icons.update,
-                count: 11,
-              ),
-            ],
-            onChanged: (index) {},
+    return BlocProvider(
+      create: (context) => getIt<HomeBloc>()
+        ..add(FetchNotificationsEvent(params: FetchNotificationsParams()))
+        ..add(
+          MakeReadAllNotificationsEvent(
+            params: MakeReadAllNotificationsParams(),
           ),
-          SizedBox(height: 16),
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 14),
-              itemCount: notifications.length,
-              itemBuilder: (context, index) {
-                return _NotificationCard(item: notifications[index]);
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNotificationCard(NotificationItem item) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Icon Box
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: item.themeColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Icon(item.icon, color: item.themeColor, size: 24),
-                if (item.isNew)
-                  const Positioned(
-                    right: -2,
-                    top: -2,
-                    child: CircleAvatar(radius: 4, backgroundColor: Colors.red),
-                  ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 15),
-          // Content
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      item.title,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
+        ),
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF5F7F9),
+        body: Column(
+          children: [
+            AppSimpleAppBar(title: "الإشعارات"),
+            // NotificationsTabBar(
+            //   items: [
+            //     NotificationsTabBarItem(title: "الكل", icon: null, count: 24),
+            //     NotificationsTabBarItem(
+            //       title: "الطلبات",
+            //       icon: Icons.receipt_long,
+            //       count: 8,
+            //     ),
+            //     NotificationsTabBarItem(
+            //       title: "العروض",
+            //       icon: Icons.local_offer,
+            //       count: 5,
+            //     ),
+            //     NotificationsTabBarItem(
+            //       title: "التحديثات",
+            //       icon: Icons.update,
+            //       count: 11,
+            //     ),
+            //   ],
+            //   onChanged: (index) {},
+            // ),
+            // SizedBox(height: 16),
+            // BlocBuilder<HomeBloc, HomeState>(
+            //   buildWhen: (previous, current) =>
+            //       previous.notifications?.status !=
+            //       current.notifications?.status,
+            //   builder: (context, state) {
+            //     return Expanded(
+            //       child: ListView.builder(
+            //         padding: const EdgeInsets.symmetric(
+            //           horizontal: 9,
+            //           vertical: 14,
+            //         ),
+            //         itemCount: notifications.length,
+            //         itemBuilder: (context, index) {
+            //           return _NotificationCard(item: notifications[index]);
+            //         },
+            //       ),
+            //     );
+            //   },
+            // ),
+            Expanded(
+              child: BlocBuilder<HomeBloc, HomeState>(
+                buildWhen: (previous, current) =>
+                    previous.notifications?.status !=
+                    current.notifications?.status,
+                builder: (context, state) {
+                  return state.notifications!.builder(
+                    loadingWidget: Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.primary,
                       ),
                     ),
-                    Text(
-                      item.time,
-                      style: const TextStyle(color: Colors.grey, fontSize: 11),
+                    emptyWidget: AppText.labelMedium(
+                      'لا يوجد منتجات',
+                      fontWeight: FontWeight.w400,
                     ),
-                  ],
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  item.body,
-                  style: TextStyle(
-                    color: Colors.grey.shade600,
-                    fontSize: 12,
-                    height: 1.4,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                // Tag
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: item.themeColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    item.tag,
-                    style: TextStyle(
-                      color: item.themeColor,
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
+                    successWidget: () {
+                      return ListView.separated(
+                        padding: EdgeInsetsDirectional.symmetric(
+                          horizontal: 24,
+                          vertical: 16,
+                        ),
+                        itemBuilder: (context, index) {
+                          if (state.notifications!.length <= index) {
+                            if (state.notifications!.length == index) {
+                              context.read<HomeBloc>().add(
+                                FetchNotificationsEvent(
+                                  isReload: false,
+                                  params: FetchNotificationsParams(
+                                    page: state.notifications!.pageNumber,
+                                  ),
+                                ),
+                              );
+                            }
+                            return SizedBox(
+                              width: 30,
+                              height: 30,
+                              child: FittedBox(
+                                child: CircularProgressIndicator.adaptive(
+                                  strokeWidth: 3,
+                                ),
+                              ),
+                            );
+                          }
+                          return _NotificationCard(
+                            item: NotificationItem(
+                              title: state.notifications!.list[index].title
+                                  .toString(),
+                              body: state.notifications!.list[index].body
+                                  .toString(),
+                              time: state.notifications!.list[index].createdAt
+                                  .toString()
+                                  .split("T")
+                                  .firstOrNull
+                                  .toString(),
+                              tag:
+                                  state.notifications!.list[index].type ==
+                                      "order"
+                                  ? "طلب"
+                                  : "عرض",
+                              themeColor:
+                                  state.notifications!.list[index].type ==
+                                      "order"
+                                  ? Colors.teal
+                                  : Colors.orange,
+                              icon: state.notifications!.list[index].icon
+                                  .toString(),
+                              isNew:
+                                  state.notifications!.list[index].readAt ==
+                                  null,
+                            ),
+                          );
+                        },
+                        separatorBuilder: (context, index) =>
+                            SizedBox(height: 16),
+                        itemCount: state.notifications!.listLength(1),
+                      );
+                    },
+                    failedWidget: Center(
+                      child: FailureWidget(
+                        message: state.errorMessage.toString(),
+                        onRetry: () {
+                          context.read<HomeBloc>().add(
+                            FetchNotificationsEvent(
+                              params: FetchNotificationsParams(),
+                              isReload: true,
+                            ),
+                          );
+                        },
+                      ),
                     ),
-                  ),
-                ),
-              ],
+                    onTapRetry: () {
+                      context.read<HomeBloc>().add(
+                        FetchNotificationsEvent(
+                          params: FetchNotificationsParams(),
+                          isReload: true,
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -229,7 +259,11 @@ class _NotificationCard extends StatelessWidget {
                       color: item.themeColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.all(Radius.circular(12)),
                     ),
-                    child: Icon(item.icon, color: item.themeColor, size: 18),
+                    child: AppImage.network(
+                      item.icon,
+                      size: 18,
+                      errorWidget: Icon(Icons.error, color: item.themeColor),
+                    ),
                   ),
                 ),
                 if (item.isNew)

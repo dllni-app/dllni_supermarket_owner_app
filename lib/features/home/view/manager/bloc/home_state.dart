@@ -1,6 +1,9 @@
 part of 'home_bloc.dart';
 
 class HomeState {
+  BlocStatus? makeReadAllNotificationsStatus;
+  MakeReadAllNotificationsModel? makeReadAllNotifications;
+  PaginationStateModel<FetchNotificationsModelDataItem>? notifications;
   BlocStatus? performanceReportStatus;
   GetPerformanceReportModel? performanceReport;
   BlocStatus? acceptOrderStatus;
@@ -21,15 +24,17 @@ class HomeState {
     this.dashboardOverviewStatus,
     this.newOrders = const PaginationStateModel(perPage: 10),
     this.preparingOrders = const PaginationStateModel(perPage: 10),
+    this.notifications = const PaginationStateModel(perPage: 10),
     this.rejectOrder,
     this.rejectOrderStatus,
     this.dailyCount,
     this.dailyCountStatus,
     this.acceptOrder,
     this.acceptOrderStatus,
-
     this.performanceReport,
     this.performanceReportStatus,
+    this.makeReadAllNotifications,
+    this.makeReadAllNotificationsStatus,
   });
 
   HomeState copyWith({
@@ -46,6 +51,10 @@ class HomeState {
     BlocStatus? acceptOrderStatus,
     GetPerformanceReportModel? performanceReport,
     BlocStatus? performanceReportStatus,
+    allNotifications,
+    PaginationStateModel<FetchNotificationsModelDataItem>? notifications,
+    MakeReadAllNotificationsModel? makeReadAllNotifications,
+    BlocStatus? makeReadAllNotificationsStatus,
   }) => HomeState(
     errorMessage: errorMessage ?? this.errorMessage,
     dashboardOverview: dashboardOverview ?? this.dashboardOverview,
@@ -62,5 +71,10 @@ class HomeState {
     performanceReport: performanceReport ?? this.performanceReport,
     performanceReportStatus:
         performanceReportStatus ?? this.performanceReportStatus,
+    notifications: notifications ?? this.notifications,
+    makeReadAllNotifications:
+        makeReadAllNotifications ?? this.makeReadAllNotifications,
+    makeReadAllNotificationsStatus:
+        makeReadAllNotificationsStatus ?? this.makeReadAllNotificationsStatus,
   );
 }

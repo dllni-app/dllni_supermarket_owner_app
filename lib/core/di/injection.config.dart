@@ -24,6 +24,8 @@ import '../../features/home/data/source/home_remote_data_source.dart' as _i557;
 import '../../features/home/domain/repository/home_repo.dart' as _i396;
 import '../../features/home/domain/usecases/accept_order_use_case.dart'
     as _i982;
+import '../../features/home/domain/usecases/fetch_notifications_use_case.dart'
+    as _i204;
 import '../../features/home/domain/usecases/get_daily_count_use_case.dart'
     as _i557;
 import '../../features/home/domain/usecases/get_dashboard_overview_use_case.dart'
@@ -34,6 +36,8 @@ import '../../features/home/domain/usecases/get_performance_report_use_case.dart
     as _i826;
 import '../../features/home/domain/usecases/get_preparing_orders_use_case.dart'
     as _i963;
+import '../../features/home/domain/usecases/make_read_all_notifications_use_case.dart'
+    as _i326;
 import '../../features/home/domain/usecases/reject_order_use_case.dart'
     as _i501;
 import '../../features/home/view/manager/bloc/home_bloc.dart' as _i648;
@@ -300,6 +304,9 @@ _i174.GetIt $initGetIt(
   gh.lazySingleton<_i982.AcceptOrderUseCase>(
     () => _i982.AcceptOrderUseCase(home: gh<_i396.HomeRepo>()),
   );
+  gh.lazySingleton<_i204.FetchNotificationsUseCase>(
+    () => _i204.FetchNotificationsUseCase(home: gh<_i396.HomeRepo>()),
+  );
   gh.lazySingleton<_i557.GetDailyCountUseCase>(
     () => _i557.GetDailyCountUseCase(home: gh<_i396.HomeRepo>()),
   );
@@ -314,6 +321,9 @@ _i174.GetIt $initGetIt(
   );
   gh.lazySingleton<_i963.GetPreparingOrdersUseCase>(
     () => _i963.GetPreparingOrdersUseCase(home: gh<_i396.HomeRepo>()),
+  );
+  gh.lazySingleton<_i326.MakeReadAllNotificationsUseCase>(
+    () => _i326.MakeReadAllNotificationsUseCase(home: gh<_i396.HomeRepo>()),
   );
   gh.lazySingleton<_i501.RejectOrderUseCase>(
     () => _i501.RejectOrderUseCase(home: gh<_i396.HomeRepo>()),
@@ -339,6 +349,19 @@ _i174.GetIt $initGetIt(
       gh<_i384.GetOrderDetailsUseCase>(),
     ),
   );
+  gh.factory<_i648.HomeBloc>(
+    () => _i648.HomeBloc(
+      gh<_i393.GetDashboardOverviewUseCase>(),
+      gh<_i856.GetNewOrdersUseCase>(),
+      gh<_i963.GetPreparingOrdersUseCase>(),
+      gh<_i501.RejectOrderUseCase>(),
+      gh<_i557.GetDailyCountUseCase>(),
+      gh<_i982.AcceptOrderUseCase>(),
+      gh<_i826.GetPerformanceReportUseCase>(),
+      gh<_i204.FetchNotificationsUseCase>(),
+      gh<_i326.MakeReadAllNotificationsUseCase>(),
+    ),
+  );
   gh.factory<_i821.ProfileBloc>(
     () => _i821.ProfileBloc(
       gh<_i712.GetStoreProfileUseCase>(),
@@ -358,17 +381,6 @@ _i174.GetIt $initGetIt(
       gh<_i40.AddCouponCodeUseCase>(),
       gh<_i622.GetCouponWeekAnalysisUseCase>(),
       gh<_i242.AddOfferUseCase>(),
-    ),
-  );
-  gh.factory<_i648.HomeBloc>(
-    () => _i648.HomeBloc(
-      gh<_i393.GetDashboardOverviewUseCase>(),
-      gh<_i856.GetNewOrdersUseCase>(),
-      gh<_i963.GetPreparingOrdersUseCase>(),
-      gh<_i501.RejectOrderUseCase>(),
-      gh<_i557.GetDailyCountUseCase>(),
-      gh<_i982.AcceptOrderUseCase>(),
-      gh<_i826.GetPerformanceReportUseCase>(),
     ),
   );
   return getIt;

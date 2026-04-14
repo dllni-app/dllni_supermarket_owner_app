@@ -49,3 +49,18 @@ class GetPerformanceReportEvent extends HomeEvent {
 
   GetPerformanceReportEvent({required this.params});
 }
+
+class FetchNotificationsEvent extends HomeEvent with EventWithReload {
+  final FetchNotificationsParams params;
+
+  @override
+  final bool isReload;
+
+  FetchNotificationsEvent({required this.params, this.isReload = false});
+}
+
+class MakeReadAllNotificationsEvent extends HomeEvent {
+  final MakeReadAllNotificationsParams params;
+
+  MakeReadAllNotificationsEvent({required this.params});
+}

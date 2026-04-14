@@ -15,6 +15,10 @@ import '../models/accept_order_model.dart';
 import '../../domain/usecases/accept_order_use_case.dart';
 import '../models/get_performance_report_model.dart';
 import '../../domain/usecases/get_performance_report_use_case.dart';
+import '../models/fetch_notifications_model.dart';
+import '../../domain/usecases/fetch_notifications_use_case.dart';
+import '../models/make_read_all_notifications_model.dart';
+import '../../domain/usecases/make_read_all_notifications_use_case.dart';
 
 @lazySingleton
 class HomeRemoteDataSource with HandlingApiManager {
@@ -92,10 +96,43 @@ class HomeRemoteDataSource with HandlingApiManager {
     );
   }
 
-
-  Future<GetPerformanceReportModel> getPerformanceReport(GetPerformanceReportParams params) {
+  Future<GetPerformanceReportModel> getPerformanceReport(
+    GetPerformanceReportParams params,
+  ) {
     return wrapHandlingApi(
-      tryCall: () => dioNetwork.getData(endPoint: '/api/v1/sm-reports/performance?startDate=2026-1-1&endDate=2026-1-1', params: params.getParams(), data: params.getBody().isEmpty ? null : params.getBody()),
+      tryCall: () => dioNetwork.getData(
+        endPoint:
+            '/api/v1/sm-reports/performance?startDate=2026-1-1&endDate=2026-1-1',
+        params: params.getParams(),
+        data: params.getBody().isEmpty ? null : params.getBody(),
+      ),
       jsonConvert: getPerformanceReportModelFromJson,
     );
-  }}
+  }
+
+  Future<FetchNotificationsModel> fetchNotifications(
+    FetchNotificationsParams params,
+  ) {
+    return wrapHandlingApi(
+      tryCall: () => dioNetwork.getData(
+        endPoint: '/api/v1/user/notifications',
+        params: params.getParams(),
+        data: params.getBody().isEmpty ? null : params.getBody(),
+      ),
+      jsonConvert: fetchNotificationsModelFromJson,
+    );
+  }
+
+  Future<MakeReadAllNotificationsModel> makeReadAllNotifications(
+    MakeReadAllNotificationsParams params,
+  ) {
+    return wrapHandlingApi(
+      tryCall: () => dioNetwork.patchData(
+        endPoint: '/api/v1/user/notifications/read-all',
+        data: params.getBody(),
+        params: params.getParams(),
+      ),
+      jsonConvert: (_) => MakeReadAllNotificationsModel(),
+    );
+  }
+}
