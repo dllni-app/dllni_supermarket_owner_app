@@ -47,7 +47,7 @@ class AddNewProductScreen extends StatelessWidget {
                         AddProductWayCard(
                           onTap: () {
                             context.pushRoute(
-                              "/products/new_product/menu",
+                              "/products/new_product/catalog",
                               arguments: UploadFileType.image,
                             );
                           },

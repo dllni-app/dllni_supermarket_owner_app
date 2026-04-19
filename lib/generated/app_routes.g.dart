@@ -10,6 +10,7 @@ import 'package:dllni_supermarket_owner_app/features/products/view/screens/add_n
 import 'package:dllni_supermarket_owner_app/features/products/view/screens/add_product_ai_screen.dart';
 import 'package:dllni_supermarket_owner_app/features/products/view/screens/add_product_details_screen.dart';
 import 'package:dllni_supermarket_owner_app/features/products/view/screens/add_product_menu_screen.dart';
+import 'package:dllni_supermarket_owner_app/features/products/view/screens/search_from_catalog_screen.dart';
 import 'package:dllni_supermarket_owner_app/features/profile/view/screens/coupons_management_screen.dart';
 import 'package:dllni_supermarket_owner_app/features/profile/view/screens/create_coupon_screen.dart';
 import 'package:dllni_supermarket_owner_app/features/profile/view/screens/create_new_employee_screen.dart';
@@ -83,6 +84,11 @@ class GeneratedAppRoutes {
           );
         }
         return _errorRoute(settings);
+      case '/products/new_product/catalog':
+        return MaterialPageRoute(
+          builder: (_) => SearchFromCatalogScreen(),
+          settings: settings,
+        );
       case '/coupons_management':
         return MaterialPageRoute(
           builder: (_) => CouponsManagementScreen(),
