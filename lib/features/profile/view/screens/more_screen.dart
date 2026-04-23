@@ -1,245 +1,19 @@
+import 'dart:convert';
+
 import 'package:common_package/common_package.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:toastification/toastification.dart';
 
-import '../../../../core/di/injection.dart';
-import '../../../home/domain/usecases/get_daily_count_use_case.dart';
-import '../../../home/domain/usecases/get_dashboard_overview_use_case.dart';
-import '../../../home/view/manager/bloc/home_bloc.dart';
-import '../../../home/view/widgets/orders_chart.dart';
-import '../../../home/view/widgets/overview_section.dart';
 import '../widgets/more_app_bar.dart';
 import '../widgets/section_card.dart';
 import '../widgets/section_title.dart';
 
-class MoreScreen extends StatelessWidget {
+class MoreScreen extends StatefulWidget {
   const MoreScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => getIt<HomeBloc>()
-        ..add(GetDashboardOverviewEvent(params: GetDashboardOverviewParams()))
-        ..add(GetDailyCountEvent(params: GetDailyCountParams())),
-      child: Scaffold(
-        body: Column(
-          children: [
-            MoreAppBar(title: 'سوبر ماركت السلطان', storeId: '122345678'),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: EdgeInsetsDirectional.symmetric(horizontal: 16),
-                child: Column(
-                  children: [
-                    SizedBox(height: 16),
-                    OverviewSection(showQuickPoints: false),
-                    SizedBox(height: 20),
-                    OrdersChartCard(),
-                    SizedBox(height: 24),
-                    SectionTitle(title: 'إعدادات السوبر ماركت'),
-                    SizedBox(height: 16),
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(24),
-                        color: context.onPrimaryContainer,
-                        border: Border.all(color: Color(0xffF3F4F6), width: 1),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withAlpha(6),
-                            offset: Offset(0, 2),
-                            blurRadius: 10,
-                          ),
-                        ],
-                      ),
-                      padding: EdgeInsetsDirectional.all(16),
-                      child: Column(
-                        children: [
-                          SectionCard(
-                            containerColor: Color(0xffD1FAE5),
-                            iconColor: Color(0xff059669),
-                            icon: FontAwesomeIcons.store,
-                            title: "معلومات السوبر ماركت",
-                            subtitle: 'الاسم والعنوان والتفاصيل',
-                            onTap: () {
-                              context.pushRoute('/profile');
-                            },
-                          ),
-                          Padding(
-                            padding: EdgeInsetsDirectional.symmetric(
-                              vertical: 16,
-                            ),
-                            child: Divider(
-                              color: context.surface,
-                              thickness: .5,
-                            ),
-                          ),
-                          SectionCard(
-                            containerColor: Color(0xffE0F2FE),
-                            iconColor: Color(0xff0284C7),
-                            icon: FontAwesomeIcons.solidClock,
-                            title: 'ساعات العمل',
-                            subtitle: 'تحديد اوقات الفتح والاغلاق',
-                            onTap: () {
-                              context.pushRoute('/workingtime');
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    SectionTitle(title: 'العروض والتسويق'),
-                    SizedBox(height: 16),
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(24),
-                        color: context.onPrimaryContainer,
-                        border: Border.all(color: Color(0xffF3F4F6), width: 1),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withAlpha(6),
-                            offset: Offset(0, 2),
-                            blurRadius: 10,
-                          ),
-                        ],
-                      ),
-                      padding: EdgeInsetsDirectional.all(16),
-                      child: Column(
-                        children: [
-                          SectionCard(
-                            containerColor: Color(0xffFEE2E2),
-                            iconColor: Color(0xffDC2626),
-                            icon: FontAwesomeIcons.circleQuestion,
-                            title: 'ادارة العروض',
-                            subtitle: 'انشاء وتعديل العروض الترويجية',
-                            onTap: () {
-                              context.pushRoute('/offers_management');
-                            },
-                          ),
-                          Padding(
-                            padding: EdgeInsetsDirectional.symmetric(
-                              vertical: 16,
-                            ),
-                            child: Divider(
-                              color: context.surface,
-                              thickness: .5,
-                            ),
-                          ),
-                          SectionCard(
-                            containerColor: Color(0xffFEF3C7),
-                            iconColor: Color(0xffD97706),
-                            icon: FontAwesomeIcons.ticket,
-                            title: 'الكوبونات',
-                            subtitle: 'ادارة اكواد الخصم',
-                            onTap: () {
-                              context.pushRoute('/coupons_management');
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    SectionTitle(title: 'الموظفون والسجل'),
-                    SizedBox(height: 16),
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(24),
-                        color: context.onPrimaryContainer,
-                        border: Border.all(color: Color(0xffF3F4F6), width: 1),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withAlpha(6),
-                            offset: Offset(0, 2),
-                            blurRadius: 10,
-                          ),
-                        ],
-                      ),
-                      padding: EdgeInsetsDirectional.all(16),
-                      child: Column(
-                        children: [
-                          SectionCard(
-                            containerColor: Color(0xffCFFAFE),
-                            iconColor: Color(0xff0891B2),
-                            icon: FontAwesomeIcons.users,
-                            title: 'ادارة الموظفين',
-                            subtitle: 'إضافة وتعديل بيانات الموظفين',
-                            onTap: () {
-                              context.pushRoute('/profile/employees');
-                            },
-                          ),
-                          Padding(
-                            padding: EdgeInsetsDirectional.symmetric(
-                              vertical: 16,
-                            ),
-                            child: Divider(
-                              color: context.surface,
-                              thickness: .5,
-                            ),
-                          ),
-                          SectionCard(
-                            containerColor: Color(0xffF1F5F9),
-                            iconColor: Color(0xff475569),
-                            icon: FontAwesomeIcons.timesCircle,
-                            title: 'سجل نشاط الموظفين',
-                            subtitle: 'متابعة نشاط الفريق',
-                            onTap: () {
-                              AppToast.showToast(
-                                context: context,
-                                message: "هذه الميزة غير متوفرة حالياً",
-                                type: ToastificationType.info,
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    SizedBox(height: 16),
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(24),
-                        color: context.onPrimaryContainer,
-                        border: Border.all(color: Color(0xffF3F4F6), width: 1),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withAlpha(6),
-                            offset: Offset(0, 2),
-                            blurRadius: 10,
-                          ),
-                        ],
-                      ),
-                      padding: EdgeInsetsDirectional.all(16),
-                      child: Column(
-                        children: [
-                          SectionCard(
-                            containerColor: Color(0xffDBEAFE),
-                            iconColor: Color(0xff2563EB),
-                            icon: FontAwesomeIcons.headset,
-                            title: 'الدعم الفني',
-                            subtitle: 'تواصل مع فريق الدعم',
-                            onTap: () {
-                              AppToast.showToast(
-                                context: context,
-                                message: "هذه الميزة غير متوفرة حالياً",
-                                type: ToastificationType.info,
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 12),
-                    _LogoutButton(),
-                    SizedBox(height: 12),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  State<MoreScreen> createState() => _MoreScreenState();
 }
 
 class _LogoutButton extends StatelessWidget {
@@ -314,5 +88,226 @@ class _LogoutButton extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _MoreScreenState extends State<MoreScreen> {
+  Map<String, dynamic> storeProfile = {};
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Column(
+        children: [
+          MoreAppBar(
+            title: storeProfile["user"]['name'],
+            storeId: storeProfile["user"]['id'].toString(),
+          ),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: EdgeInsetsDirectional.symmetric(horizontal: 16),
+              child: Column(
+                children: [
+                  SizedBox(height: 24),
+                  SectionTitle(title: 'إعدادات السوبر ماركت'),
+                  SizedBox(height: 16),
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(24),
+                      color: context.onPrimaryContainer,
+                      border: Border.all(color: Color(0xffF3F4F6), width: 1),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withAlpha(6),
+                          offset: Offset(0, 2),
+                          blurRadius: 10,
+                        ),
+                      ],
+                    ),
+                    padding: EdgeInsetsDirectional.all(16),
+                    child: Column(
+                      children: [
+                        SectionCard(
+                          containerColor: Color(0xffD1FAE5),
+                          iconColor: Color(0xff059669),
+                          icon: FontAwesomeIcons.store,
+                          title: "معلومات السوبر ماركت",
+                          subtitle: 'الاسم والعنوان والتفاصيل',
+                          onTap: () {
+                            context.pushRoute('/profile');
+                          },
+                        ),
+                        Padding(
+                          padding: EdgeInsetsDirectional.symmetric(
+                            vertical: 16,
+                          ),
+                          child: Divider(color: context.surface, thickness: .5),
+                        ),
+                        SectionCard(
+                          containerColor: Color(0xffE0F2FE),
+                          iconColor: Color(0xff0284C7),
+                          icon: FontAwesomeIcons.solidClock,
+                          title: 'ساعات العمل',
+                          subtitle: 'تحديد اوقات الفتح والاغلاق',
+                          onTap: () {
+                            context.pushRoute('/workingtime');
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  SectionTitle(title: 'العروض والتسويق'),
+                  SizedBox(height: 16),
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(24),
+                      color: context.onPrimaryContainer,
+                      border: Border.all(color: Color(0xffF3F4F6), width: 1),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withAlpha(6),
+                          offset: Offset(0, 2),
+                          blurRadius: 10,
+                        ),
+                      ],
+                    ),
+                    padding: EdgeInsetsDirectional.all(16),
+                    child: Column(
+                      children: [
+                        SectionCard(
+                          containerColor: Color(0xffFEE2E2),
+                          iconColor: Color(0xffDC2626),
+                          icon: FontAwesomeIcons.circleQuestion,
+                          title: 'ادارة العروض',
+                          subtitle: 'انشاء وتعديل العروض الترويجية',
+                          onTap: () {
+                            context.pushRoute('/offers_management');
+                          },
+                        ),
+                        Padding(
+                          padding: EdgeInsetsDirectional.symmetric(
+                            vertical: 16,
+                          ),
+                          child: Divider(color: context.surface, thickness: .5),
+                        ),
+                        SectionCard(
+                          containerColor: Color(0xffFEF3C7),
+                          iconColor: Color(0xffD97706),
+                          icon: FontAwesomeIcons.ticket,
+                          title: 'الكوبونات',
+                          subtitle: 'ادارة اكواد الخصم',
+                          onTap: () {
+                            context.pushRoute('/coupons_management');
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  SectionTitle(title: 'الموظفون والسجل'),
+                  SizedBox(height: 16),
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(24),
+                      color: context.onPrimaryContainer,
+                      border: Border.all(color: Color(0xffF3F4F6), width: 1),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withAlpha(6),
+                          offset: Offset(0, 2),
+                          blurRadius: 10,
+                        ),
+                      ],
+                    ),
+                    padding: EdgeInsetsDirectional.all(16),
+                    child: Column(
+                      children: [
+                        SectionCard(
+                          containerColor: Color(0xffCFFAFE),
+                          iconColor: Color(0xff0891B2),
+                          icon: FontAwesomeIcons.users,
+                          title: 'ادارة الموظفين',
+                          subtitle: 'إضافة وتعديل بيانات الموظفين',
+                          onTap: () {
+                            context.pushRoute('/profile/employees');
+                          },
+                        ),
+                        Padding(
+                          padding: EdgeInsetsDirectional.symmetric(
+                            vertical: 16,
+                          ),
+                          child: Divider(color: context.surface, thickness: .5),
+                        ),
+                        SectionCard(
+                          containerColor: Color(0xffF1F5F9),
+                          iconColor: Color(0xff475569),
+                          icon: FontAwesomeIcons.timesCircle,
+                          title: 'سجل نشاط الموظفين',
+                          subtitle: 'متابعة نشاط الفريق',
+                          onTap: () {
+                            AppToast.showToast(
+                              context: context,
+                              message: "هذه الميزة غير متوفرة حالياً",
+                              type: ToastificationType.info,
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  SizedBox(height: 16),
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(24),
+                      color: context.onPrimaryContainer,
+                      border: Border.all(color: Color(0xffF3F4F6), width: 1),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withAlpha(6),
+                          offset: Offset(0, 2),
+                          blurRadius: 10,
+                        ),
+                      ],
+                    ),
+                    padding: EdgeInsetsDirectional.all(16),
+                    child: Column(
+                      children: [
+                        SectionCard(
+                          containerColor: Color(0xffDBEAFE),
+                          iconColor: Color(0xff2563EB),
+                          icon: FontAwesomeIcons.headset,
+                          title: 'الدعم الفني',
+                          subtitle: 'تواصل مع فريق الدعم',
+                          onTap: () {
+                            AppToast.showToast(
+                              context: context,
+                              message: "هذه الميزة غير متوفرة حالياً",
+                              type: ToastificationType.info,
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 12),
+                  _LogoutButton(),
+                  SizedBox(height: 12),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    storeProfile = jsonDecode(
+      SharedPreferencesHelper.getData(key: 'user') as String,
+    );
+    print(storeProfile);
   }
 }

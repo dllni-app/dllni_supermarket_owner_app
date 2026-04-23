@@ -284,29 +284,15 @@ class OrderCard extends StatelessWidget {
                             ),
                           )
                         else if (status == OrderStatus.readyForPickup)
-                          Row(
-                            spacing: 16,
-                            children: [
-                              Expanded(
-                                child: AppButton(
-                                  color: const Color(0xFF24B364),
-                                  title: "تسليم للمندوب",
-                                  onTap: () {
-                                    print("give to worker");
-                                  },
-                                ),
-                              ),
-                              Expanded(
-                                child: AppOutlinedButton(
-                                  withBackground: false,
-                                  color: const Color(0xFF6C63FF),
-                                  title: "طباعة الفاتورة",
-                                  onTap: () {
-                                    print("print bill");
-                                  },
-                                ),
-                              ),
-                            ],
+                          SizedBox(
+                            width: double.infinity,
+                            child: AppButton(
+                              color: const Color(0xFF24B364),
+                              title: "تسليم للمندوب",
+                              onTap: () {
+                                print("give to worker");
+                              },
+                            ),
                           ),
                       ],
                     ),

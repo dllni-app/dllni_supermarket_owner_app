@@ -7,6 +7,114 @@ import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_shadows.dart';
 import '../../../products/view/screens/add_product_menu_screen.dart';
 
+class QuickActionChip extends StatelessWidget {
+  final QuickActionChipItem item;
+
+  const QuickActionChip({super.key, required this.item});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: item.onTap,
+      borderRadius: BorderRadius.all(Radius.circular(23)),
+      child: Container(
+        width: item.width,
+        height: 47,
+        padding: EdgeInsets.fromLTRB(20, 3, 3, 3),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(23)),
+          color: const Color(0xFFFFEAD6),
+        ),
+        child: Row(
+          children: [
+            CircleAvatar(
+              radius: 21.5,
+              backgroundColor: AppColors.accent,
+              child: Icon(item.icon, size: 18, color: AppColors.white),
+            ),
+            SizedBox(width: 10),
+            Flexible(
+              child: AppText(
+                item.label,
+                style: TextStyle(
+                  color: AppColors.accent,
+                  fontSize: 10,
+                  height: 1.5,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class QuickActionChipItem {
+  final double width;
+  final String label;
+  final IconData icon;
+  final void Function() onTap;
+
+  QuickActionChipItem({
+    required this.width,
+    required this.label,
+    required this.icon,
+    required this.onTap,
+  });
+}
+
+class QuickActionChipOld extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final bool isPrimary;
+  final void Function() onTap;
+  const QuickActionChipOld({
+    super.key,
+    required this.label,
+    required this.icon,
+    this.isPrimary = false,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      spacing: 8,
+      children: [
+        InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(24),
+          child: Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              color: isPrimary ? context.primaryContainer : AppColors.white,
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: const Color(0xFFF3F4F6)),
+              boxShadow: [AppShadows.shadow],
+            ),
+            child: Icon(
+              icon,
+              color: isPrimary ? AppColors.white : const Color(0xFF064E3B),
+              size: 18,
+            ),
+          ),
+        ),
+        AppText(
+          label,
+          style: TextStyle(
+            fontSize: 10,
+            color: Color(0xFF4B5563),
+            height: 1.5,
+            letterSpacing: 0,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class QuickActionsSection extends StatelessWidget {
   const QuickActionsSection({super.key});
 
@@ -68,10 +176,7 @@ class QuickActionsSection extends StatelessWidget {
                   label: "البحث في الكتالوج المركزي",
                   icon: FontAwesomeIcons.magnifyingGlass,
                   onTap: () {
-                    context.pushRoute(
-                      "/products/new_product/menu",
-                      arguments: UploadFileType.image,
-                    );
+                    context.pushRoute("/products/new_product/catalog");
                   },
                 ),
                 QuickActionChipItem(
@@ -92,63 +197,6 @@ class QuickActionsSection extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class QuickActionChipItem {
-  final double width;
-  final String label;
-  final IconData icon;
-  final void Function() onTap;
-
-  QuickActionChipItem({
-    required this.width,
-    required this.label,
-    required this.icon,
-    required this.onTap,
-  });
-}
-
-class QuickActionChip extends StatelessWidget {
-  const QuickActionChip({super.key, required this.item});
-
-  final QuickActionChipItem item;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: item.onTap,
-      borderRadius: BorderRadius.all(Radius.circular(23)),
-      child: Container(
-        width: item.width,
-        height: 47,
-        padding: EdgeInsets.fromLTRB(20, 3, 3, 3),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(23)),
-          color: const Color(0xFFFFEAD6),
-        ),
-        child: Row(
-          children: [
-            CircleAvatar(
-              radius: 21.5,
-              backgroundColor: AppColors.accent,
-              child: Icon(item.icon, size: 18, color: AppColors.white),
-            ),
-            SizedBox(width: 10),
-            Flexible(
-              child: AppText(
-                item.label,
-                style: TextStyle(
-                  color: AppColors.accent,
-                  fontSize: 10,
-                  height: 1.5,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
@@ -224,57 +272,6 @@ class QuickActionsSectionOld extends StatelessWidget {
               ),
             ),
           ],
-        ),
-      ],
-    );
-  }
-}
-
-class QuickActionChipOld extends StatelessWidget {
-  const QuickActionChipOld({
-    super.key,
-    required this.label,
-    required this.icon,
-    this.isPrimary = false,
-    required this.onTap,
-  });
-  final String label;
-  final IconData icon;
-  final bool isPrimary;
-  final void Function() onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      spacing: 8,
-      children: [
-        InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(24),
-          child: Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              color: isPrimary ? context.primaryContainer : AppColors.white,
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: const Color(0xFFF3F4F6)),
-              boxShadow: [AppShadows.shadow],
-            ),
-            child: Icon(
-              icon,
-              color: isPrimary ? AppColors.white : const Color(0xFF064E3B),
-              size: 18,
-            ),
-          ),
-        ),
-        AppText(
-          label,
-          style: TextStyle(
-            fontSize: 10,
-            color: Color(0xFF4B5563),
-            height: 1.5,
-            letterSpacing: 0,
-          ),
         ),
       ],
     );

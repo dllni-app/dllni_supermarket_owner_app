@@ -23,6 +23,11 @@ import '../../../domain/usecases/update_product_use_case.dart';
 import '../../../data/models/update_product_model.dart';
 import '../../../domain/usecases/import_products_file_use_case.dart';
 import '../../../data/models/import_products_file_model.dart';
+import '../../../data/models/search_master_products_model.dart';
+import '../../../domain/usecases/search_master_products_use_case.dart';
+import '../../../domain/usecases/import_products_from_master_use_case.dart';
+import '../../../data/models/import_products_from_master_model.dart';
+import '../../../domain/usecases/delete_product_use_case.dart';
 
 part 'products_event.dart';
 part 'products_state.dart';
@@ -38,6 +43,10 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
   final TotalProducstCountUseCase totalProducstCountUseCase;
   final GetLowStockUseCase getLowStockUseCase;
   final GetProductsUseCase getProductsUseCase;
+  final SearchMasterProductsUseCase searchMasterProductsUseCase;
+  final ImportProductsFromMasterUseCase importProductsFromMasterUseCase;
+  final DeleteProductUseCase deleteProductUseCase;
+
   ProductsBloc(
     this.getProductsUseCase,
     this.getLowStockUseCase,
@@ -47,7 +56,11 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
     this.getProductFromTextUseCase,
     this.addProductUseCase,
     this.updateProductUseCase,
-    this.importProductsFileUseCase,) : super(ProductsState()) {
+    this.importProductsFileUseCase,
+    this.searchMasterProductsUseCase,
+    this.importProductsFromMasterUseCase,
+    this.deleteProductUseCase,
+  ) : super(ProductsState()) {
     on<GetProductsEvent>(_getProducts, transformer: droppableProMax());
     on<GetLowStockEvent>(_getLowStock);
     on<TotalProductsCountEvent>(_totalProducstCount);
@@ -56,7 +69,16 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
     on<GetProductFromTextEvent>(_getProductFromText);
     on<AddProductEvent>(_addProduct);
     on<UpdateProductEvent>(_updateProduct);
-    on<ImportProductsFileEvent>(_importProductsFile);}
+    on<DeleteProductEvent>(_deleteProduct);
+    on<ResetDeleteProductEvent>(_resetDeleteProduct);
+    on<ImportProductsFileEvent>(_importProductsFile);
+    on<FetchMasterProductsSearchEvent>(
+      _getMasterProductsSearch,
+      transformer: droppableProMax(),
+    );
+    on<SearchMasterProductsSubmitted>(_searchMasterProductsSubmitted);
+    on<ImportProductsFromMasterEvent>(_importProductsFromMaster);
+  }
 
   EventTransformer<T> droppableProMax<T extends EventWithReload>() {
     return (events, mapper) {
@@ -140,99 +162,287 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
     );
   }
 
-
-  FutureOr<void> _getCategories(GetCategoriesEvent event, Emitter<ProductsState> emit) async {
+  FutureOr<void> _getCategories(
+    GetCategoriesEvent event,
+    Emitter<ProductsState> emit,
+  ) async {
     emit(state.copyWith(categoriesStatus: BlocStatus.loading));
     final res = await getCategoriesUseCase(event.params);
-    res.fold((l) {
-      emit(state.copyWith(
-        categoriesStatus: BlocStatus.failed,
-        errorMessage: l.message,
-      ));
-    }, (r) {
-      emit(state.copyWith(
-        categoriesStatus: BlocStatus.success,
-        categories: r,
-      ));
-    });
+    res.fold(
+      (l) {
+        emit(
+          state.copyWith(
+            categoriesStatus: BlocStatus.failed,
+            errorMessage: l.message,
+          ),
+        );
+      },
+      (r) {
+        emit(
+          state.copyWith(categoriesStatus: BlocStatus.success, categories: r),
+        );
+      },
+    );
   }
 
-  FutureOr<void> _getProductFromImage(GetProductFromImageEvent event, Emitter<ProductsState> emit) async {
+  FutureOr<void> _getProductFromImage(
+    GetProductFromImageEvent event,
+    Emitter<ProductsState> emit,
+  ) async {
     emit(state.copyWith(productFromImageStatus: BlocStatus.loading));
     final res = await getProductFromImageUseCase(event.params);
-    res.fold((l) {
-      emit(state.copyWith(
-        productFromImageStatus: BlocStatus.failed,
-        errorMessage: l.message,
-      ));
-    }, (r) {
-      emit(state.copyWith(
-        productFromImageStatus: BlocStatus.success,
-        productFromImage: r,
-      ));
-    });
+    res.fold(
+      (l) {
+        emit(
+          state.copyWith(
+            productFromImageStatus: BlocStatus.failed,
+            errorMessage: l.message,
+          ),
+        );
+      },
+      (r) {
+        emit(
+          state.copyWith(
+            productFromImageStatus: BlocStatus.success,
+            productFromImage: r,
+          ),
+        );
+      },
+    );
   }
 
-  FutureOr<void> _getProductFromText(GetProductFromTextEvent event, Emitter<ProductsState> emit) async {
+  FutureOr<void> _getProductFromText(
+    GetProductFromTextEvent event,
+    Emitter<ProductsState> emit,
+  ) async {
     emit(state.copyWith(productFromTextStatus: BlocStatus.loading));
     final res = await getProductFromTextUseCase(event.params);
-    res.fold((l) {
-      emit(state.copyWith(
-        productFromTextStatus: BlocStatus.failed,
-        errorMessage: l.message,
-      ));
-    }, (r) {
-      emit(state.copyWith(
-        productFromTextStatus: BlocStatus.success,
-        productFromText: r,
-      ));
-    });
+    res.fold(
+      (l) {
+        emit(
+          state.copyWith(
+            productFromTextStatus: BlocStatus.failed,
+            errorMessage: l.message,
+          ),
+        );
+      },
+      (r) {
+        emit(
+          state.copyWith(
+            productFromTextStatus: BlocStatus.success,
+            productFromText: r,
+          ),
+        );
+      },
+    );
   }
 
-  FutureOr<void> _addProduct(AddProductEvent event, Emitter<ProductsState> emit) async {
+  FutureOr<void> _addProduct(
+    AddProductEvent event,
+    Emitter<ProductsState> emit,
+  ) async {
     emit(state.copyWith(addProductStatus: BlocStatus.loading));
     final res = await addProductUseCase(event.params);
-    res.fold((l) {
-      emit(state.copyWith(
-        addProductStatus: BlocStatus.failed,
-        errorMessage: l.message,
-      ));
-    }, (r) {
-      emit(state.copyWith(
-        addProductStatus: BlocStatus.success,
-        addProduct: r,
-      ));
-    });
+    res.fold(
+      (l) {
+        emit(
+          state.copyWith(
+            addProductStatus: BlocStatus.failed,
+            errorMessage: l.message,
+          ),
+        );
+      },
+      (r) {
+        emit(
+          state.copyWith(addProductStatus: BlocStatus.success, addProduct: r),
+        );
+      },
+    );
   }
 
-  FutureOr<void> _updateProduct(UpdateProductEvent event, Emitter<ProductsState> emit) async {
+  FutureOr<void> _updateProduct(
+    UpdateProductEvent event,
+    Emitter<ProductsState> emit,
+  ) async {
     emit(state.copyWith(productStatus: BlocStatus.loading));
     final res = await updateProductUseCase(event.params);
-    res.fold((l) {
-      emit(state.copyWith(
-        productStatus: BlocStatus.failed,
-        errorMessage: l.message,
-      ));
-    }, (r) {
-      emit(state.copyWith(
-        productStatus: BlocStatus.success,
-        product: r,
-      ));
-    });
+    res.fold(
+      (l) {
+        emit(
+          state.copyWith(
+            productStatus: BlocStatus.failed,
+            errorMessage: l.message,
+          ),
+        );
+      },
+      (r) {
+        emit(state.copyWith(productStatus: BlocStatus.success, product: r));
+      },
+    );
   }
 
-  FutureOr<void> _importProductsFile(ImportProductsFileEvent event, Emitter<ProductsState> emit) async {
+  FutureOr<void> _deleteProduct(
+    DeleteProductEvent event,
+    Emitter<ProductsState> emit,
+  ) async {
+    emit(state.copyWith(deleteProductStatus: BlocStatus.loading));
+    final res = await deleteProductUseCase(event.params);
+    res.fold(
+      (l) {
+        emit(
+          state.copyWith(
+            deleteProductStatus: BlocStatus.failed,
+            errorMessage: l.message,
+          ),
+        );
+      },
+      (r) {
+        emit(state.copyWith(deleteProductStatus: BlocStatus.success));
+      },
+    );
+  }
+
+  void _resetDeleteProduct(
+    ResetDeleteProductEvent event,
+    Emitter<ProductsState> emit,
+  ) {
+    emit(state.copyWith(deleteProductStatus: null));
+  }
+
+  FutureOr<void> _importProductsFile(
+    ImportProductsFileEvent event,
+    Emitter<ProductsState> emit,
+  ) async {
     emit(state.copyWith(importProductsFileStatus: BlocStatus.loading));
     final res = await importProductsFileUseCase(event.params);
-    res.fold((l) {
-      emit(state.copyWith(
-        importProductsFileStatus: BlocStatus.failed,
-        errorMessage: l.message,
-      ));
-    }, (r) {
-      emit(state.copyWith(
-        importProductsFileStatus: BlocStatus.success,
-        importProductsFile: r,
-      ));
-    });
-  }}
+    res.fold(
+      (l) {
+        emit(
+          state.copyWith(
+            importProductsFileStatus: BlocStatus.failed,
+            errorMessage: l.message,
+          ),
+        );
+      },
+      (r) {
+        emit(
+          state.copyWith(
+            importProductsFileStatus: BlocStatus.success,
+            importProductsFile: r,
+          ),
+        );
+      },
+    );
+  }
+
+  FutureOr<void> _getMasterProductsSearch(
+    FetchMasterProductsSearchEvent event,
+    Emitter<ProductsState> emit,
+  ) async {
+    if (!state.catalogMasterProducts!.isEndPage || event.isReload) {
+      emit(
+        state.copyWith(
+          catalogMasterProducts: state.catalogMasterProducts!.setLoading(
+            isReload: event.isReload,
+          ),
+        ),
+      );
+      final page = event.isReload ? 1 : state.catalogMasterProducts!.pageNumber;
+      final res = await searchMasterProductsUseCase(
+        SearchMasterProductsParams(
+          page: page,
+          index: state.catalogMasterSearchIndex,
+        ),
+      );
+      res.fold(
+        (l) {
+          emit(
+            state.copyWith(
+              catalogMasterProducts: state.catalogMasterProducts!.setFaild(
+                errorMessage: l.message,
+              ),
+              errorMessage: l.message,
+            ),
+          );
+        },
+        (r) {
+          emit(
+            state.copyWith(
+              catalogMasterProducts: state.catalogMasterProducts!.setSuccess(
+                data: r.data ?? [],
+                perPage: 10,
+              ),
+            ),
+          );
+        },
+      );
+    }
+  }
+
+  FutureOr<void> _searchMasterProductsSubmitted(
+    SearchMasterProductsSubmitted event,
+    Emitter<ProductsState> emit,
+  ) async {
+    final trimmed = event.raw.trim();
+    final index = trimmed.isEmpty ? null : trimmed;
+    emit(
+      state.copyWith(
+        catalogMasterSearchIndex: index,
+        catalogMasterProducts: state.catalogMasterProducts!.setLoading(
+          isReload: true,
+        ),
+      ),
+    );
+    final res = await searchMasterProductsUseCase(
+      SearchMasterProductsParams(page: 1, index: index),
+    );
+    res.fold(
+      (l) {
+        emit(
+          state.copyWith(
+            catalogMasterProducts: state.catalogMasterProducts!.setFaild(
+              errorMessage: l.message,
+            ),
+            errorMessage: l.message,
+          ),
+        );
+      },
+      (r) {
+        emit(
+          state.copyWith(
+            catalogMasterProducts: state.catalogMasterProducts!.setSuccess(
+              data: r.data ?? [],
+              perPage: 10,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  FutureOr<void> _importProductsFromMaster(
+    ImportProductsFromMasterEvent event,
+    Emitter<ProductsState> emit,
+  ) async {
+    emit(state.copyWith(importProductsFromMasterStatus: BlocStatus.loading));
+    final res = await importProductsFromMasterUseCase(event.params);
+    res.fold(
+      (l) {
+        emit(
+          state.copyWith(
+            importProductsFromMasterStatus: BlocStatus.failed,
+            errorMessage: l.message,
+          ),
+        );
+      },
+      (r) {
+        emit(
+          state.copyWith(
+            importProductsFromMasterStatus: BlocStatus.success,
+            importProductsFromMaster: r,
+          ),
+        );
+      },
+    );
+  }
+}

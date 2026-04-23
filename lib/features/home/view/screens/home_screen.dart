@@ -27,8 +27,6 @@ class HomeScreen extends StatelessWidget {
         body: Column(
           children: [
             HomeAppBar(
-              shopName: 'مطعم البيت الحلبي',
-              shopAddress: "الفرع الرئيسي - العزيزية",
             ),
             Expanded(
               child: SingleChildScrollView(

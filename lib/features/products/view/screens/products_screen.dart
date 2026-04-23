@@ -5,6 +5,7 @@ import 'package:dllni_supermarket_owner_app/core/widgets/failure_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:toastification/toastification.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/utils/app_svgs.dart';
@@ -13,6 +14,7 @@ import '../../domain/usecases/get_categories_use_case.dart';
 import '../../domain/usecases/get_low_stock_use_case.dart';
 import '../../domain/usecases/get_products_use_case.dart';
 import '../../domain/usecases/total_producst_count_use_case.dart';
+import '../../domain/usecases/delete_product_use_case.dart';
 import '../manager/bloc/products_bloc.dart';
 import '../widgets/big_button_with_icon.dart';
 import '../widgets/loadings/products_list_loading.dart';
@@ -21,6 +23,7 @@ import '../widgets/loadings/state_pointer_loading.dart';
 import '../widgets/product_card.dart';
 import '../widgets/products_tab_bar.dart';
 import '../widgets/state_pointer.dart';
+import 'add_product_details_screen.dart';
 
 // @AutoRoutePage(path: "/products")
 class ProductsScreen extends StatefulWidget {
@@ -34,25 +37,47 @@ class _ProductsScreenState extends State<ProductsScreen> {
   int? selectedCategoryId;
   String? search;
   @override
-  void initState() {
-    SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(
-        statusBarIconBrightness: Brightness.light,
-        statusBarBrightness: Brightness.dark,
-      ),
-    );
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => getIt<ProductsBloc>()
         ..add(GetProductsEvent(params: GetProductsParams(page: 1)))
         ..add(GetCategoriesEvent(params: GetCategoriesParams()))
         ..add(TotalProductsCountEvent(params: TotalProductsCountParams()))
-        ..add(GetLowStockEvent(params: GetLowStockParams(storeId: 1))),
-      child: Scaffold(
+        ..add(GetLowStockEvent(params: GetLowStockParams())),
+      child: BlocListener<ProductsBloc, ProductsState>(
+        listenWhen: (previous, current) =>
+            previous.deleteProductStatus != current.deleteProductStatus,
+        listener: (context, state) {
+          if (state.deleteProductStatus == BlocStatus.success) {
+            context.read<ProductsBloc>().add(
+              GetProductsEvent(
+                isReload: true,
+                params: GetProductsParams(
+                  page: 1,
+                  categoryId: selectedCategoryId,
+                  search: search,
+                ),
+              ),
+            );
+            context.read<ProductsBloc>().add(
+              TotalProductsCountEvent(params: TotalProductsCountParams()),
+            );
+            AppToast.showToast(
+              context: context,
+              message: "تم حذف المنتج",
+              type: ToastificationType.success,
+            );
+            context.read<ProductsBloc>().add(ResetDeleteProductEvent());
+          } else if (state.deleteProductStatus == BlocStatus.failed) {
+            AppToast.showToast(
+              context: context,
+              message: state.errorMessage ?? "فشل حذف المنتج",
+              type: ToastificationType.error,
+            );
+            context.read<ProductsBloc>().add(ResetDeleteProductEvent());
+          }
+        },
+        child: Scaffold(
         body: Column(
           children: [
             Builder(
@@ -141,7 +166,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                                     onRetry: () {
                                       context.read<ProductsBloc>().add(
                                         GetLowStockEvent(
-                                          params: GetLowStockParams(storeId: 1),
+                                          params: GetLowStockParams(),
                                         ),
                                       );
                                     },
@@ -254,6 +279,66 @@ class _ProductsScreenState extends State<ProductsScreen> {
                                 }
                                 return ProductCard(
                                   product: state.products!.list[index],
+                                  onEdit: (p) async {
+                                    final result = await context.pushRoute<bool>(
+                                      "/products/new_product/details",
+                                      arguments: AddProductDetailsParams.fromProduct(
+                                        p,
+                                      ),
+                                    );
+                                    if (result == true && context.mounted) {
+                                      context.read<ProductsBloc>().add(
+                                        GetProductsEvent(
+                                          isReload: true,
+                                          params: GetProductsParams(
+                                            page: 1,
+                                            categoryId: selectedCategoryId,
+                                            search: search,
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                  },
+                                  onDelete: (p) {
+                                    showDialog<void>(
+                                      context: context,
+                                      builder: (ctx) {
+                                        return AlertDialog(
+                                          title: Text("تأكيد الحذف"),
+                                          content: Text(
+                                            "هل تريد حذف \"${p.name ?? ""}\"؟",
+                                          ),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () =>
+                                                  Navigator.of(ctx).pop(),
+                                              child: Text("إلغاء"),
+                                            ),
+                                            TextButton(
+                                              onPressed: () {
+                                                Navigator.of(ctx).pop();
+                                                final id = p.id;
+                                                if (id == null) return;
+                                                context.read<ProductsBloc>().add(
+                                                  DeleteProductEvent(
+                                                    params: DeleteProductParams(
+                                                      productId: id,
+                                                    ),
+                                                  ),
+                                                );
+                                              },
+                                              child: Text(
+                                                "حذف",
+                                                style: TextStyle(
+                                                  color: Color(0xFFEF4444),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    );
+                                  },
                                 );
                               },
                               separatorBuilder: (context, index) =>
@@ -261,14 +346,22 @@ class _ProductsScreenState extends State<ProductsScreen> {
                               itemCount: state.products!.listLength(1),
                             );
                           },
-                          failedWidget: Center(child: FailureWidget(message: state.errorMessage.toString(),onRetry: () {
-                            context.read<ProductsBloc>().add(
-                              GetProductsEvent(
-                                params: GetProductsParams(categoryId: selectedCategoryId, search: search),
-                                isReload: true,
-                              ),
-                            );
-                          },),),
+                          failedWidget: Center(
+                            child: FailureWidget(
+                              message: state.errorMessage.toString(),
+                              onRetry: () {
+                                context.read<ProductsBloc>().add(
+                                  GetProductsEvent(
+                                    params: GetProductsParams(
+                                      categoryId: selectedCategoryId,
+                                      search: search,
+                                    ),
+                                    isReload: true,
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
                           onTapRetry: () {
                             context.read<ProductsBloc>().add(
                               GetProductsEvent(
@@ -287,7 +380,19 @@ class _ProductsScreenState extends State<ProductsScreen> {
           ],
         ),
       ),
+    ),
     );
+  }
+
+  @override
+  void initState() {
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+      ),
+    );
+    super.initState();
   }
 }
 

@@ -15,15 +15,48 @@ import '../../domain/usecases/update_product_use_case.dart';
 import '../manager/bloc/products_bloc.dart';
 
 class ProductCard extends StatefulWidget {
-  const ProductCard({super.key, required this.product});
   final GetProductsModelDataItem product;
+  final Future<void> Function(GetProductsModelDataItem product)? onEdit;
+  final void Function(GetProductsModelDataItem product)? onDelete;
+
+  const ProductCard({
+    super.key,
+    required this.product,
+    this.onEdit,
+    this.onDelete,
+  });
 
   @override
   State<ProductCard> createState() => _ProductCardState();
 }
 
+class _AvailabilityChip extends StatelessWidget {
+  final bool isAvailable;
+  const _AvailabilityChip({required this.isAvailable});
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: isAvailable ? Color(0x2928C76F) : Color(0x662F2B3D),
+        borderRadius: BorderRadius.all(Radius.circular(6)),
+      ),
+      child: Text(
+        isAvailable ? "متوفر" : "غير متوفر",
+        style: TextStyle(
+          color: isAvailable ? Color(0xFF24B364) : Color(0xE52F2B3D),
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+          height: 1.5,
+        ),
+      ),
+    );
+  }
+}
+
 class _ProductCardState extends State<ProductCard> {
-  bool enabled = true;
+  late bool enabled;
+
   @override
   Widget build(BuildContext context) {
     final bool unavailable = widget.product.stockQuantity == 0;
@@ -32,7 +65,6 @@ class _ProductCardState extends State<ProductCard> {
             (widget.product.lowStockThreshold ?? 0) &&
         widget.product.stockQuantity != 0;
     final bool available = !unavailable && !limited;
-
     return BlocProvider(
       create: (context) => getIt<ProductsBloc>(),
       child: Stack(
@@ -67,7 +99,13 @@ class _ProductCardState extends State<ProductCard> {
                       child: Stack(
                         alignment: Alignment.bottomCenter,
                         children: [
-                          AppImage.asset(AppImages.image1, size: 96),
+                          widget.product.imageUrls?.isEmpty == true
+                              ? AppImage.asset(AppImages.image1, size: 96)
+                              : AppImage.network(
+                                  widget.product.imageUrls?[0] ?? "",
+                                  size: 96,
+                                  fit: BoxFit.cover,
+                                ),
                           if (unavailable)
                             Container(
                               height: 96,
@@ -135,11 +173,66 @@ class _ProductCardState extends State<ProductCard> {
                                       ),
                                     ),
                                   ),
-                                  Icon(
-                                    Icons.more_vert,
-                                    size: 16,
-                                    color: Colors.grey,
-                                  ),
+                                  if (widget.onEdit != null ||
+                                      widget.onDelete != null)
+                                    Theme(
+                                      data: Theme.of(context).copyWith(
+                                        splashColor: Colors.transparent,
+                                        highlightColor: Colors.transparent,
+                                      ),
+                                      child: PopupMenuButton<String>(
+                                        padding: EdgeInsets.zero,
+                                        icon: Icon(
+                                          Icons.more_vert,
+                                          size: 16,
+                                          color: Colors.grey,
+                                        ),
+                                        onSelected: (value) async {
+                                          if (value == 'edit' &&
+                                              widget.onEdit != null) {
+                                            await widget.onEdit!(
+                                              widget.product,
+                                            );
+                                          } else if (value == 'delete' &&
+                                              widget.onDelete != null) {
+                                            widget.onDelete!(widget.product);
+                                          }
+                                        },
+                                        itemBuilder: (context) => [
+                                          if (widget.onEdit != null)
+                                            PopupMenuItem(
+                                              value: 'edit',
+                                              child: Text(
+                                                "تعديل",
+                                                textAlign: TextAlign.start,
+                                                style: TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            ),
+                                          if (widget.onDelete != null)
+                                            PopupMenuItem(
+                                              value: 'delete',
+                                              child: Text(
+                                                "حذف",
+                                                textAlign: TextAlign.start,
+                                                style: TextStyle(
+                                                  fontSize: 14,
+                                                  color: Color(0xFFEF4444),
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                    )
+                                  else
+                                    Icon(
+                                      Icons.more_vert,
+                                      size: 16,
+                                      color: Colors.grey,
+                                    ),
                                 ],
                               ),
                               if (!limited)
@@ -179,10 +272,12 @@ class _ProductCardState extends State<ProductCard> {
                                           enabled = !enabled;
                                           context.read<ProductsBloc>().add(
                                             UpdateProductEvent(
-                                              params: UpdateProductParams(
-                                                productId: widget.product.id!,
-                                                isActive: enabled,
-                                              ),
+                                              params:
+                                                  UpdateProductParams.toggle(
+                                                    productId:
+                                                        widget.product.id!,
+                                                    isActive: enabled,
+                                                  ),
                                             ),
                                           );
                                           setState(() {});
@@ -216,7 +311,7 @@ class _ProductCardState extends State<ProductCard> {
               }
             },
             buildWhen: (previous, current) =>
-                previous.productsStatus != current.productStatus,
+                previous.productStatus != current.productStatus,
             builder: (context, state) {
               if (state.productStatus == BlocStatus.loading) {
                 return Positioned.fill(
@@ -236,28 +331,10 @@ class _ProductCardState extends State<ProductCard> {
       ),
     );
   }
-}
 
-class _AvailabilityChip extends StatelessWidget {
-  const _AvailabilityChip({required this.isAvailable});
-  final bool isAvailable;
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(
-        color: isAvailable ? Color(0x2928C76F) : Color(0x662F2B3D),
-        borderRadius: BorderRadius.all(Radius.circular(6)),
-      ),
-      child: Text(
-        isAvailable ? "متوفر" : "غير متوفر",
-        style: TextStyle(
-          color: isAvailable ? Color(0xFF24B364) : Color(0xE52F2B3D),
-          fontSize: 10,
-          fontWeight: FontWeight.w700,
-          height: 1.5,
-        ),
-      ),
-    );
+  void initState() {
+    super.initState();
+    enabled = widget.product.isAvailable ?? true;
   }
 }

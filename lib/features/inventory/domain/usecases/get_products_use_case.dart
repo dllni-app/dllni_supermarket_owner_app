@@ -17,4 +17,16 @@ class GetProductsUseCase
   }
 }
 
-class GetProductsParams with Params {}
+class GetProductsParams with Params {
+  final int page;
+  final String? search;
+
+  GetProductsParams({this.page = 1, this.search});
+
+  @override
+  QueryParams getParams() => {
+    'page': page,
+    if (search != null && search!.trim().isNotEmpty)
+      'filter[search]': search!.trim(),
+  };
+}

@@ -18,6 +18,12 @@ import '../usecases/update_product_use_case.dart';
 import '../../data/models/update_product_model.dart';
 import '../usecases/import_products_file_use_case.dart';
 import '../../data/models/import_products_file_model.dart';
+import '../../data/models/search_master_products_model.dart';
+import '../usecases/search_master_products_use_case.dart';
+import '../usecases/import_products_from_master_use_case.dart';
+import '../../data/models/import_products_from_master_model.dart';
+import '../usecases/delete_product_use_case.dart';
+import '../../data/models/delete_product_model.dart';
 
 abstract class ProductsRepo {
   DataResponse<GetProductsModel> getProducts(GetProductsParams params);
@@ -39,5 +45,15 @@ abstract class ProductsRepo {
 
   DataResponse<UpdateProductModel> updateProduct(UpdateProductParams params);
 
+  DataResponse<DeleteProductModel> deleteProduct(DeleteProductParams params);
+
   DataResponse<ImportProductsFileModel> importProductsFile(ImportProductsFileParams params);
+
+  DataResponse<SearchMasterProductsModel> searchMasterProducts(
+    SearchMasterProductsParams params,
+  );
+
+  DataResponse<ImportProductsFromMasterModel> importProductsFromMaster(
+    ImportProductsFromMasterParams params,
+  );
 }

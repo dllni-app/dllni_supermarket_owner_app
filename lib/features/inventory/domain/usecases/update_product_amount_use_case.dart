@@ -1,7 +1,7 @@
 import 'package:injectable/injectable.dart';
 import 'package:common_package/helpers/typedef.dart';
 
-import '../../view/screens/inventory_screen.dart';
+import '../editing_type.dart';
 import '../repository/inventory_repo.dart';
 import '../../data/models/update_product_amount_model.dart';
 

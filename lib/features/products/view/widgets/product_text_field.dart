@@ -100,10 +100,12 @@ class ProductMenuField<T> extends StatelessWidget {
     this.onChanged,
     required this.items,
     this.isRequired = false,
+    this.value,
   });
   final String title;
   final bool isRequired;
   final String? hintText;
+  final T? value;
   final void Function(T? value)? onChanged;
   final List<DropdownMenuItem<T>> items;
   @override
@@ -137,6 +139,8 @@ class ProductMenuField<T> extends StatelessWidget {
           ),
         ),
         DropdownButtonFormField<T>(
+          // ignore: deprecated_member_use
+          value: value,
           items: items,
           onChanged: onChanged,
           style: TextStyle(color: Color(0xB22F2B3D), fontSize: 14),
@@ -176,10 +180,12 @@ class AppDatePicker extends StatefulWidget {
     super.key,
     required this.title,
     this.isRequired = false,
+    this.initialDate,
     required this.onDateChanged,
   });
   final String title;
   final bool isRequired;
+  final DateTime? initialDate;
   final void Function(DateTime expiredDate) onDateChanged;
   @override
   State<AppDatePicker> createState() => _AppDatePickerState();
@@ -187,6 +193,12 @@ class AppDatePicker extends StatefulWidget {
 
 class _AppDatePickerState extends State<AppDatePicker> {
   DateTime? expiredDate;
+  @override
+  void initState() {
+    super.initState();
+    expiredDate = widget.initialDate;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -231,7 +243,7 @@ class _AppDatePickerState extends State<AppDatePicker> {
                 onTap: () async {
                   DateTime? date = await showDatePicker(
                     context: context,
-                    firstDate: DateTime.now(),
+                    firstDate: DateTime(2000),
                     lastDate: DateTime(2030),
                     builder: (BuildContext context, Widget? child) {
                       return Theme(
@@ -283,8 +295,9 @@ class _AppDatePickerState extends State<AppDatePicker> {
 }
 
 class ProductUnit extends StatefulWidget {
-  const ProductUnit({super.key, required this.onChanged});
+  const ProductUnit({super.key, required this.onChanged, this.initialUnit});
   final void Function(String unit) onChanged;
+  final String? initialUnit;
   @override
   State<ProductUnit> createState() => _ProductUnitState();
 }
@@ -294,8 +307,13 @@ class _ProductUnitState extends State<ProductUnit> {
   late TextEditingController controller;
   @override
   void initState() {
-    controller = TextEditingController();
-
+    final initial = widget.initialUnit;
+    if (initial != null && initial.trim().isNotEmpty) {
+      unit = initial.trim();
+      controller = TextEditingController(text: initial.trim());
+    } else {
+      controller = TextEditingController();
+    }
     super.initState();
   }
 

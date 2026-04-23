@@ -69,26 +69,27 @@ class WarningAlert extends StatelessWidget {
               ],
             ),
           ),
-          InkWell(
-            onTap: onTapButton,
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: AppColors.white,
-                borderRadius: BorderRadius.all(Radius.circular(8)),
-                boxShadow: [AppShadows.shadow],
-              ),
-              child: AppText(
-                labelButton,
-                style: TextStyle(
-                  color: Color(0xFF6C63FF),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  height: 1.333,
+          if (onTapButton != null)
+            InkWell(
+              onTap: onTapButton,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: AppColors.white,
+                  borderRadius: BorderRadius.all(Radius.circular(8)),
+                  boxShadow: [AppShadows.shadow],
+                ),
+                child: AppText(
+                  labelButton,
+                  style: TextStyle(
+                    color: Color(0xFF6C63FF),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    height: 1.333,
+                  ),
                 ),
               ),
             ),
-          ),
         ],
       ),
     );

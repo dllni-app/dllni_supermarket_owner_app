@@ -7,6 +7,8 @@ import '../models/update_product_amount_model.dart';
 import '../../domain/usecases/update_product_amount_use_case.dart';
 import '../models/get_hourly_count_model.dart';
 import '../../domain/usecases/get_hourly_count_use_case.dart';
+import '../models/get_inventory_summary_model.dart';
+import '../../domain/usecases/get_inventory_summary_use_case.dart';
 
 @lazySingleton
 class InventoryRemoteDataSource with HandlingApiManager {
@@ -46,6 +48,19 @@ class InventoryRemoteDataSource with HandlingApiManager {
         data: params.getBody().isEmpty ? null : params.getBody(),
       ),
       jsonConvert: getHourlyCountModelFromJson,
+    );
+  }
+
+  Future<GetInventorySummaryModel> getInventorySummary(
+    GetInventorySummaryParams params,
+  ) {
+    return wrapHandlingApi(
+      tryCall: () => dioNetwork.getData(
+        endPoint: '/api/v1/store-owner/inventory/summary',
+        params: params.getParams(),
+        data: params.getBody().isEmpty ? null : params.getBody(),
+      ),
+      jsonConvert: getInventorySummaryModelFromJson,
     );
   }
 }

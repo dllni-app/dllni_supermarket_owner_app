@@ -46,10 +46,7 @@ class AddNewProductScreen extends StatelessWidget {
                         ),
                         AddProductWayCard(
                           onTap: () {
-                            context.pushRoute(
-                              "/products/new_product/catalog",
-                              arguments: UploadFileType.image,
-                            );
+                            context.pushRoute("/products/new_product/catalog");
                           },
                           backgroundColor: Color(0xFFEFF6FF),
                           foregroundColor: Color(0xFF2563EB),

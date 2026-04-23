@@ -1,4 +1,5 @@
 import 'dart:developer' show log;
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:common_package/common_package.dart';
@@ -13,8 +14,11 @@ import '../../../../core/widgets/app_app_bars.dart';
 import '../../../../core/widgets/app_buttons.dart';
 import '../../../../core/widgets/failure_widget.dart';
 import '../../../../core/widgets/step_details.dart';
+import '../../data/models/get_categories_model.dart';
+import '../../data/models/get_products_model.dart';
 import '../../domain/usecases/add_product_use_case.dart';
 import '../../domain/usecases/get_categories_use_case.dart';
+import '../../domain/usecases/update_product_use_case.dart';
 import '../manager/bloc/products_bloc.dart';
 import '../widgets/product_pick_images.dart';
 import '../widgets/product_text_field.dart';
@@ -33,21 +37,70 @@ class AddProductDetailsScreen extends StatefulWidget {
 class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
   late BarcodeScanner _barcodeScanner;
   late AddProductDetailsParams params;
+  bool get isEdit => params.editingProductId != null;
+
+  late final TextEditingController _titleController;
+  late final TextEditingController _descriptionController;
+  late final TextEditingController _barcodeController;
+  late final TextEditingController _quantityController;
+  late final TextEditingController _lowStockController;
+  late final TextEditingController _priceController;
+  late final TextEditingController _discountedController;
+
   @override
   void initState() {
+    super.initState();
     _barcodeScanner = BarcodeScanner();
     if (widget.params != null) {
       params = widget.params!;
     } else {
       params = AddProductDetailsParams();
     }
-    super.initState();
+    _titleController = TextEditingController(text: params.title ?? '');
+    _descriptionController = TextEditingController(
+      text: params.description ?? '',
+    );
+    _barcodeController = TextEditingController(text: params.barcode ?? '');
+    _quantityController = TextEditingController(
+      text: params.quantity == null ? '' : '${params.quantity}',
+    );
+    _lowStockController = TextEditingController(
+      text: params.lowStockQuantity == null
+          ? ''
+          : '${params.lowStockQuantity}',
+    );
+    _priceController = TextEditingController(
+      text: params.price == null ? '' : '${params.price}',
+    );
+    _discountedController = TextEditingController(
+      text: params.discountedPrice == null
+          ? ''
+          : '${params.discountedPrice}',
+    );
   }
 
   @override
   void dispose() {
     _barcodeScanner.close();
+    _titleController.dispose();
+    _descriptionController.dispose();
+    _barcodeController.dispose();
+    _quantityController.dispose();
+    _lowStockController.dispose();
+    _priceController.dispose();
+    _discountedController.dispose();
     super.dispose();
+  }
+
+  void _syncParamsFromControllers() {
+    params.title = _titleController.text.trim();
+    params.description = _descriptionController.text.trim();
+    params.barcode = _barcodeController.text.trim();
+    params.quantity = int.tryParse(_quantityController.text.trim());
+    params.lowStockQuantity = int.tryParse(_lowStockController.text.trim());
+    params.price = num.tryParse(_priceController.text.trim());
+    final d = _discountedController.text.trim();
+    params.discountedPrice = d.isEmpty ? null : num.tryParse(d);
   }
 
   @override
@@ -59,7 +112,9 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
       child: Scaffold(
         body: Column(
           children: [
-            AppSimpleAppBar(title: "إضافة منتج جديد"),
+            AppSimpleAppBar(
+              title: isEdit ? "تعديل المنتج" : "إضافة منتج جديد",
+            ),
             Expanded(
               child: SingleChildScrollView(
                 child: Padding(
@@ -76,9 +131,7 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
                               title: "اسم المنتج",
                               hintText: "مثال: برجر دجاج كلاسيك",
                               isRequired: true,
-                              controller: TextEditingController(
-                                text: params.title,
-                              ),
+                              controller: _titleController,
                               onChanged: (value) {
                                 params.title = value;
                               },
@@ -87,9 +140,7 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
                             AppTextField(
                               title: "وصف المنتج",
                               hintText: "وصف مكونات المنتج ومميزاته...",
-                              controller: TextEditingController(
-                                text: params.description,
-                              ),
+                              controller: _descriptionController,
                               maxLines: 4,
                               onChanged: (value) {
                                 params.description = value;
@@ -112,9 +163,12 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
                                     title: "التصنيف",
                                     isRequired: true,
                                     hintText: "اختر تصنيف...",
+                                    value: _categoryDropdownValue(
+                                      state.categories,
+                                      params.categoryId,
+                                    ),
                                     onChanged: (value) {
-                                      if (value != null &&
-                                          params.categoryId != value) {
+                                      if (value != null) {
                                         params.categoryId = value;
                                       }
                                     },
@@ -126,7 +180,9 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
                                         child: AppText(
                                           state.categories!.data![index].name ??
                                               "null",
-                                          style: TextStyle(fontFamily: "Cairo"),
+                                          style: TextStyle(
+                                            fontFamily: "Cairo",
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -136,16 +192,24 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
                               },
                             ),
                             SizedBox(height: 20),
+                            AppTextField(
+                              title: "الباركود",
+                              hintText: "امسح أو اكتب رمز الباركود",
+                              isRequired: true,
+                              controller: _barcodeController,
+                              onChanged: (v) {
+                                params.barcode = v;
+                              },
+                            ),
+                            SizedBox(height: 20),
                             ProductPickMainImage(
                               title: "صورة رئيسية",
-                              isRequired: true,
+                              isRequired: !isEdit,
+                              networkImageUrl: params.initialMainImageUrl,
                               icon: FontAwesomeIcons.solidCamera,
                               onPickImage: (imagePath) {
                                 print(imagePath);
                                 params.mainImagePath = imagePath;
-                                // params.mainImage64Based = File(
-                                //   params.mainImagePath!,
-                                // ).readAsBytesSync();
                               },
                             ),
                             SizedBox(height: 16),
@@ -159,7 +223,7 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
                             SizedBox(height: 24),
                             ProductPickMainImage(
                               title: "صورة  الباركود",
-                              isRequired: true,
+                              isRequired: !isEdit,
                               icon: FontAwesomeIcons.barcode,
                               onPickImage: (imagePath) async {
                                 List<Barcode> barcodes = await _barcodeScanner
@@ -175,7 +239,9 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
                                   );
                                   return;
                                 }
-                                params.barcode = barcodes.first.rawValue;
+                                final value = barcodes.first.rawValue ?? "";
+                                _barcodeController.text = value;
+                                params.barcode = value;
                                 log(
                                   'Detected Barcode: ${barcodes.first.rawValue}',
                                 );
@@ -184,6 +250,11 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
                             ),
                             SizedBox(height: 24),
                             ProductUnit(
+                              initialUnit:
+                                  (params.unit != null &&
+                                      params.unit!.trim().isNotEmpty)
+                                  ? params.unit
+                                  : null,
                               onChanged: (unit) {
                                 print(unit);
                                 params.unit = unit;
@@ -198,6 +269,7 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
                                     title: "الكمية الأولية",
                                     isRequired: true,
                                     hintText: "0",
+                                    controller: _quantityController,
                                     onChanged: (value) {
                                       if (int.tryParse(value) == null) return;
                                       params.quantity = int.parse(value);
@@ -209,6 +281,7 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
                                     title: "الحد الأدنى",
                                     isRequired: true,
                                     hintText: "0",
+                                    controller: _lowStockController,
                                     onChanged: (value) {
                                       if (int.tryParse(value) == null) return;
                                       params.lowStockQuantity = int.parse(
@@ -222,6 +295,7 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
                             SizedBox(height: 24),
                             AppDatePicker(
                               title: "صلاحية المنتج",
+                              initialDate: params.expiredAt,
                               onDateChanged: (expiredDate) {
                                 print(expiredDate);
                                 params.expiredAt = expiredDate;
@@ -240,6 +314,7 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
                               title: "السعر الأساسي",
                               isRequired: true,
                               hintText: "0.00",
+                              controller: _priceController,
                               onChanged: (value) {
                                 if (num.tryParse(value) == null) return;
                                 params.price = num.parse(value);
@@ -260,8 +335,13 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
                             AppTextField(
                               title: "السعر بعد الحسم",
                               hintText: "0.00",
-                              isRequired: true,
+                              isRequired: !isEdit,
+                              controller: _discountedController,
                               onChanged: (value) {
+                                if (value.isEmpty) {
+                                  params.discountedPrice = null;
+                                  return;
+                                }
                                 if (num.tryParse(value) == null) return;
                                 params.discountedPrice = num.parse(value);
                               },
@@ -283,44 +363,94 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
                       SizedBox(height: 16),
                       SizedBox(height: 16),
                       BlocConsumer<ProductsBloc, ProductsState>(
-                        listener: (context, state) {
-                          if (state.addProductStatus == BlocStatus.success) {
-                            context.pushRouteAndRemoveUntil("/", arguments: 2);
+                        listenWhen: (p, c) {
+                          if (isEdit) {
+                            return p.productStatus != c.productStatus;
                           }
-                          if (state.addProductStatus == BlocStatus.failed) {
-                            AppToast.showToast(
-                              context: context,
-                              message: state.errorMessage.toString(),
-                              type: ToastificationType.error,
-                            );
+                          return p.addProductStatus != c.addProductStatus;
+                        },
+                        listener: (context, state) {
+                          if (isEdit) {
+                            if (state.productStatus == BlocStatus.success) {
+                              context.pop(true);
+                            }
+                            if (state.productStatus == BlocStatus.failed) {
+                              AppToast.showToast(
+                                context: context,
+                                message: state.errorMessage.toString(),
+                                type: ToastificationType.error,
+                              );
+                            }
+                          } else {
+                            if (state.addProductStatus == BlocStatus.success) {
+                              context.pushRouteAndRemoveUntil(
+                                "/",
+                                arguments: 2,
+                              );
+                            }
+                            if (state.addProductStatus == BlocStatus.failed) {
+                              AppToast.showToast(
+                                context: context,
+                                message: state.errorMessage.toString(),
+                                type: ToastificationType.error,
+                              );
+                            }
                           }
                         },
                         buildWhen: (previous, current) =>
                             previous.addProductStatus !=
-                            current.addProductStatus,
+                                current.addProductStatus ||
+                            previous.productStatus != current.productStatus,
                         builder: (context, state) {
-                          if (state.addProductStatus == BlocStatus.loading) {
+                          final busy = (!isEdit &&
+                                  state.addProductStatus ==
+                                      BlocStatus.loading) ||
+                              (isEdit &&
+                                  state.productStatus == BlocStatus.loading);
+                          if (busy) {
                             return CircularProgressIndicator();
                           }
                           return Row(
                             children: [
                               Expanded(
                                 child: AppButton(
-                                  title: "نشر المنتج",
+                                  title: isEdit
+                                      ? "حفظ التغييرات"
+                                      : "نشر المنتج",
                                   onTap: () {
-                                    if (!validateProductFields(
-                                      context,
-                                      params,
-                                    )) {
-                                      return;
-                                    }
-                                    context.read<ProductsBloc>().add(
-                                      AddProductEvent(
-                                        params: AddProductParams(
-                                          params: params,
+                                    _syncParamsFromControllers();
+                                    if (isEdit) {
+                                      if (!validateProductFields(
+                                        context,
+                                        params,
+                                      )) {
+                                        return;
+                                      }
+                                      context.read<ProductsBloc>().add(
+                                        UpdateProductEvent(
+                                          params: UpdateProductParams.form(
+                                            productId: params.editingProductId!,
+                                            body: buildUpdateStoreProductBody(
+                                              params,
+                                            ),
+                                          ),
                                         ),
-                                      ),
-                                    );
+                                      );
+                                    } else {
+                                      if (!validateProductFields(
+                                        context,
+                                        params,
+                                      )) {
+                                        return;
+                                      }
+                                      context.read<ProductsBloc>().add(
+                                        AddProductEvent(
+                                          params: AddProductParams(
+                                            params: params,
+                                          ),
+                                        ),
+                                      );
+                                    }
                                   },
                                 ),
                               ),
@@ -328,6 +458,7 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
                               AppOutlinedButton(
                                 title: "إلغاء",
                                 color: const Color(0xFFFF4C51),
+                                onTap: () => context.pop(),
                               ),
                             ],
                           );
@@ -344,6 +475,63 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
       ),
     );
   }
+}
+
+int? _categoryDropdownValue(
+  GetCategoriesModel? categories,
+  int? categoryId,
+) {
+  if (categories?.data == null || categoryId == null) {
+    return null;
+  }
+  final has = categories!.data!.any((c) => c.id == categoryId);
+  if (!has) {
+    return null;
+  }
+  return categoryId;
+}
+
+UpdateStoreProductBody buildUpdateStoreProductBody(
+  AddProductDetailsParams params,
+) {
+  final Object? image;
+  if (params.mainImagePath != null) {
+    image = File(params.mainImagePath!);
+  } else if (params.initialMainImageUrl != null &&
+      params.initialMainImageUrl!.isNotEmpty) {
+    image = params.initialMainImageUrl;
+  } else {
+    image = null;
+  }
+  final images = <dynamic>[
+    ...params.existingAdditionalImageUrls,
+    if (params.additionalImagesPath != null)
+      for (final path in params.additionalImagesPath!) File(path),
+  ];
+  String? expiresAtStr;
+  final e = params.expiredAt;
+  if (e != null) {
+    expiresAtStr = e.toIso8601String();
+  }
+  return UpdateStoreProductBody(
+    categoryId: params.categoryId!,
+    masterProductId: params.masterProductId,
+    name: params.title!.trim(),
+    barcode: (params.barcode == null || params.barcode!.isEmpty)
+        ? null
+        : params.barcode,
+    description: (params.description == null || params.description!.isEmpty)
+        ? null
+        : params.description,
+    price: params.price!,
+    discountedPrice: params.discountedPrice,
+    stockQuantity: params.quantity!,
+    lowStockThreshold: params.lowStockQuantity!,
+    expiresAt: expiresAtStr,
+    isAvailable: true,
+    image: image,
+    images: images,
+  );
 }
 
 bool validateProductFields(
@@ -375,7 +563,13 @@ bool validateProductFields(
     return false;
   }
 
-  if (params.mainImagePath == null && params.mainImage64Based == null) {
+  final hasMainImage = params.mainImagePath != null ||
+      params.mainImage64Based != null ||
+      (params.editingProductId != null &&
+          (params.initialMainImageUrl != null &&
+              params.initialMainImageUrl!.isNotEmpty));
+
+  if (!hasMainImage) {
     AppToast.showToast(
       context: context,
       message: "يجب إضافة صورة أساسية للمنتج",
@@ -393,13 +587,15 @@ bool validateProductFields(
     return false;
   }
 
-  if (params.unit == null || params.unit!.trim().isEmpty) {
-    AppToast.showToast(
-      context: context,
-      message: "يرجى إدخال وحدة القياس",
-      type: ToastificationType.error,
-    );
-    return false;
+  if (params.editingProductId == null) {
+    if (params.unit == null || params.unit!.trim().isEmpty) {
+      AppToast.showToast(
+        context: context,
+        message: "يرجى إدخال وحدة القياس",
+        type: ToastificationType.error,
+      );
+      return false;
+    }
   }
 
   if (params.quantity == null || params.quantity! < 0) {
@@ -450,6 +646,10 @@ class AddProductDetailsParams {
   int? categoryId;
   Uint8List? mainImage64Based;
   String? mainImagePath;
+  int? editingProductId;
+  int? masterProductId;
+  String? initialMainImageUrl;
+  List<String> existingAdditionalImageUrls;
   List<String>? additionalImagesPath;
   String? barcode;
   String? unit;
@@ -460,8 +660,13 @@ class AddProductDetailsParams {
   AddProductDetailsParams({
     this.title,
     this.description,
+    this.categoryId,
     this.mainImage64Based,
     this.mainImagePath,
+    this.editingProductId,
+    this.masterProductId,
+    this.initialMainImageUrl,
+    this.existingAdditionalImageUrls = const [],
     this.additionalImagesPath,
     this.barcode,
     this.unit,
@@ -471,4 +676,61 @@ class AddProductDetailsParams {
     this.price,
     this.discountedPrice,
   });
+
+  static AddProductDetailsParams fromProduct(GetProductsModelDataItem p) {
+    String? desc;
+    final d = p.description;
+    if (d is String) {
+      desc = d;
+    } else if (d != null) {
+      desc = d.toString();
+    }
+    num? pr;
+    if (p.price != null && p.price!.isNotEmpty) {
+      pr = num.tryParse(p.price!);
+    }
+    num? dpr;
+    if (p.discountedPrice != null && p.discountedPrice!.isNotEmpty) {
+      dpr = num.tryParse(p.discountedPrice!);
+    }
+    DateTime? ex;
+    if (p.expiresAt != null) {
+      if (p.expiresAt is DateTime) {
+        ex = p.expiresAt as DateTime;
+      } else {
+        ex = DateTime.tryParse(p.expiresAt.toString());
+      }
+    }
+    final urlList = p.imageUrls
+            ?.map((e) => e?.toString() ?? '')
+            .where((s) => s.isNotEmpty)
+            .toList() ??
+        <String>[];
+    String? mainU;
+    final rest = <String>[];
+    if (urlList.isNotEmpty) {
+      mainU = urlList.first;
+      if (urlList.length > 1) {
+        rest.addAll(urlList.sublist(1));
+      }
+    }
+    return AddProductDetailsParams(
+      editingProductId: p.id,
+      masterProductId: p.masterProductId,
+      title: p.name,
+      description: desc,
+      categoryId: p.categoryId,
+      barcode: p.barcode is String
+          ? p.barcode as String?
+          : p.barcode?.toString() ?? '',
+      mainImagePath: null,
+      initialMainImageUrl: mainU,
+      existingAdditionalImageUrls: rest,
+      quantity: p.stockQuantity,
+      lowStockQuantity: p.lowStockThreshold,
+      price: pr,
+      discountedPrice: dpr,
+      expiredAt: ex,
+    );
+  }
 }

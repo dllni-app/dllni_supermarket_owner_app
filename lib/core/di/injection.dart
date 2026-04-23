@@ -26,8 +26,8 @@ abstract class InjectableModule {
     interceptors: [
       TokenInterceptor(
         tokenKey: 'token',
-        fcmKey: 'fcm',
-        lang: '',
+        fcmKey: 'fcm_token',
+        lang: 'ar',
         onRequestFunction: null,
       ),
       UnauthorizedInterceptor(

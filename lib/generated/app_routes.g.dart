@@ -20,8 +20,6 @@ import 'package:dllni_supermarket_owner_app/features/profile/view/screens/offers
 import 'package:dllni_supermarket_owner_app/features/profile/view/screens/profile_screen.dart';
 import 'package:dllni_supermarket_owner_app/features/profile/view/screens/working_time_screen.dart';
 
-import '../features/profile/data/models/get_store_employees_model.dart';
-
 class GeneratedAppRoutes {
   static Route<dynamic>? onGenerateRoute(RouteSettings settings) {
     final args = settings.arguments;
@@ -45,7 +43,7 @@ class GeneratedAppRoutes {
       case '/':
         if (args is int?) {
           return MaterialPageRoute(
-            builder: (_) => MainPage(initialPage: args),
+            builder: (_) => MainPage(initialPage: initialPage),
             settings: settings,
           );
         }
@@ -53,7 +51,7 @@ class GeneratedAppRoutes {
       case '/orders/order_details':
         if (args is int) {
           return MaterialPageRoute(
-            builder: (_) => OrderDetailsScreen(orderId: args),
+            builder: (_) => OrderDetailsScreen(orderId: orderId),
             settings: settings,
           );
         }
@@ -71,7 +69,7 @@ class GeneratedAppRoutes {
       case '/products/new_product/details':
         if (args is AddProductDetailsParams?) {
           return MaterialPageRoute(
-            builder: (_) => AddProductDetailsScreen(params: args),
+            builder: (_) => AddProductDetailsScreen(params: params),
             settings: settings,
           );
         }
@@ -79,7 +77,7 @@ class GeneratedAppRoutes {
       case '/products/new_product/menu':
         if (args is UploadFileType?) {
           return MaterialPageRoute(
-            builder: (_) => AddProductMenuScreen(type: args),
+            builder: (_) => AddProductMenuScreen(type: type),
             settings: settings,
           );
         }
@@ -102,7 +100,7 @@ class GeneratedAppRoutes {
       case '/profile/employees/create_employee':
         if (args is GetStoreEmployeesModelDataEmployeesItem?) {
           return MaterialPageRoute(
-            builder: (_) => CreateNewEmployeeScreen(params: args),
+            builder: (_) => CreateNewEmployeeScreen(params: params),
             settings: settings,
           );
         }

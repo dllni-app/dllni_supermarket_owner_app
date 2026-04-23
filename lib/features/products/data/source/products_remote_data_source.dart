@@ -19,6 +19,12 @@ import '../models/update_product_model.dart';
 import '../../domain/usecases/update_product_use_case.dart';
 import '../models/import_products_file_model.dart';
 import '../../domain/usecases/import_products_file_use_case.dart';
+import '../models/search_master_products_model.dart';
+import '../../domain/usecases/search_master_products_use_case.dart';
+import '../models/import_products_from_master_model.dart';
+import '../../domain/usecases/import_products_from_master_use_case.dart';
+import '../models/delete_product_model.dart';
+import '../../domain/usecases/delete_product_use_case.dart';
 
 @lazySingleton
 class ProductsRemoteDataSource with HandlingApiManager {
@@ -120,10 +126,47 @@ class ProductsRemoteDataSource with HandlingApiManager {
     );
   }
 
+  Future<DeleteProductModel> deleteProduct(DeleteProductParams params) {
+    return wrapHandlingApi(
+      tryCall: () => dioNetwork.deleteData(
+        endPoint: '/api/v1/store-owner/products/${params.productId}',
+        params: params.getParams(),
+        data: params.getBody().isEmpty ? null : params.getBody(),
+      ),
+      jsonConvert: (data) => DeleteProductModel.fromJson(data),
+    );
+  }
 
   Future<ImportProductsFileModel> importProductsFile(ImportProductsFileParams params) {
     return wrapHandlingApi(
       tryCall: () => dioNetwork.postData(endPoint: '/api/v1/sm-products/import', data: params.getBody(), params: params.getParams()),
       jsonConvert: importProductsFileModelFromJson,
     );
-  }}
+  }
+
+  Future<SearchMasterProductsModel> searchMasterProducts(
+    SearchMasterProductsParams params,
+  ) {
+    return wrapHandlingApi(
+      tryCall: () => dioNetwork.getData(
+        endPoint: '/api/v1/store-owner/master-products/search',
+        params: params.getParams(),
+        data: params.getBody().isEmpty ? null : params.getBody(),
+      ),
+      jsonConvert: searchMasterProductsModelFromJson,
+    );
+  }
+
+  Future<ImportProductsFromMasterModel> importProductsFromMaster(
+    ImportProductsFromMasterParams params,
+  ) {
+    return wrapHandlingApi(
+      tryCall: () => dioNetwork.postData(
+        endPoint: '/api/v1/store-owner/products/from-master',
+        data: params.getBody(),
+        params: params.getParams(),
+      ),
+      jsonConvert: (_) => ImportProductsFromMasterModel(),
+    );
+  }
+}

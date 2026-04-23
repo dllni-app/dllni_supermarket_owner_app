@@ -11,8 +11,8 @@ import 'profile/view/screens/more_screen.dart';
 
 @AutoRoutePage(path: "/")
 class MainPage extends StatefulWidget {
-  const MainPage({super.key, this.initialPage});
   final int? initialPage;
+  const MainPage({super.key, this.initialPage});
   @override
   State<MainPage> createState() => _MainPageState();
 }
@@ -21,17 +21,6 @@ class _MainPageState extends State<MainPage>
     with SingleTickerProviderStateMixin {
   int selectedTab = 0;
   late TabController tabController;
-  @override
-  void initState() {
-    super.initState();
-    if (widget.initialPage != null) selectedTab = widget.initialPage!;
-    tabController = TabController(
-      length: 5,
-      vsync: this,
-      initialIndex: selectedTab,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,6 +52,17 @@ class _MainPageState extends State<MainPage>
           }
         },
       ),
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialPage != null) selectedTab = widget.initialPage!;
+    tabController = TabController(
+      length: 5,
+      vsync: this,
+      initialIndex: selectedTab,
     );
   }
 }

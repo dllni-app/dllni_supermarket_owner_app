@@ -16,11 +16,13 @@ class ProductPickMainImage extends StatefulWidget {
     required this.title,
     required this.icon,
     required this.isRequired,
+    this.networkImageUrl,
   });
   final void Function(String imagePath) onPickImage;
   final String title;
   final IconData icon;
   final bool isRequired;
+  final String? networkImageUrl;
   @override
   State<ProductPickMainImage> createState() => _ProductPickMainImageState();
 }
@@ -67,6 +69,20 @@ class _ProductPickMainImageState extends State<ProductPickMainImage> {
                 width: context.width,
                 height: 195,
                 image: FileImage(File(imagePath!)),
+                fit: BoxFit.cover,
+              ),
+            ),
+          )
+        else if (widget.networkImageUrl != null &&
+            widget.networkImageUrl!.isNotEmpty)
+          InkWell(
+            onTap: pickImage,
+            child: ClipRRect(
+              borderRadius: BorderRadius.all(Radius.circular(16)),
+              child: AppImage.network(
+                widget.networkImageUrl!,
+                width: context.width,
+                height: 195,
                 fit: BoxFit.cover,
               ),
             ),

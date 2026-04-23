@@ -53,8 +53,36 @@ class UpdateProductEvent extends ProductsEvent {
   UpdateProductEvent({required this.params});
 }
 
+class DeleteProductEvent extends ProductsEvent {
+  final DeleteProductParams params;
+
+  DeleteProductEvent({required this.params});
+}
+
+class ResetDeleteProductEvent extends ProductsEvent {}
+
 class ImportProductsFileEvent extends ProductsEvent {
   final ImportProductsFileParams params;
 
   ImportProductsFileEvent({required this.params});
+}
+
+class FetchMasterProductsSearchEvent extends ProductsEvent
+    with EventWithReload {
+  @override
+  final bool isReload;
+
+  FetchMasterProductsSearchEvent({this.isReload = false});
+}
+
+class SearchMasterProductsSubmitted extends ProductsEvent {
+  final String raw;
+
+  SearchMasterProductsSubmitted(this.raw);
+}
+
+class ImportProductsFromMasterEvent extends ProductsEvent {
+  final ImportProductsFromMasterParams params;
+
+  ImportProductsFromMasterEvent({required this.params});
 }

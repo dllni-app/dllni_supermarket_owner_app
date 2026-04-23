@@ -22,6 +22,12 @@ import '../../domain/usecases/update_product_use_case.dart';
 import '../models/update_product_model.dart';
 import '../../domain/usecases/import_products_file_use_case.dart';
 import '../models/import_products_file_model.dart';
+import '../models/search_master_products_model.dart';
+import '../../domain/usecases/search_master_products_use_case.dart';
+import '../../domain/usecases/import_products_from_master_use_case.dart';
+import '../models/import_products_from_master_model.dart';
+import '../../domain/usecases/delete_product_use_case.dart';
+import '../models/delete_product_model.dart';
 
 @LazySingleton(as: ProductsRepo)
 class ProductsRepoImpl with HandlingException implements ProductsRepo {
@@ -90,8 +96,35 @@ class ProductsRepoImpl with HandlingException implements ProductsRepo {
   }
 
   @override
+  DataResponse<DeleteProductModel> deleteProduct(DeleteProductParams params) {
+    return wrapHandlingException(
+      tryCall: () => productsRemoteDataSource.deleteProduct(params),
+    );
+  }
+
+  @override
   DataResponse<ImportProductsFileModel> importProductsFile(ImportProductsFileParams params) {
     return wrapHandlingException(
       tryCall: () => productsRemoteDataSource.importProductsFile(params),
     );
-  }}
+  }
+
+  @override
+  DataResponse<SearchMasterProductsModel> searchMasterProducts(
+    SearchMasterProductsParams params,
+  ) {
+    return wrapHandlingException(
+      tryCall: () => productsRemoteDataSource.searchMasterProducts(params),
+    );
+  }
+
+  @override
+  DataResponse<ImportProductsFromMasterModel> importProductsFromMaster(
+    ImportProductsFromMasterParams params,
+  ) {
+    return wrapHandlingException(
+      tryCall: () =>
+          productsRemoteDataSource.importProductsFromMaster(params),
+    );
+  }
+}

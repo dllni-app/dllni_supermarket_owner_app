@@ -19,8 +19,5 @@ class GetNewOrdersUseCase
 
 class GetNewOrdersParams with Params {
   @override
-  QueryParams getParams() => {
-    "filter[storeId]": 1,
-    "filter[status]": "pending",
-  };
+  QueryParams getParams() => {"filter[status]": "pending"};
 }

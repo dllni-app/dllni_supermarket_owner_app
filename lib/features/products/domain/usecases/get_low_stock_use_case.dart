@@ -18,11 +18,10 @@ class GetLowStockUseCase
 }
 
 class GetLowStockParams with Params {
-  final int storeId;
+  final int? storeId;
 
-  GetLowStockParams({required this.storeId});
+  GetLowStockParams({this.storeId});
+
   @override
-  QueryParams getParams() {
-    return {"store_id": 1};
-  }
+  QueryParams getParams() => {'store_id': storeId ?? 1};
 }

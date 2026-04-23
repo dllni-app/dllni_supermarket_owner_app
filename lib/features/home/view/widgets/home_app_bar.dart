@@ -1,17 +1,28 @@
+import 'dart:convert';
+
 import 'package:common_package/common_package.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../../../../core/themes/app_colors.dart';
 
-class HomeAppBar extends StatelessWidget {
-  final String shopName;
-  final String shopAddress;
-  const HomeAppBar({
-    super.key,
-    required this.shopName,
-    required this.shopAddress,
-  });
+class HomeAppBar extends StatefulWidget {
+  const HomeAppBar({super.key});
+
+  @override
+  State<HomeAppBar> createState() => _HomeAppBarState();
+}
+
+class _HomeAppBarState extends State<HomeAppBar> {
+  Map<String, dynamic> storeProfile = {};
+  @override
+  void initState() {
+    super.initState();
+    storeProfile = jsonDecode(
+      SharedPreferencesHelper.getData(key: 'user') as String,
+    );
+    print(storeProfile);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +52,7 @@ class HomeAppBar extends StatelessWidget {
         children: [
           Icon(FontAwesomeIcons.store, color: context.primary, size: 29),
           AppText(
-            "سوبر ماركت السلطان",
+            storeProfile["user"]['name'],
             style: TextStyle(
               color: Colors.black,
               fontSize: 20,
