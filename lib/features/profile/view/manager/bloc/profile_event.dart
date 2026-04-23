@@ -14,28 +14,12 @@ class UpdateStoreDataEvent extends ProfileEvent {
   UpdateStoreDataEvent({required this.params});
 }
 
-class GetStoreHoursEvent extends ProfileEvent {
-  final GetStoreHoursParams params;
+class GetOperatingHoursEvent extends ProfileEvent {}
 
-  GetStoreHoursEvent({required this.params});
-}
+class UpdateOperatingHoursEvent extends ProfileEvent {
+  final UpdateOperatingHoursParams params;
 
-class AddStoreHoursEvent extends ProfileEvent {
-  final AddStoreHoursParams params;
-
-  AddStoreHoursEvent({required this.params});
-}
-
-class UpdateStoreHoursEvent extends ProfileEvent {
-  final UpdateStoreHoursParams params;
-
-  UpdateStoreHoursEvent({required this.params});
-}
-
-class DeleteStoreHoursEvent extends ProfileEvent {
-  final DeleteStoreHoursParams params;
-
-  DeleteStoreHoursEvent({required this.params});
+  UpdateOperatingHoursEvent({required this.params});
 }
 
 class GetCouponCodesEvent extends ProfileEvent with EventWithReload {
@@ -111,4 +95,13 @@ class AddOfferEvent extends ProfileEvent {
   final AddOfferParams params;
 
   AddOfferEvent({required this.params});
+}
+
+class GetActivityLogsEvent extends ProfileEvent with EventWithReload {
+  final GetActivityLogsParams params;
+
+  @override
+  final bool isReload;
+
+  GetActivityLogsEvent({required this.params, this.isReload = false});
 }

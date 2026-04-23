@@ -1,21 +1,16 @@
 import 'package:injectable/injectable.dart';
 import 'package:common_package/helpers/error_handler.dart';
+import 'package:common_package/helpers/typedef.dart';
 
 import '../../domain/repository/profile_repo.dart';
-import 'package:common_package/helpers/typedef.dart';
 import '../source/profile_remote_data_source.dart';
 import '../../domain/usecases/get_store_profile_use_case.dart';
 import '../models/get_store_profile_model.dart';
 import '../../domain/usecases/update_store_data_use_case.dart';
 import '../models/update_store_data_model.dart';
-import '../../domain/usecases/get_store_hours_use_case.dart';
-import '../models/get_store_hours_model.dart';
-import '../../domain/usecases/add_store_hours_use_case.dart';
-import '../models/add_store_hours_model.dart';
-import '../../domain/usecases/update_store_hours_use_case.dart';
-import '../models/update_store_hours_model.dart';
-import '../../domain/usecases/delete_store_hours_use_case.dart';
-import '../models/delete_store_hours_model.dart';
+import '../../domain/usecases/get_operating_hours_use_case.dart';
+import '../models/operating_hours_model.dart';
+import '../../domain/usecases/update_operating_hours_use_case.dart';
 import '../../domain/usecases/get_coupon_codes_use_case.dart';
 import '../models/get_coupon_codes_model.dart';
 import '../../domain/usecases/get_employee_permissions_use_case.dart';
@@ -38,6 +33,8 @@ import '../../domain/usecases/get_coupon_week_analysis_use_case.dart';
 import '../models/get_coupon_week_analysis_model.dart';
 import '../../domain/usecases/add_offer_use_case.dart';
 import '../models/add_offer_model.dart';
+import '../../domain/usecases/get_activity_logs_use_case.dart';
+import '../models/get_activity_logs_model.dart';
 
 @LazySingleton(as: ProfileRepo)
 class ProfileRepoImpl with HandlingException implements ProfileRepo {
@@ -61,30 +58,18 @@ class ProfileRepoImpl with HandlingException implements ProfileRepo {
   }
 
   @override
-  DataResponse<GetStoreHoursModel> getStoreHours(GetStoreHoursParams params) {
+  DataResponse<OperatingHoursModel> getOperatingHours(NoParams params) {
     return wrapHandlingException(
-      tryCall: () => profileRemoteDataSource.getStoreHours(params),
+      tryCall: () => profileRemoteDataSource.getOperatingHours(params),
     );
   }
 
   @override
-  DataResponse<AddStoreHoursModel> addStoreHours(AddStoreHoursParams params) {
+  DataResponse<OperatingHoursModel> updateOperatingHours(
+    UpdateOperatingHoursParams params,
+  ) {
     return wrapHandlingException(
-      tryCall: () => profileRemoteDataSource.addStoreHours(params),
-    );
-  }
-
-  @override
-  DataResponse<UpdateStoreHoursModel> updateStoreHours(UpdateStoreHoursParams params) {
-    return wrapHandlingException(
-      tryCall: () => profileRemoteDataSource.updateStoreHours(params),
-    );
-  }
-
-  @override
-  DataResponse<DeleteStoreHoursModel> deleteStoreHours(DeleteStoreHoursParams params) {
-    return wrapHandlingException(
-      tryCall: () => profileRemoteDataSource.deleteStoreHours(params),
+      tryCall: () => profileRemoteDataSource.updateOperatingHours(params),
     );
   }
 
@@ -163,5 +148,15 @@ class ProfileRepoImpl with HandlingException implements ProfileRepo {
     return wrapHandlingException(
       tryCall: () => profileRemoteDataSource.addOffer(params),
     );
-  }}
+  }
+
+  @override
+  DataResponse<GetActivityLogsModel> getActivityLogs(
+    GetActivityLogsParams params,
+  ) {
+    return wrapHandlingException(
+      tryCall: () => profileRemoteDataSource.getActivityLogs(params),
+    );
+  }
+}
 

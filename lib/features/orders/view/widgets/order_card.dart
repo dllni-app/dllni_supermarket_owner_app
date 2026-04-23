@@ -7,11 +7,14 @@ import '../../../../core/themes/app_colors.dart';
 import '../../../../core/widgets/app_buttons.dart';
 import '../../data/models/get_orders_model.dart';
 
-enum PaymentWay { cash }
-
-enum OrderStatus { pending, preparing, readyForPickup, completed, rejected }
-
 class OrderCard extends StatelessWidget {
+  final OrderStatus status;
+  final GetOrdersModelDataItem order;
+  final void Function() onAcceptTap;
+  final void Function() onRejectTap;
+  final void Function() onViewDetailsTap;
+  final void Function() onCourierHandoverTap;
+  final bool isCourierHandoverLoading;
   const OrderCard({
     super.key,
     required this.status,
@@ -19,12 +22,27 @@ class OrderCard extends StatelessWidget {
     required this.onAcceptTap,
     required this.onRejectTap,
     required this.onViewDetailsTap,
+    required this.onCourierHandoverTap,
+    this.isCourierHandoverLoading = false,
   });
-  final OrderStatus status;
-  final GetOrdersModelDataItem order;
-  final void Function() onAcceptTap;
-  final void Function() onRejectTap;
-  final void Function() onViewDetailsTap;
+
+  Widget get leadingStatusTag => switch (status) {
+    OrderStatus.pending => CircleAvatar(
+      radius: 4,
+      backgroundColor: AppColors.primary,
+    ),
+    OrderStatus.preparing => Icon(
+      FontAwesomeIcons.fireBurner,
+      size: 12,
+      color: statusFontColor,
+    ),
+    OrderStatus.readyForPickup => Icon(
+      FontAwesomeIcons.solidCircleCheck,
+      size: 12,
+      color: statusFontColor,
+    ),
+    _ => SizedBox(),
+  };
 
   String get orderDelay {
     final Duration diffDate = DateTime.now().difference(
@@ -35,6 +53,28 @@ class OrderCard extends StatelessWidget {
     if (diffDate.inMinutes != 0) return "${diffDate.inMinutes} دقيقة";
     return "${diffDate.inSeconds} ثانية";
   }
+
+  Color get statusColor => switch (status) {
+    OrderStatus.completed ||
+    OrderStatus.readyForPickup => const Color(0xFF28C76F),
+    OrderStatus.preparing => AppColors.accent,
+    _ => AppColors.primary,
+  };
+
+  Color get statusFontColor => switch (status) {
+    OrderStatus.completed ||
+    OrderStatus.readyForPickup => const Color(0xFF24B364),
+    OrderStatus.preparing => AppColors.accent,
+    _ => AppColors.primary,
+  };
+
+  String get statusLabel => switch (status) {
+    OrderStatus.pending => "طلب جديد",
+    OrderStatus.preparing => "قيد التحضير",
+    OrderStatus.readyForPickup => "جاهز للتسليم",
+    OrderStatus.completed => "مكتمل",
+    OrderStatus.rejected => "مرفوض",
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -284,16 +324,25 @@ class OrderCard extends StatelessWidget {
                             ),
                           )
                         else if (status == OrderStatus.readyForPickup)
-                          SizedBox(
-                            width: double.infinity,
-                            child: AppButton(
-                              color: const Color(0xFF24B364),
-                              title: "تسليم للمندوب",
-                              onTap: () {
-                                print("give to worker");
-                              },
-                            ),
-                          ),
+                          isCourierHandoverLoading
+                              ? Center(
+                                  child: SizedBox(
+                                    width: 24,
+                                    height: 24,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2.5,
+                                      color: Color(0xFF24B364),
+                                    ),
+                                  ),
+                                )
+                              : SizedBox(
+                                  width: context.width,
+                                  child: AppButton(
+                                    color: const Color(0xFF24B364),
+                                    title: "تسليم للمندوب",
+                                    onTap: onCourierHandoverTap,
+                                  ),
+                                ),
                       ],
                     ),
             ),
@@ -302,52 +351,16 @@ class OrderCard extends StatelessWidget {
       ),
     );
   }
-
-  Color get statusColor => switch (status) {
-    OrderStatus.completed ||
-    OrderStatus.readyForPickup => const Color(0xFF28C76F),
-    OrderStatus.preparing => AppColors.accent,
-    _ => AppColors.primary,
-  };
-
-  Color get statusFontColor => switch (status) {
-    OrderStatus.completed ||
-    OrderStatus.readyForPickup => const Color(0xFF24B364),
-    OrderStatus.preparing => AppColors.accent,
-    _ => AppColors.primary,
-  };
-
-  Widget get leadingStatusTag => switch (status) {
-    OrderStatus.pending => CircleAvatar(
-      radius: 4,
-      backgroundColor: AppColors.primary,
-    ),
-    OrderStatus.preparing => Icon(
-      FontAwesomeIcons.fireBurner,
-      size: 12,
-      color: statusFontColor,
-    ),
-    OrderStatus.readyForPickup => Icon(
-      FontAwesomeIcons.solidCircleCheck,
-      size: 12,
-      color: statusFontColor,
-    ),
-    _ => SizedBox(),
-  };
-
-  String get statusLabel => switch (status) {
-    OrderStatus.pending => "طلب جديد",
-    OrderStatus.preparing => "قيد التحضير",
-    OrderStatus.readyForPickup => "جاهز للتسليم",
-    OrderStatus.completed => "مكتمل",
-    OrderStatus.rejected => "مرفوض",
-  };
 }
 
-class _RequirementRow extends StatelessWidget {
-  const _RequirementRow({required this.label});
+enum OrderStatus { pending, preparing, readyForPickup, completed, rejected }
 
+enum PaymentWay { cash }
+
+class _RequirementRow extends StatelessWidget {
   final String label;
+
+  const _RequirementRow({required this.label});
   @override
   Widget build(BuildContext context) {
     return Row(

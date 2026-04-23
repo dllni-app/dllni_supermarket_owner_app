@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:injectable/injectable.dart';
 import 'package:common_package/helpers/typedef.dart';
 
@@ -21,55 +23,56 @@ class UpdateStoreProductBody {
   static const int kDefaultStoreId = 1;
   static const String kSourceTypeManual = 'manual';
 
-  final int storeId;
-  final int categoryId;
+  final int? storeId;
+  final int? categoryId;
   final int? masterProductId;
-  final String name;
+  final String? name;
   final String? barcode;
   final String? description;
-  final num price;
+  final num? price;
   final num? discountedPrice;
-  final int stockQuantity;
-  final int lowStockThreshold;
+  final int? stockQuantity;
+  final int? lowStockThreshold;
   final String? expiresAt;
-  final bool isAvailable;
+  final bool? isAvailable;
   final Object? image;
-  final List<dynamic> images;
+  final List<dynamic>? images;
 
   const UpdateStoreProductBody({
-    this.storeId = kDefaultStoreId,
-    required this.categoryId,
+    this.storeId,
+    this.categoryId,
     this.masterProductId,
-    required this.name,
+    this.name,
     this.barcode,
     this.description,
-    required this.price,
+    this.price,
     this.discountedPrice,
-    required this.stockQuantity,
-    required this.lowStockThreshold,
+    this.stockQuantity,
+    this.lowStockThreshold,
     this.expiresAt,
-    this.isAvailable = true,
+    this.isAvailable,
     this.image,
-    this.images = const [],
+    this.images,
   });
 
   Map<String, dynamic> toMap() {
+    final imgs = images;
     return {
-      'storeId': storeId,
-      'categoryId': categoryId,
-      'masterProductId': masterProductId,
-      'name': name,
-      'barcode': barcode,
+      'storeId': storeId ?? kDefaultStoreId,
+      if (categoryId != null) 'categoryId': categoryId,
+      if (masterProductId != null) 'masterProductId': masterProductId,
+      if (name != null) 'name': name,
+      if (barcode != null) 'barcode': barcode,
       'sourceType': kSourceTypeManual,
-      'description': description,
-      'price': price,
-      'discountedPrice': discountedPrice,
-      'stockQuantity': stockQuantity,
-      'lowStockThreshold': lowStockThreshold,
-      'expiresAt': expiresAt,
-      'isAvailable': isAvailable,
-      'image': image,
-      'images': images,
+      if (description != null) 'description': description,
+      if (price != null) 'price': price,
+      if (discountedPrice != null) 'discountedPrice': discountedPrice,
+      if (stockQuantity != null) 'stockQuantity': stockQuantity,
+      if (lowStockThreshold != null) 'lowStockThreshold': lowStockThreshold,
+      if (expiresAt != null) 'expiresAt': expiresAt,
+      'isAvailable': isAvailable ?? true,
+      if (image is File) 'image': image,
+      if (imgs != null && imgs.isNotEmpty) 'images': imgs,
     };
   }
 }
@@ -79,7 +82,6 @@ class UpdateProductParams with Params {
   final bool? isActive;
   final UpdateStoreProductBody? fullUpdate;
 
-  /// Product card switch (keeps previous JSON shape for the same endpoint).
   factory UpdateProductParams.toggle({
     required int productId,
     required bool isActive,
@@ -91,7 +93,6 @@ class UpdateProductParams with Params {
     );
   }
 
-  /// Full PUT body from the edit form.
   factory UpdateProductParams.form({
     required int productId,
     required UpdateStoreProductBody body,

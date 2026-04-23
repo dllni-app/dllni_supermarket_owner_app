@@ -11,6 +11,8 @@ import '../../../domain/usecases/reject_order_use_case.dart';
 import '../../../data/models/reject_order_model.dart';
 import '../../../domain/usecases/get_order_details_use_case.dart';
 import '../../../data/models/get_order_details_model.dart';
+import '../../../domain/usecases/courier_handover_use_case.dart';
+import '../../../data/models/courier_handover_model.dart';
 
 part 'orders_event.dart';
 part 'orders_state.dart';
@@ -21,18 +23,23 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
   final RejectOrderUseCase rejectOrderUseCase;
   final AcceptOrderUseCase acceptOrderUseCase;
   final GetOrdersUseCase getOrdersUseCase;
+  final CourierHandoverUseCase courierHandoverUseCase;
+
   OrdersBloc(
     this.getOrdersUseCase,
     this.acceptOrderUseCase,
     this.rejectOrderUseCase,
-    this.getOrderDetailsUseCase,) : super(OrdersState()) {
+    this.getOrderDetailsUseCase,
+    this.courierHandoverUseCase,
+  ) : super(OrdersState()) {
     
   
     on<GetOrdersEvent>(_getOrders, transformer: droppableProMax());
     on<AcceptOrderEvent>(_acceptOrder);
     on<RejectOrderEvent>(_rejectOrder);
-    on<GetOrderDetailsEvent>(_getOrderDetails);}
-
+    on<GetOrderDetailsEvent>(_getOrderDetails);
+    on<CourierHandoverEvent>(_courierHandover);
+  }
 
   EventTransformer<T> droppableProMax<T extends EventWithReload>() {
     return (events, mapper) {
@@ -105,4 +112,41 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
         orderDetails: r,
       ));
     });
-  }}
+  }
+
+  FutureOr<void> _courierHandover(
+    CourierHandoverEvent event,
+    Emitter<OrdersState> emit,
+  ) async {
+    emit(
+      state.copyWith(
+        courierHandoverStatus: BlocStatus.loading,
+        courierHandoverLoadingOrderId: event.params.orderId,
+      ),
+    );
+    final res = await courierHandoverUseCase(event.params);
+    res.fold((l) {
+      emit(state.copyWith(
+        courierHandoverStatus: BlocStatus.failed,
+        errorMessage: l.message,
+        courierHandoverLoadingOrderId: 0,
+      ));
+    }, (r) {
+      emit(state.copyWith(
+        courierHandoverStatus: BlocStatus.success,
+        courierHandover: r,
+        courierHandoverLoadingOrderId: 0,
+      ));
+      add(
+        GetOrdersEvent(
+          isReload: true,
+          params: GetOrdersParams(
+            page: 1,
+            status: event.ordersListStatus,
+          ),
+        ),
+      );
+    });
+  }
+}
+

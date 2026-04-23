@@ -3,9 +3,11 @@ import 'package:dllni_supermarket_owner_app/core/widgets/failure_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:toastification/toastification.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/themes/app_colors.dart';
+import '../../domain/usecases/courier_handover_use_case.dart';
 import '../../domain/usecases/get_orders_use_case.dart';
 import '../manager/bloc/orders_bloc.dart';
 import '../widgets/order_card.dart';
@@ -28,9 +30,27 @@ class _OrdersScreenState extends State<OrdersScreen> {
     return BlocProvider<OrdersBloc>(
       create: (context) =>
           getIt<OrdersBloc>()..add(GetOrdersEvent(params: GetOrdersParams())),
-      child: Scaffold(
-        backgroundColor: const Color(0xffF5F6FA),
-        body: Column(
+      child: BlocListener<OrdersBloc, OrdersState>(
+        listenWhen: (previous, current) =>
+            previous.courierHandoverStatus != current.courierHandoverStatus,
+        listener: (context, state) {
+          if (state.courierHandoverStatus == BlocStatus.failed) {
+            AppToast.showToast(
+              context: context,
+              message: state.errorMessage ?? "Unknown Error",
+              type: ToastificationType.error,
+            );
+          } else if (state.courierHandoverStatus == BlocStatus.success) {
+            AppToast.showToast(
+              context: context,
+              message: "تم تسليم الطلب للمندوب",
+              type: ToastificationType.success,
+            );
+          }
+        },
+        child: Scaffold(
+          backgroundColor: const Color(0xffF5F6FA),
+          body: Column(
           children: [
             OrdersAppBar(),
             Expanded(
@@ -132,7 +152,11 @@ class _OrdersScreenState extends State<OrdersScreen> {
                   Expanded(
                     child: BlocBuilder<OrdersBloc, OrdersState>(
                       buildWhen: (previous, current) =>
-                          previous.orders != current.orders,
+                          previous.orders != current.orders ||
+                          previous.courierHandoverStatus !=
+                              current.courierHandoverStatus ||
+                          previous.courierHandoverLoadingOrderId !=
+                              current.courierHandoverLoadingOrderId,
                       builder: (context, state) {
                         return state.orders!.builder(
                           loadingWidget: Shimmer.fromColors(
@@ -270,6 +294,22 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                     );
                                   },
                                   onViewDetailsTap: () {},
+                                  onCourierHandoverTap: () {
+                                    context.read<OrdersBloc>().add(
+                                      CourierHandoverEvent(
+                                        params: CourierHandoverParams(
+                                          orderId:
+                                              state.orders!.list[index].id!,
+                                        ),
+                                        ordersListStatus: selectedStatus,
+                                      ),
+                                    );
+                                  },
+                                  isCourierHandoverLoading:
+                                      state.courierHandoverStatus ==
+                                          BlocStatus.loading &&
+                                      state.courierHandoverLoadingOrderId ==
+                                          state.orders!.list[index].id,
                                 );
                               },
                               separatorBuilder: (context, index) =>
@@ -312,6 +352,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
           ],
         ),
       ),
+    ),
     );
   }
 }

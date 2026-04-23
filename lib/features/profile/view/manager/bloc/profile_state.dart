@@ -20,19 +20,18 @@ class ProfileState {
   BlocStatus? employeePermissionsStatus;
   GetEmployeePermissionsModel? employeePermissions;
   PaginationStateModel<GetCouponCodesModelDataItem>? couponCodes;
-  BlocStatus? storeHours2Status;
-  DeleteStoreHoursModel? storeHours2;
-  BlocStatus? addStoreHoursStatus;
-  AddStoreHoursModel? addStoreHours;
-  BlocStatus? storeHoursStatus;
-  GetStoreHoursModel? storeHours;
+  BlocStatus? operatingHoursStatus;
+  OperatingHoursModel? operatingHours;
+  BlocStatus? updateOperatingHoursStatus;
+  OperatingHoursModel? lastUpdatedOperatingHours;
   BlocStatus? storeDataStatus;
-  UpdateStoreHoursModel? storeHours3;
-  BlocStatus? storeHours3Status;
   UpdateStoreDataModel? storeData;
   BlocStatus? storeProfileStatus;
   GetStoreProfileModel? storeProfile;
   String? errorMessage;
+  PaginationStateModel<GetActivityLogsModelDataItem>? activityLogs;
+  /// Keys: `''` for all logs, otherwise API `logName` (e.g. `orders`).
+  Map<String, int> activityLogTotalsByFilter;
 
   ProfileState({
     this.errorMessage,
@@ -40,14 +39,10 @@ class ProfileState {
     this.storeProfileStatus,
     this.storeData,
     this.storeDataStatus,
-    this.storeHours,
-    this.storeHoursStatus,
-    this.addStoreHours,
-    this.addStoreHoursStatus,
-    this.storeHours3,
-    this.storeHours3Status,
-    this.storeHours2,
-    this.storeHours2Status,
+    this.operatingHours,
+    this.operatingHoursStatus,
+    this.lastUpdatedOperatingHours,
+    this.updateOperatingHoursStatus,
     this.couponCodes = const PaginationStateModel(perPage: 10),
     this.employeePermissions,
     this.employeePermissionsStatus,
@@ -67,6 +62,8 @@ class ProfileState {
     this.couponWeekAnalysisStatus,
     this.addOffer,
     this.addOfferStatus,
+    this.activityLogs = const PaginationStateModel(perPage: 10),
+    this.activityLogTotalsByFilter = const {},
   });
 
   ProfileState copyWith({
@@ -75,14 +72,10 @@ class ProfileState {
     BlocStatus? storeProfileStatus,
     UpdateStoreDataModel? storeData,
     BlocStatus? storeDataStatus,
-    GetStoreHoursModel? storeHours,
-    BlocStatus? storeHoursStatus,
-    AddStoreHoursModel? addStoreHours,
-    BlocStatus? addStoreHoursStatus,
-    DeleteStoreHoursModel? storeHours2,
-    BlocStatus? storeHours2Status,
-    UpdateStoreHoursModel? storeHours3,
-    BlocStatus? storeHours3Status,
+    OperatingHoursModel? operatingHours,
+    BlocStatus? operatingHoursStatus,
+    OperatingHoursModel? lastUpdatedOperatingHours,
+    BlocStatus? updateOperatingHoursStatus,
     PaginationStateModel<GetCouponCodesModelDataItem>? couponCodes,
     GetEmployeePermissionsModel? employeePermissions,
     BlocStatus? employeePermissionsStatus,
@@ -102,20 +95,20 @@ class ProfileState {
     BlocStatus? couponWeekAnalysisStatus,
     AddOfferModel? addOffer,
     BlocStatus? addOfferStatus,
+    PaginationStateModel<GetActivityLogsModelDataItem>? activityLogs,
+    Map<String, int>? activityLogTotalsByFilter,
   }) => ProfileState(
     errorMessage: errorMessage ?? this.errorMessage,
     storeProfile: storeProfile ?? this.storeProfile,
     storeProfileStatus: storeProfileStatus ?? this.storeProfileStatus,
     storeData: storeData ?? this.storeData,
     storeDataStatus: storeDataStatus ?? this.storeDataStatus,
-    storeHours: storeHours ?? this.storeHours,
-    storeHoursStatus: storeHoursStatus ?? this.storeHoursStatus,
-    addStoreHours: addStoreHours ?? this.addStoreHours,
-    addStoreHoursStatus: addStoreHoursStatus ?? this.addStoreHoursStatus,
-    storeHours2: storeHours2 ?? this.storeHours2,
-    storeHours2Status: storeHours2Status ?? this.storeHours2Status,
-    storeHours3: storeHours3 ?? this.storeHours3,
-    storeHours3Status: storeHours3Status ?? this.storeHours3Status,
+    operatingHours: operatingHours ?? this.operatingHours,
+    operatingHoursStatus: operatingHoursStatus ?? this.operatingHoursStatus,
+    lastUpdatedOperatingHours:
+        lastUpdatedOperatingHours ?? this.lastUpdatedOperatingHours,
+    updateOperatingHoursStatus:
+        updateOperatingHoursStatus ?? this.updateOperatingHoursStatus,
     couponCodes: couponCodes ?? this.couponCodes,
     employeePermissions: employeePermissions ?? this.employeePermissions,
     employeePermissionsStatus:
@@ -140,5 +133,8 @@ class ProfileState {
         couponWeekAnalysisStatus ?? this.couponWeekAnalysisStatus,
     addOffer: addOffer ?? this.addOffer,
     addOfferStatus: addOfferStatus ?? this.addOfferStatus,
+    activityLogs: activityLogs ?? this.activityLogs,
+    activityLogTotalsByFilter:
+        activityLogTotalsByFilter ?? this.activityLogTotalsByFilter,
   );
 }

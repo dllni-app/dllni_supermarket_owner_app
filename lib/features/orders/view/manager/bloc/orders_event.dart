@@ -28,3 +28,13 @@ class GetOrderDetailsEvent extends OrdersEvent {
 
   GetOrderDetailsEvent({required this.params});
 }
+
+class CourierHandoverEvent extends OrdersEvent {
+  final CourierHandoverParams params;
+  final String? ordersListStatus;
+
+  CourierHandoverEvent({
+    required this.params,
+    this.ordersListStatus,
+  });
+}

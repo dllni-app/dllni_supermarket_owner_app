@@ -148,18 +148,18 @@ class QuickActionsSection extends StatelessWidget {
                     context.pushRoute("/products/new_product/details");
                   },
                 ),
-                QuickActionChipItem(
-                  width: 152,
-                  label: "المسح الضوئي للباركود",
-                  icon: FontAwesomeIcons.expand,
-                  onTap: () {
-                    AppToast.showToast(
-                      context: context,
-                      message: "قيد التطوير",
-                      type: ToastificationType.info,
-                    );
-                  },
-                ),
+                // QuickActionChipItem(
+                //   width: 152,
+                //   label: "المسح الضوئي للباركود",
+                //   icon: FontAwesomeIcons.expand,
+                //   onTap: () {
+                //     AppToast.showToast(
+                //       context: context,
+                //       message: "قيد التطوير",
+                //       type: ToastificationType.info,
+                //     );
+                //   },
+                // ),
                 QuickActionChipItem(
                   width: 137,
                   label: "رفع ملف إكسل",
@@ -193,7 +193,7 @@ class QuickActionsSection extends StatelessWidget {
               ][index],
             ),
             separatorBuilder: (_, _) => SizedBox(width: 8),
-            itemCount: 5,
+            itemCount: 4,
           ),
         ),
       ],

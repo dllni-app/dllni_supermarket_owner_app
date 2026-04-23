@@ -241,15 +241,10 @@ class _MoreScreenState extends State<MoreScreen> {
                         SectionCard(
                           containerColor: Color(0xffF1F5F9),
                           iconColor: Color(0xff475569),
-                          icon: FontAwesomeIcons.timesCircle,
-                          title: 'سجل نشاط الموظفين',
+                          icon: FontAwesomeIcons.circleXmark,                          title: 'سجل نشاط الموظفين',
                           subtitle: 'متابعة نشاط الفريق',
                           onTap: () {
-                            AppToast.showToast(
-                              context: context,
-                              message: "هذه الميزة غير متوفرة حالياً",
-                              type: ToastificationType.info,
-                            );
+                            context.pushRoute('/profile/employees/activity_log');
                           },
                         ),
                       ],

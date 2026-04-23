@@ -148,7 +148,7 @@ class _ProductCardState extends State<ProductCard> {
                     SizedBox(width: 16),
                     Expanded(
                       child: SizedBox(
-                        height: 96,
+                        height: 105,
                         child: Padding(
                           padding: EdgeInsets.symmetric(vertical: 4),
                           child: Column(
@@ -181,10 +181,9 @@ class _ProductCardState extends State<ProductCard> {
                                         highlightColor: Colors.transparent,
                                       ),
                                       child: PopupMenuButton<String>(
-                                        padding: EdgeInsets.zero,
                                         icon: Icon(
                                           Icons.more_vert,
-                                          size: 16,
+                                          size: 20,
                                           color: Colors.grey,
                                         ),
                                         onSelected: (value) async {

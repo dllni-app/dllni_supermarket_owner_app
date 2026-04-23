@@ -7,12 +7,10 @@ import '../../../../core/di/injection.dart';
 import '../../../../core/widgets/app_app_bars.dart';
 import '../../../../core/widgets/app_buttons.dart';
 import '../../../../core/widgets/failure_widget.dart';
-import '../../data/models/get_store_hours_model.dart';
-import '../../domain/usecases/add_store_hours_use_case.dart';
-import '../../domain/usecases/delete_store_hours_use_case.dart';
-import '../../domain/usecases/get_store_hours_use_case.dart';
-import '../../domain/usecases/update_store_hours_use_case.dart';
+import '../../data/models/operating_hours_model.dart';
+import '../../domain/usecases/update_operating_hours_use_case.dart';
 import '../manager/bloc/profile_bloc.dart';
+import '../working_day_draft.dart';
 import '../widgets/working_time_card.dart';
 
 @AutoRoutePage()
@@ -23,11 +21,41 @@ class WorkingTimeScreen extends StatefulWidget {
   State<WorkingTimeScreen> createState() => _WorkingTimeScreenState();
 }
 
+/// PUT body order (matches API sample: Monday → Sunday).
+const List<String> _kApiPutDayOrder = [
+  'monday',
+  'tuesday',
+  'wednesday',
+  'thursday',
+  'friday',
+  'saturday',
+  'sunday',
+];
+
+int _apiDayToUiIndex(String? day) {
+  switch ((day ?? '').toLowerCase()) {
+    case 'sunday':
+      return 0;
+    case 'monday':
+      return 1;
+    case 'tuesday':
+      return 2;
+    case 'wednesday':
+      return 3;
+    case 'thursday':
+      return 4;
+    case 'friday':
+      return 5;
+    case 'saturday':
+      return 6;
+    default:
+      return -1;
+  }
+}
+
 class _WorkingTimeScreenState extends State<WorkingTimeScreen> {
-  late List<WorkingScreenParams> params;
-  int failedAddResponses = 0;
-  int failedUpdateResponses = 0;
-  int failedDeleteResponses = 0;
+  late final List<WorkingDayDraft> dayDrafts;
+  bool isTemporarilyClosed = false;
 
   static const List<String> arabicDayNames = [
     'الأحد',
@@ -51,8 +79,72 @@ class _WorkingTimeScreenState extends State<WorkingTimeScreen> {
 
   @override
   void initState() {
-    params = List.generate(7, (index) => WorkingScreenParams(dayIndex: index));
     super.initState();
+    dayDrafts = List.generate(
+      7,
+      (_) => WorkingDayDraft(isEnabled: true),
+    );
+  }
+
+  void _applyOperatingHours(OperatingHoursModel? model) {
+    final data = model?.data;
+    if (data == null) return;
+    setState(() {
+      isTemporarilyClosed = data.isTemporarilyClosed ?? false;
+      for (final d in dayDrafts) {
+        d.isEnabled = true;
+        d.slots.clear();
+      }
+      for (final daily in data.dailyHours ?? []) {
+        final idx = _apiDayToUiIndex(daily.dayOfWeek);
+        if (idx < 0 || idx > 6) continue;
+        dayDrafts[idx].isEnabled = daily.isEnabled ?? false;
+        dayDrafts[idx].slots.clear();
+        if (!dayDrafts[idx].isEnabled) continue;
+        for (final ts in daily.timeSlots ?? []) {
+          dayDrafts[idx].slots.add(
+            OperatingHoursTimeSlot(
+              startTime: apiTimeToHHmm(ts.startTime) ?? ts.startTime,
+              endTime: apiTimeToHHmm(ts.endTime) ?? ts.endTime,
+            ),
+          );
+        }
+      }
+    });
+  }
+
+  List<OperatingHoursDaily> _buildDailyHoursForPut() {
+    final out = <OperatingHoursDaily>[];
+    for (final apiDay in _kApiPutDayOrder) {
+      final idx = _apiDayToUiIndex(apiDay);
+      final draft = dayDrafts[idx];
+      var enabled = draft.isEnabled;
+      final slots = <OperatingHoursTimeSlot>[];
+      if (enabled) {
+        for (final slot in draft.slots) {
+          final st = slot.startTime?.trim() ?? '';
+          final en = slot.endTime?.trim() ?? '';
+          if (st.isEmpty || en.isEmpty) continue;
+          slots.add(
+            OperatingHoursTimeSlot(
+              startTime: hhmmToApiTime(st),
+              endTime: hhmmToApiTime(en),
+            ),
+          );
+        }
+        if (slots.isEmpty) {
+          enabled = false;
+        }
+      }
+      out.add(
+        OperatingHoursDaily(
+          dayOfWeek: apiDay,
+          isEnabled: enabled,
+          timeSlots: enabled ? slots : [],
+        ),
+      );
+    }
+    return out;
   }
 
   @override
@@ -62,202 +154,182 @@ class _WorkingTimeScreenState extends State<WorkingTimeScreen> {
 
     return BlocProvider(
       create: (context) =>
-          getIt<ProfileBloc>()
-            ..add(GetStoreHoursEvent(params: GetStoreHoursParams(storeId: 1))),
+          getIt<ProfileBloc>()..add(GetOperatingHoursEvent()),
       child: Scaffold(
         body: Column(
           children: [
             AppSimpleAppBar(title: "ساعات العمل السوبر ماركت"),
-            BlocListener<ProfileBloc, ProfileState>(
-              listener: (context, state) {
-                if (state.storeHoursStatus == BlocStatus.success) {
-                  for (final GetStoreHoursModelDataItem period
-                      in state.storeHours?.data ?? []) {
-                    params[period.dayOfWeek ?? 0].periods.add(period);
-                  }
-                }
-              },
-              child: SizedBox(),
-            ),
             Expanded(
-              child: BlocConsumer<ProfileBloc, ProfileState>(
+              child: BlocListener<ProfileBloc, ProfileState>(
                 listenWhen: (previous, current) =>
-                    previous.addStoreHoursStatus !=
-                        current.addStoreHoursStatus ||
-                    previous.storeHours2Status != current.storeHours2Status ||
-                    previous.storeHours3Status != current.storeHours3Status,
+                    previous.operatingHours != current.operatingHours &&
+                    current.operatingHoursStatus == BlocStatus.success,
                 listener: (context, state) {
-                  if (state.addStoreHoursStatus == BlocStatus.failed) {
-                    failedAddResponses++;
-                  }
-                  if (state.storeHours3Status == BlocStatus.failed) {
-                    failedUpdateResponses++;
-                  }
-                  if (state.storeHours2Status == BlocStatus.failed) {
-                    failedDeleteResponses++;
-                  }
-                  if (state.addStoreHoursStatus == BlocStatus.success ||
-                      state.addStoreHoursStatus == BlocStatus.failed ||
-                      state.storeHours2Status == BlocStatus.success ||
-                      state.storeHours2Status == BlocStatus.failed ||
-                      state.storeHours3Status == BlocStatus.success ||
-                      state.storeHours3Status == BlocStatus.failed) {
-                    if (updateNextWorkingTimes(context, state, params)) {
-                      print("=====finish uploading");
-                      if (failedAddResponses != 0 ||
-                          failedUpdateResponses != 0 ||
-                          failedDeleteResponses != 0) {
-                        AppToast.showToast(
-                          context: context,
-                          message:
-                              "${failedDeleteResponses != 0 ? "فشل حذف $failedDeleteResponses من الفترات" : ""}${failedUpdateResponses != 0 ? "\nفشل تحديث $failedUpdateResponses من الفترات\n" : ""}${failedAddResponses != 0 ? "\nفشل إضافة $failedAddResponses من الفترات\n" : ""}",
-                          type: ToastificationType.error,
-                        );
-                        failedAddResponses = failedUpdateResponses =
-                            failedDeleteResponses = 0;
-                      } else {
-                        AppToast.showToast(
-                          context: context,
-                          message: "تم حفظ التغييرات بنجاح",
-                          type: ToastificationType.success,
-                        );
-                      }
-                      context.read<ProfileBloc>().add(
-                        GetStoreHoursEvent(
-                          params: GetStoreHoursParams(storeId: 1),
-                        ),
+                  _applyOperatingHours(state.operatingHours);
+                },
+                child: BlocListener<ProfileBloc, ProfileState>(
+                  listenWhen: (previous, current) =>
+                      previous.updateOperatingHoursStatus !=
+                      current.updateOperatingHoursStatus,
+                  listener: (context, state) {
+                    if (state.updateOperatingHoursStatus ==
+                        BlocStatus.failed) {
+                      AppToast.showToast(
+                        context: context,
+                        message: state.errorMessage ?? 'Unknown Error',
+                        type: ToastificationType.error,
                       );
                     }
-                  }
-                },
-                buildWhen: (previous, current) =>
-                    previous.storeHoursStatus != current.storeHoursStatus,
-                builder: (context, state) {
-                  if (state.storeHoursStatus == BlocStatus.loading) {
-                    return Center(child: CircularProgressIndicator());
-                  } else if (state.storeHoursStatus == BlocStatus.failed) {
-                    return Center(
-                      child: FailureWidget(
-                        message: state.errorMessage.toString(),
-                        onRetry: () {
-                          context.read<ProfileBloc>().add(
-                            GetStoreHoursEvent(
-                              params: GetStoreHoursParams(storeId: 1),
-                            ),
-                          );
-                        },
-                      ),
-                    );
-                  } else if (state.storeHoursStatus == BlocStatus.success) {
-                    return Column(
-                      children: [
-                        const SizedBox(height: 16),
-                        Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(16),
-                            color: context.onPrimary,
-                          ),
-                          padding: EdgeInsetsDirectional.all(16),
-                          margin: EdgeInsetsDirectional.symmetric(
-                            horizontal: 20,
-                          ),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(16),
-                              color: Color(0xffEF4444).withAlpha(6),
-                              border: Border.all(color: Color(0xffEF4444)),
-                            ),
-                            padding: EdgeInsetsDirectional.symmetric(
-                              vertical: 14,
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              spacing: 8,
-                              children: [
-                                Icon(
-                                  Icons.door_back_door,
-                                  color: Color(0xffEF4444),
-                                  size: 16,
-                                ),
-                                AppText.bodyMedium(
-                                  'إغلاق مؤقت للمتجر',
-                                  color: Color(0xffEF4444),
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Expanded(
-                          child: ListView.builder(
-                            padding: const EdgeInsets.symmetric(horizontal: 20),
-                            itemCount: 7,
-                            itemBuilder: (context, index) {
-                              final isToday = index == todayWeekday;
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 16),
-                                child: WorkingTimeCard(
-                                  dayName: arabicDayNames[index],
-                                  dayNameEn: englishDayNames[index],
-                                  isToday: isToday,
-                                  dayIndex: index,
-                                  periods: params[index].periods,
-                                  addedPeriods: params[index].newPeriods,
-                                  updatedPeriods: params[index].updatedPeriods,
-                                  deletedPeriods: params[index].deletedPeriods,
-                                ),
+                    if (state.updateOperatingHoursStatus ==
+                        BlocStatus.success) {
+                      AppToast.showToast(
+                        context: context,
+                        message: 'تم حفظ التغييرات بنجاح',
+                        type: ToastificationType.success,
+                      );
+                      context.read<ProfileBloc>().add(
+                        GetOperatingHoursEvent(),
+                      );
+                    }
+                  },
+                  child: BlocBuilder<ProfileBloc, ProfileState>(
+                    buildWhen: (previous, current) =>
+                        previous.operatingHoursStatus !=
+                            current.operatingHoursStatus ||
+                        previous.updateOperatingHoursStatus !=
+                            current.updateOperatingHoursStatus,
+                    builder: (context, state) {
+                      if (state.operatingHoursStatus == BlocStatus.loading) {
+                        return Center(child: CircularProgressIndicator());
+                      }
+                      if (state.operatingHoursStatus == BlocStatus.failed) {
+                        return Center(
+                          child: FailureWidget(
+                            message: state.errorMessage.toString(),
+                            onRetry: () {
+                              context.read<ProfileBloc>().add(
+                                GetOperatingHoursEvent(),
                               );
                             },
                           ),
-                        ),
-                        SizedBox(height: 16),
-                        BlocBuilder<ProfileBloc, ProfileState>(
-                          builder: (context, state) {
-                            if (state.addStoreHoursStatus ==
-                                    BlocStatus.loading ||
-                                state.storeHours2Status == BlocStatus.loading ||
-                                state.storeHours3Status == BlocStatus.loading) {
-                              return Center(child: CircularProgressIndicator());
-                            }
-                            return Padding(
-                              padding: EdgeInsetsDirectional.symmetric(
-                                horizontal: 24,
+                        );
+                      }
+                      if (state.operatingHoursStatus == BlocStatus.success) {
+                        return Column(
+                          children: [
+                            const SizedBox(height: 16),
+                            Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(16),
+                                color: context.onPrimary,
                               ),
-                              child: Row(
-                                spacing: 16,
-                                children: [
-                                  Expanded(
-                                    child: AppButton(
-                                      title: "حفظ التغييرات",
-                                      onTap: () {
-                                        updateNextWorkingTimes(
-                                          context,
-                                          state,
-                                          params,
-                                        );
-                                      },
+                              padding: EdgeInsetsDirectional.all(16),
+                              margin: EdgeInsetsDirectional.symmetric(
+                                horizontal: 20,
+                              ),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(16),
+                                  color: Color(0xffEF4444).withAlpha(6),
+                                  border: Border.all(color: Color(0xffEF4444)),
+                                ),
+                                padding: EdgeInsetsDirectional.symmetric(
+                                  vertical: 8,
+                                  horizontal: 12,
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.door_back_door,
+                                      color: Color(0xffEF4444),
+                                      size: 16,
                                     ),
-                                  ),
-                                  AppOutlinedButton(
-                                    title: "إلغاء",
-                                    color: const Color(0xFFFF4C51),
-                                    onTap: () {
-                                      print("Reject");
-                                      context.pop();
-                                    },
-                                  ),
-                                ],
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: AppText.bodyMedium(
+                                        'إغلاق مؤقت للمتجر',
+                                        color: Color(0xffEF4444),
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    Switch(
+                                      value: isTemporarilyClosed,
+                                      onChanged: (v) {
+                                        setState(() => isTemporarilyClosed = v);
+                                      },
+                                      activeTrackColor: Color(0xffEF4444),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            );
-                          },
-                        ),
-                        SizedBox(height: 16 + context.padding.bottom),
-                      ],
-                    );
-                  }
-                  return SizedBox();
-                },
+                            ),
+                            const SizedBox(height: 16),
+                            Expanded(
+                              child: ListView.builder(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                ),
+                                itemCount: 7,
+                                itemBuilder: (context, index) {
+                                  final isToday = index == todayWeekday;
+                                  return Padding(
+                                    padding: const EdgeInsets.only(bottom: 16),
+                                    child: WorkingTimeCard(
+                                      dayName: arabicDayNames[index],
+                                      dayNameEn: englishDayNames[index],
+                                      isToday: isToday,
+                                      day: dayDrafts[index],
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                            SizedBox(height: 16),
+                            if (state.updateOperatingHoursStatus ==
+                                BlocStatus.loading)
+                              Center(child: CircularProgressIndicator())
+                            else
+                              Padding(
+                                padding: EdgeInsetsDirectional.symmetric(
+                                  horizontal: 24,
+                                ),
+                                child: Row(
+                                  spacing: 16,
+                                  children: [
+                                    Expanded(
+                                      child: AppButton(
+                                        title: "حفظ التغييرات",
+                                        onTap: () {
+                                          context.read<ProfileBloc>().add(
+                                            UpdateOperatingHoursEvent(
+                                              params:
+                                                  UpdateOperatingHoursParams(
+                                                isTemporarilyClosed:
+                                                    isTemporarilyClosed,
+                                                dailyHours:
+                                                    _buildDailyHoursForPut(),
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                    AppOutlinedButton(
+                                      title: "إلغاء",
+                                      color: const Color(0xFFFF4C51),
+                                      onTap: () => context.pop(),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            SizedBox(height: 16 + context.padding.bottom),
+                          ],
+                        );
+                      }
+                      return SizedBox();
+                    },
+                  ),
+                ),
               ),
             ),
           ],
@@ -265,62 +337,4 @@ class _WorkingTimeScreenState extends State<WorkingTimeScreen> {
       ),
     );
   }
-
-  /// ### this function to update the whole of periods in the store
-  /// - returns `true`  ->  updates have finished
-  /// - returns `false` ->  updates haven't finished
-  bool updateNextWorkingTimes(
-    BuildContext context,
-    ProfileState state,
-    List<WorkingScreenParams> params,
-  ) {
-    int? selectedDay = selectNextDay(params);
-    print("selectedDay is : $selectedDay");
-    if (selectedDay == null) return true;
-    if (params[selectedDay].deletedPeriods.isNotEmpty) {
-      final period = params[selectedDay].deletedPeriods.removeLast();
-      context.read<ProfileBloc>().add(
-        DeleteStoreHoursEvent(
-          params: DeleteStoreHoursParams(periodId: period.id!),
-        ),
-      );
-    } else if (params[selectedDay].updatedPeriods.isNotEmpty) {
-      final period = params[selectedDay].updatedPeriods.removeLast();
-      context.read<ProfileBloc>().add(
-        UpdateStoreHoursEvent(
-          params: UpdateStoreHoursParams(period: period, storeId: 1),
-        ),
-      );
-    } else {
-      final period = params[selectedDay].newPeriods.removeLast();
-      period.dayOfWeek = selectedDay;
-      context.read<ProfileBloc>().add(
-        AddStoreHoursEvent(
-          params: AddStoreHoursParams(period: period, storeId: 1),
-        ),
-      );
-    }
-    return false;
-  }
-
-  int? selectNextDay(List<WorkingScreenParams> params) {
-    for (int i = 0; i < params.length; i++) {
-      if (params[i].newPeriods.isNotEmpty ||
-          params[i].updatedPeriods.isNotEmpty ||
-          params[i].deletedPeriods.isNotEmpty) {
-        return i;
-      }
-    }
-    return null;
-  }
-}
-
-class WorkingScreenParams {
-  final int dayIndex;
-  List<GetStoreHoursModelDataItem> periods = [];
-  List<GetStoreHoursModelDataItem> newPeriods = [];
-  List<GetStoreHoursModelDataItem> updatedPeriods = [];
-  List<GetStoreHoursModelDataItem> deletedPeriods = [];
-
-  WorkingScreenParams({required this.dayIndex});
 }

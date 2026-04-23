@@ -1,3 +1,4 @@
+import 'package:common_package/common_package.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'dart:async';
@@ -6,14 +7,9 @@ import '../../../domain/usecases/get_store_profile_use_case.dart';
 import '../../../data/models/get_store_profile_model.dart';
 import '../../../domain/usecases/update_store_data_use_case.dart';
 import '../../../data/models/update_store_data_model.dart';
-import '../../../domain/usecases/get_store_hours_use_case.dart';
-import '../../../data/models/get_store_hours_model.dart';
-import '../../../domain/usecases/add_store_hours_use_case.dart';
-import '../../../data/models/add_store_hours_model.dart';
-import '../../../domain/usecases/update_store_hours_use_case.dart';
-import '../../../data/models/update_store_hours_model.dart';
-import '../../../domain/usecases/delete_store_hours_use_case.dart';
-import '../../../data/models/delete_store_hours_model.dart';
+import '../../../domain/usecases/get_operating_hours_use_case.dart';
+import '../../../data/models/operating_hours_model.dart';
+import '../../../domain/usecases/update_operating_hours_use_case.dart';
 import 'package:common_package/helpers/droppable_helper.dart';
 import '../../../domain/usecases/get_coupon_codes_use_case.dart';
 import '../../../data/models/get_coupon_codes_model.dart';
@@ -37,6 +33,8 @@ import '../../../domain/usecases/get_coupon_week_analysis_use_case.dart';
 import '../../../data/models/get_coupon_week_analysis_model.dart';
 import '../../../domain/usecases/add_offer_use_case.dart';
 import '../../../data/models/add_offer_model.dart';
+import '../../../domain/usecases/get_activity_logs_use_case.dart';
+import '../../../data/models/get_activity_logs_model.dart';
 
 part 'profile_event.dart';
 part 'profile_state.dart';
@@ -54,19 +52,16 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   final GetOffersWeeklySummaryUseCase getOffersWeeklySummaryUseCase;
   final GetEmployeePermissionsUseCase getEmployeePermissionsUseCase;
   final GetCouponCodesUseCase getCouponCodesUseCase;
-  final DeleteStoreHoursUseCase deleteStoreHoursUseCase;
-  final UpdateStoreHoursUseCase updateStoreHoursUseCase;
-  final AddStoreHoursUseCase addStoreHoursUseCase;
-  final GetStoreHoursUseCase getStoreHoursUseCase;
+  final UpdateOperatingHoursUseCase updateOperatingHoursUseCase;
+  final GetOperatingHoursUseCase getOperatingHoursUseCase;
   final UpdateStoreDataUseCase updateStoreDataUseCase;
   final GetStoreProfileUseCase getStoreProfileUseCase;
+  final GetActivityLogsUseCase getActivityLogsUseCase;
   ProfileBloc(
     this.getStoreProfileUseCase,
     this.updateStoreDataUseCase,
-    this.getStoreHoursUseCase,
-    this.addStoreHoursUseCase,
-    this.updateStoreHoursUseCase,
-    this.deleteStoreHoursUseCase,
+    this.getOperatingHoursUseCase,
+    this.updateOperatingHoursUseCase,
     this.getCouponCodesUseCase,
     this.getEmployeePermissionsUseCase,
     this.getOffersWeeklySummaryUseCase,
@@ -77,15 +72,13 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     this.getProductsCountUseCase,
     this.addCouponCodeUseCase,
     this.getCouponWeekAnalysisUseCase,
-    this.addOfferUseCase,) : super(ProfileState()) {
-    
-  
+    this.addOfferUseCase,
+    this.getActivityLogsUseCase,
+  ) : super(ProfileState()) {
     on<GetStoreProfileEvent>(_getStoreProfile);
     on<UpdateStoreDataEvent>(_updateStoreData);
-    on<GetStoreHoursEvent>(_getStoreHours);
-    on<AddStoreHoursEvent>(_addStoreHours);
-    on<UpdateStoreHoursEvent>(_updateStoreHours);
-    on<DeleteStoreHoursEvent>(_deleteStoreHours);
+    on<GetOperatingHoursEvent>(_getOperatingHours);
+    on<UpdateOperatingHoursEvent>(_updateOperatingHours);
     on<GetCouponCodesEvent>(_getCouponCodes, transformer: droppableProMax());
     on<GetEmployeePermissionsEvent>(_getEmployeePermissions);
     on<GetOffersWeeklySummaryEvent>(_getOffersWeeklySummary);
@@ -96,106 +89,108 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     on<GetProductsCountEvent>(_getProductsCount);
     on<AddCouponCodeEvent>(_addCouponCode);
     on<GetCouponWeekAnalysisEvent>(_getCouponWeekAnalysis);
-    on<AddOfferEvent>(_addOffer);}
+    on<AddOfferEvent>(_addOffer);
+    on<GetActivityLogsEvent>(_getActivityLogs, transformer: droppableProMax());
+  }
 
-
-  FutureOr<void> _getStoreProfile(GetStoreProfileEvent event, Emitter<ProfileState> emit) async {
+  FutureOr<void> _getStoreProfile(
+    GetStoreProfileEvent event,
+    Emitter<ProfileState> emit,
+  ) async {
     emit(state.copyWith(storeProfileStatus: BlocStatus.loading));
     final res = await getStoreProfileUseCase(event.params);
-    res.fold((l) {
-      emit(state.copyWith(
-        storeProfileStatus: BlocStatus.failed,
-        errorMessage: l.message,
-      ));
-    }, (r) {
-      emit(state.copyWith(
-        storeProfileStatus: BlocStatus.success,
-        storeProfile: r,
-      ));
-    });
+    res.fold(
+      (l) {
+        emit(
+          state.copyWith(
+            storeProfileStatus: BlocStatus.failed,
+            errorMessage: l.message,
+          ),
+        );
+      },
+      (r) {
+        emit(
+          state.copyWith(
+            storeProfileStatus: BlocStatus.success,
+            storeProfile: r,
+          ),
+        );
+      },
+    );
   }
 
-
-  FutureOr<void> _updateStoreData(UpdateStoreDataEvent event, Emitter<ProfileState> emit) async {
+  FutureOr<void> _updateStoreData(
+    UpdateStoreDataEvent event,
+    Emitter<ProfileState> emit,
+  ) async {
     emit(state.copyWith(storeDataStatus: BlocStatus.loading));
     final res = await updateStoreDataUseCase(event.params);
-    res.fold((l) {
-      emit(state.copyWith(
-        storeDataStatus: BlocStatus.failed,
-        errorMessage: l.message,
-      ));
-    }, (r) {
-      emit(state.copyWith(
-        storeDataStatus: BlocStatus.success,
-        storeData: r,
-      ));
-    });
+    res.fold(
+      (l) {
+        emit(
+          state.copyWith(
+            storeDataStatus: BlocStatus.failed,
+            errorMessage: l.message,
+          ),
+        );
+      },
+      (r) {
+        emit(state.copyWith(storeDataStatus: BlocStatus.success, storeData: r));
+      },
+    );
   }
 
-  FutureOr<void> _getStoreHours(GetStoreHoursEvent event, Emitter<ProfileState> emit) async {
-    emit(state.copyWith(storeHoursStatus: BlocStatus.loading));
-    final res = await getStoreHoursUseCase(event.params);
-    res.fold((l) {
-      emit(state.copyWith(
-        storeHoursStatus: BlocStatus.failed,
-        errorMessage: l.message,
-      ));
-    }, (r) {
-      emit(state.copyWith(
-        storeHoursStatus: BlocStatus.success,
-        storeHours: r,
-      ));
-    });
+  FutureOr<void> _getOperatingHours(
+    GetOperatingHoursEvent event,
+    Emitter<ProfileState> emit,
+  ) async {
+    emit(state.copyWith(operatingHoursStatus: BlocStatus.loading));
+    final res = await getOperatingHoursUseCase(NoParams());
+    res.fold(
+      (l) {
+        emit(
+          state.copyWith(
+            operatingHoursStatus: BlocStatus.failed,
+            errorMessage: l.message,
+          ),
+        );
+      },
+      (r) {
+        emit(
+          state.copyWith(
+            operatingHoursStatus: BlocStatus.success,
+            operatingHours: r,
+          ),
+        );
+      },
+    );
   }
 
-  FutureOr<void> _addStoreHours(AddStoreHoursEvent event, Emitter<ProfileState> emit) async {
-    emit(state.copyWith(addStoreHoursStatus: BlocStatus.loading));
-    final res = await addStoreHoursUseCase(event.params);
-    res.fold((l) {
-      emit(state.copyWith(
-        addStoreHoursStatus: BlocStatus.failed,
-        errorMessage: l.message,
-      ));
-    }, (r) {
-      emit(state.copyWith(
-        addStoreHoursStatus: BlocStatus.success,
-        addStoreHours: r,
-      ));
-    });
+  FutureOr<void> _updateOperatingHours(
+    UpdateOperatingHoursEvent event,
+    Emitter<ProfileState> emit,
+  ) async {
+    emit(state.copyWith(updateOperatingHoursStatus: BlocStatus.loading));
+    final res = await updateOperatingHoursUseCase(event.params);
+    res.fold(
+      (l) {
+        emit(
+          state.copyWith(
+            updateOperatingHoursStatus: BlocStatus.failed,
+            errorMessage: l.message,
+          ),
+        );
+      },
+      (r) {
+        emit(
+          state.copyWith(
+            updateOperatingHoursStatus: BlocStatus.success,
+            lastUpdatedOperatingHours: r,
+          ),
+        );
+      },
+    );
   }
-
-  FutureOr<void> _updateStoreHours(UpdateStoreHoursEvent event, Emitter<ProfileState> emit) async {
-    emit(state.copyWith(storeHours3Status: BlocStatus.loading));
-    final res = await updateStoreHoursUseCase(event.params);
-    res.fold((l) {
-      emit(state.copyWith(
-        storeHours3Status: BlocStatus.failed,
-        errorMessage: l.message,
-      ));
-    }, (r) {
-      emit(state.copyWith(
-        storeHours3Status: BlocStatus.success,
-        storeHours3: r,
-      ));
-    });
-  }
-
-  FutureOr<void> _deleteStoreHours(DeleteStoreHoursEvent event, Emitter<ProfileState> emit) async {
-    emit(state.copyWith(storeHours2Status: BlocStatus.loading));
-    final res = await deleteStoreHoursUseCase(event.params);
-    res.fold((l) {
-      emit(state.copyWith(
-        storeHours2Status: BlocStatus.failed,
-        errorMessage: l.message,
-      ));
-    }, (r) {
-      emit(state.copyWith(
-        storeHours2Status: BlocStatus.success,
-        storeHours2: r,
-      ));
-    });
-  }
-
 
   EventTransformer<T> droppableProMax<T extends EventWithReload>() {
     return (events, mapper) {
@@ -203,187 +198,339 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     };
   }
 
-  FutureOr<void> _getCouponCodes(GetCouponCodesEvent event, Emitter<ProfileState> emit) async {
+  FutureOr<void> _getCouponCodes(
+    GetCouponCodesEvent event,
+    Emitter<ProfileState> emit,
+  ) async {
     if (!state.couponCodes!.isEndPage || event.isReload) {
-      emit(state.copyWith(
-        couponCodes: state.couponCodes!.setLoading(isReload: event.isReload),
-      ));
+      emit(
+        state.copyWith(
+          couponCodes: state.couponCodes!.setLoading(isReload: event.isReload),
+        ),
+      );
       final res = await getCouponCodesUseCase(event.params);
-      res.fold((l) {
-        emit(state.copyWith(
-          couponCodes: state.couponCodes!.setFaild(errorMessage: l.message),
-          errorMessage: l.message,
-        ));
-      }, (r) {
-        emit(state.copyWith(
-          couponCodes: state.couponCodes!.setSuccess(data: r.data!),
-        ));
-      });
+      res.fold(
+        (l) {
+          emit(
+            state.copyWith(
+              couponCodes: state.couponCodes!.setFaild(errorMessage: l.message),
+              errorMessage: l.message,
+            ),
+          );
+        },
+        (r) {
+          emit(
+            state.copyWith(
+              couponCodes: state.couponCodes!.setSuccess(data: r.data!),
+            ),
+          );
+        },
+      );
     }
   }
 
-  FutureOr<void> _getEmployeePermissions(GetEmployeePermissionsEvent event, Emitter<ProfileState> emit) async {
+  FutureOr<void> _getActivityLogs(
+    GetActivityLogsEvent event,
+    Emitter<ProfileState> emit,
+  ) async {
+    if (!state.activityLogs!.isEndPage || event.isReload) {
+      emit(
+        state.copyWith(
+          activityLogs: state.activityLogs!.setLoading(
+            isReload: event.isReload,
+          ),
+        ),
+      );
+      final res = await getActivityLogsUseCase(event.params);
+      res.fold(
+        (l) {
+          emit(
+            state.copyWith(
+              activityLogs: state.activityLogs!.setFaild(
+                errorMessage: l.message,
+              ),
+              errorMessage: l.message,
+            ),
+          );
+        },
+        (r) {
+          final totals = Map<String, int>.from(state.activityLogTotalsByFilter);
+          final key = event.params.logName ?? '';
+          final metaTotal = r.meta?.total;
+          if (metaTotal != null) {
+            totals[key] = metaTotal;
+          }
+          emit(
+            state.copyWith(
+              activityLogs: state.activityLogs!.setSuccess(data: r.data ?? []),
+              activityLogTotalsByFilter: totals,
+            ),
+          );
+        },
+      );
+    }
+  }
+
+  FutureOr<void> _getEmployeePermissions(
+    GetEmployeePermissionsEvent event,
+    Emitter<ProfileState> emit,
+  ) async {
     emit(state.copyWith(employeePermissionsStatus: BlocStatus.loading));
     final res = await getEmployeePermissionsUseCase(event.params);
-    res.fold((l) {
-      emit(state.copyWith(
-        employeePermissionsStatus: BlocStatus.failed,
-        errorMessage: l.message,
-      ));
-    }, (r) {
-      emit(state.copyWith(
-        employeePermissionsStatus: BlocStatus.success,
-        employeePermissions: r,
-      ));
-    });
+    res.fold(
+      (l) {
+        emit(
+          state.copyWith(
+            employeePermissionsStatus: BlocStatus.failed,
+            errorMessage: l.message,
+          ),
+        );
+      },
+      (r) {
+        emit(
+          state.copyWith(
+            employeePermissionsStatus: BlocStatus.success,
+            employeePermissions: r,
+          ),
+        );
+      },
+    );
   }
 
-  FutureOr<void> _getOffersWeeklySummary(GetOffersWeeklySummaryEvent event, Emitter<ProfileState> emit) async {
+  FutureOr<void> _getOffersWeeklySummary(
+    GetOffersWeeklySummaryEvent event,
+    Emitter<ProfileState> emit,
+  ) async {
     emit(state.copyWith(offersWeeklySummaryStatus: BlocStatus.loading));
     final res = await getOffersWeeklySummaryUseCase(event.params);
-    res.fold((l) {
-      emit(state.copyWith(
-        offersWeeklySummaryStatus: BlocStatus.failed,
-        errorMessage: l.message,
-      ));
-    }, (r) {
-      emit(state.copyWith(
-        offersWeeklySummaryStatus: BlocStatus.success,
-        offersWeeklySummary: r,
-      ));
-    });
+    res.fold(
+      (l) {
+        emit(
+          state.copyWith(
+            offersWeeklySummaryStatus: BlocStatus.failed,
+            errorMessage: l.message,
+          ),
+        );
+      },
+      (r) {
+        emit(
+          state.copyWith(
+            offersWeeklySummaryStatus: BlocStatus.success,
+            offersWeeklySummary: r,
+          ),
+        );
+      },
+    );
   }
 
-  FutureOr<void> _getStoreEmployees(GetStoreEmployeesEvent event, Emitter<ProfileState> emit) async {
+  FutureOr<void> _getStoreEmployees(
+    GetStoreEmployeesEvent event,
+    Emitter<ProfileState> emit,
+  ) async {
     emit(state.copyWith(storeEmployeesStatus: BlocStatus.loading));
     final res = await getStoreEmployeesUseCase(event.params);
-    res.fold((l) {
-      emit(state.copyWith(
-        storeEmployeesStatus: BlocStatus.failed,
-        errorMessage: l.message,
-      ));
-    }, (r) {
-      emit(state.copyWith(
-        storeEmployeesStatus: BlocStatus.success,
-        storeEmployees: r,
-      ));
-    });
+    res.fold(
+      (l) {
+        emit(
+          state.copyWith(
+            storeEmployeesStatus: BlocStatus.failed,
+            errorMessage: l.message,
+          ),
+        );
+      },
+      (r) {
+        emit(
+          state.copyWith(
+            storeEmployeesStatus: BlocStatus.success,
+            storeEmployees: r,
+          ),
+        );
+      },
+    );
   }
 
-  FutureOr<void> _addUpdateStoreEmployee(AddUpdateStoreEmployeeEvent event, Emitter<ProfileState> emit) async {
+  FutureOr<void> _addUpdateStoreEmployee(
+    AddUpdateStoreEmployeeEvent event,
+    Emitter<ProfileState> emit,
+  ) async {
     emit(state.copyWith(addUpdateStoreEmployeeStatus: BlocStatus.loading));
     final res = await addUpdateStoreEmployeeUseCase(event.params);
-    res.fold((l) {
-      emit(state.copyWith(
-        addUpdateStoreEmployeeStatus: BlocStatus.failed,
-        errorMessage: l.message,
-      ));
-    }, (r) {
-      emit(state.copyWith(
-        addUpdateStoreEmployeeStatus: BlocStatus.success,
-        addUpdateStoreEmployee: r,
-      ));
-    });
+    res.fold(
+      (l) {
+        emit(
+          state.copyWith(
+            addUpdateStoreEmployeeStatus: BlocStatus.failed,
+            errorMessage: l.message,
+          ),
+        );
+      },
+      (r) {
+        emit(
+          state.copyWith(
+            addUpdateStoreEmployeeStatus: BlocStatus.success,
+            addUpdateStoreEmployee: r,
+          ),
+        );
+      },
+    );
   }
 
-  FutureOr<void> _getOfferCodes(GetOfferCodesEvent event, Emitter<ProfileState> emit) async {
+  FutureOr<void> _getOfferCodes(
+    GetOfferCodesEvent event,
+    Emitter<ProfileState> emit,
+  ) async {
     if (!state.offerCodes!.isEndPage || event.isReload) {
-      emit(state.copyWith(
-        offerCodes: state.offerCodes!.setLoading(isReload: event.isReload),
-      ));
+      emit(
+        state.copyWith(
+          offerCodes: state.offerCodes!.setLoading(isReload: event.isReload),
+        ),
+      );
       final res = await getOfferCodesUseCase(event.params);
-      res.fold((l) {
-        emit(state.copyWith(
-          offerCodes: state.offerCodes!.setFaild(errorMessage: l.message),
-          errorMessage: l.message,
-        ));
-      }, (r) {
-        emit(state.copyWith(
-          offerCodes: state.offerCodes!.setSuccess(data: r.data!),
-        ));
-      });
+      res.fold(
+        (l) {
+          emit(
+            state.copyWith(
+              offerCodes: state.offerCodes!.setFaild(errorMessage: l.message),
+              errorMessage: l.message,
+            ),
+          );
+        },
+        (r) {
+          emit(
+            state.copyWith(
+              offerCodes: state.offerCodes!.setSuccess(data: r.data!),
+            ),
+          );
+        },
+      );
     }
   }
 
-  FutureOr<void> _getProducts(GetProductsEvent event, Emitter<ProfileState> emit) async {
+  FutureOr<void> _getProducts(
+    GetProductsEvent event,
+    Emitter<ProfileState> emit,
+  ) async {
     if (!state.products!.isEndPage || event.isReload) {
-      emit(state.copyWith(
-        products: state.products!.setLoading(isReload: event.isReload),
-      ));
+      emit(
+        state.copyWith(
+          products: state.products!.setLoading(isReload: event.isReload),
+        ),
+      );
       final res = await getProductsUseCase(event.params);
-      res.fold((l) {
-        emit(state.copyWith(
-          products: state.products!.setFaild(errorMessage: l.message),
-          errorMessage: l.message,
-        ));
-      }, (r) {
-        emit(state.copyWith(
-          products: state.products!.setSuccess(data: r.data!),
-        ));
-      });
+      res.fold(
+        (l) {
+          emit(
+            state.copyWith(
+              products: state.products!.setFaild(errorMessage: l.message),
+              errorMessage: l.message,
+            ),
+          );
+        },
+        (r) {
+          emit(
+            state.copyWith(products: state.products!.setSuccess(data: r.data!)),
+          );
+        },
+      );
     }
   }
 
-  FutureOr<void> _getProductsCount(GetProductsCountEvent event, Emitter<ProfileState> emit) async {
+  FutureOr<void> _getProductsCount(
+    GetProductsCountEvent event,
+    Emitter<ProfileState> emit,
+  ) async {
     emit(state.copyWith(productsCountStatus: BlocStatus.loading));
     final res = await getProductsCountUseCase(event.params);
-    res.fold((l) {
-      emit(state.copyWith(
-        productsCountStatus: BlocStatus.failed,
-        errorMessage: l.message,
-      ));
-    }, (r) {
-      emit(state.copyWith(
-        productsCountStatus: BlocStatus.success,
-        productsCount: r,
-      ));
-    });
+    res.fold(
+      (l) {
+        emit(
+          state.copyWith(
+            productsCountStatus: BlocStatus.failed,
+            errorMessage: l.message,
+          ),
+        );
+      },
+      (r) {
+        emit(
+          state.copyWith(
+            productsCountStatus: BlocStatus.success,
+            productsCount: r,
+          ),
+        );
+      },
+    );
   }
 
-  FutureOr<void> _addCouponCode(AddCouponCodeEvent event, Emitter<ProfileState> emit) async {
+  FutureOr<void> _addCouponCode(
+    AddCouponCodeEvent event,
+    Emitter<ProfileState> emit,
+  ) async {
     emit(state.copyWith(addCouponCodeStatus: BlocStatus.loading));
     final res = await addCouponCodeUseCase(event.params);
-    res.fold((l) {
-      emit(state.copyWith(
-        addCouponCodeStatus: BlocStatus.failed,
-        errorMessage: l.message,
-      ));
-    }, (r) {
-      emit(state.copyWith(
-        addCouponCodeStatus: BlocStatus.success,
-        addCouponCode: r,
-      ));
-    });
+    res.fold(
+      (l) {
+        emit(
+          state.copyWith(
+            addCouponCodeStatus: BlocStatus.failed,
+            errorMessage: l.message,
+          ),
+        );
+      },
+      (r) {
+        emit(
+          state.copyWith(
+            addCouponCodeStatus: BlocStatus.success,
+            addCouponCode: r,
+          ),
+        );
+      },
+    );
   }
 
-  FutureOr<void> _getCouponWeekAnalysis(GetCouponWeekAnalysisEvent event, Emitter<ProfileState> emit) async {
+  FutureOr<void> _getCouponWeekAnalysis(
+    GetCouponWeekAnalysisEvent event,
+    Emitter<ProfileState> emit,
+  ) async {
     emit(state.copyWith(couponWeekAnalysisStatus: BlocStatus.loading));
     final res = await getCouponWeekAnalysisUseCase(event.params);
-    res.fold((l) {
-      emit(state.copyWith(
-        couponWeekAnalysisStatus: BlocStatus.failed,
-        errorMessage: l.message,
-      ));
-    }, (r) {
-      emit(state.copyWith(
-        couponWeekAnalysisStatus: BlocStatus.success,
-        couponWeekAnalysis: r,
-      ));
-    });
+    res.fold(
+      (l) {
+        emit(
+          state.copyWith(
+            couponWeekAnalysisStatus: BlocStatus.failed,
+            errorMessage: l.message,
+          ),
+        );
+      },
+      (r) {
+        emit(
+          state.copyWith(
+            couponWeekAnalysisStatus: BlocStatus.success,
+            couponWeekAnalysis: r,
+          ),
+        );
+      },
+    );
   }
 
-  FutureOr<void> _addOffer(AddOfferEvent event, Emitter<ProfileState> emit) async {
+  FutureOr<void> _addOffer(
+    AddOfferEvent event,
+    Emitter<ProfileState> emit,
+  ) async {
     emit(state.copyWith(addOfferStatus: BlocStatus.loading));
     final res = await addOfferUseCase(event.params);
-    res.fold((l) {
-      emit(state.copyWith(
-        addOfferStatus: BlocStatus.failed,
-        errorMessage: l.message,
-      ));
-    }, (r) {
-      emit(state.copyWith(
-        addOfferStatus: BlocStatus.success,
-        addOffer: r,
-      ));
-    });
-  }}
+    res.fold(
+      (l) {
+        emit(
+          state.copyWith(
+            addOfferStatus: BlocStatus.failed,
+            errorMessage: l.message,
+          ),
+        );
+      },
+      (r) {
+        emit(state.copyWith(addOfferStatus: BlocStatus.success, addOffer: r));
+      },
+    );
+  }
+}

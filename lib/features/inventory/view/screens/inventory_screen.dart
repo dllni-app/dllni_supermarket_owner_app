@@ -43,11 +43,11 @@ int _inventoryTabCount(List<GetProductsModelDataItem> list, int tab) {
   switch (tab) {
     case 1:
       return list
-          .where((e) => (e.stockQuantity ?? 0) >= (e.lowStockThreshold ?? 0))
+          .where((e) => (e.stockQuantity ?? 0) > (e.lowStockThreshold ?? 0))
           .length;
     case 2:
       return list
-          .where((e) => (e.stockQuantity ?? 0) < (e.lowStockThreshold ?? 0))
+          .where((e) => (e.stockQuantity ?? 0) <= (e.lowStockThreshold ?? 0))
           .length;
     default:
       return list.length;
@@ -348,7 +348,7 @@ class _EditProductAmountState extends State<EditProductAmount> {
                   previous.productAmountStatus != current.productAmountStatus,
               listener: (context, state) {
                 if (state.productAmountStatus == BlocStatus.success) {
-                  Navigator.of(context).pop(quantity);
+                  if (context.canPop()) Navigator.of(context).pop(quantity);
                 }
               },
               builder: (context, state) {

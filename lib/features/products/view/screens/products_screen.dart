@@ -280,7 +280,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                                 return ProductCard(
                                   product: state.products!.list[index],
                                   onEdit: (p) async {
-                                    final result = await context.pushRoute<bool>(
+                                    final result = await context.pushRoute(
                                       "/products/new_product/details",
                                       arguments: AddProductDetailsParams.fromProduct(
                                         p,
