@@ -26,6 +26,7 @@ class CouponsManagementScreen extends StatefulWidget {
 
 class _CouponsManagementScreenState extends State<CouponsManagementScreen> {
   String search = "";
+  String? sort;
   int selectedTab = 0;
   @override
   Widget build(BuildContext context) {
@@ -91,6 +92,24 @@ class _CouponsManagementScreenState extends State<CouponsManagementScreen> {
             Builder(
               builder: (context) {
                 return CouponsFilterCard(
+                  onSortChanged: (sort) {
+                    this.sort = sort;
+                    context.read<ProfileBloc>().add(
+                      GetCouponCodesEvent(
+                        isReload: true,
+                        params: GetCouponCodesParams(
+                          storeId: 1,
+                          search: search,
+                          sort: sort,
+                          isActive: selectedTab == 1
+                              ? true
+                              : selectedTab == 2
+                              ? false
+                              : null,
+                        ),
+                      ),
+                    );
+                  },
                   onSearchChanged: (value) {
                     search = value;
                     context.read<ProfileBloc>().add(

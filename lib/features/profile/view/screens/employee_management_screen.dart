@@ -1,11 +1,11 @@
 import 'package:common_package/common_package.dart';
 import 'package:dllni_supermarket_owner_app/core/widgets/app_app_bars.dart';
+import 'package:flutter/material.dart' as material;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:flutter/material.dart' as material;
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/themes/app_colors.dart';
@@ -17,133 +17,6 @@ import '../../data/models/get_store_employees_model.dart';
 import '../../domain/usecases/get_store_employees_use_case.dart';
 import '../manager/bloc/profile_bloc.dart';
 import 'create_new_employee_screen.dart';
-
-@AutoRoutePage(path: "/profile/employees")
-class EmployeeManagementScreen extends StatefulWidget {
-  const EmployeeManagementScreen({super.key});
-
-  @override
-  State<EmployeeManagementScreen> createState() =>
-      _EmployeeManagementScreenState();
-}
-
-class _EmployeeManagementScreenState extends State<EmployeeManagementScreen> {
-  String? search;
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
-      body: BlocProvider(
-        create: (context) => getIt<ProfileBloc>()
-          ..add(
-            GetStoreEmployeesEvent(params: GetStoreEmployeesParams(storeId: 1)),
-          ),
-        child: Column(
-          children: [
-            AppSimpleAppBar(title: "إدارة الموظفين"),
-            SizedBox(height: 8),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SizedBox(
-                    width: context.width,
-                    child: Builder(
-                      builder: (context) {
-                        return BigButtonWithIcon(
-                          icon: AppImage.asset(AppSvgs.add, size: 22),
-                          title: "إضافة موظف جديد",
-                          onPressed: () async {
-                            final refresh = await context.pushRoute(
-                              "/profile/employees/create_employee",
-                            );
-                            if (refresh is! bool) return;
-                            if (!refresh || !context.mounted) return;
-                            context.read<ProfileBloc>().add(
-                              GetStoreEmployeesEvent(
-                                params: GetStoreEmployeesParams(
-                                  storeId: 1,
-                                  search: search,
-                                ),
-                              ),
-                            );
-                          },
-                        );
-                      },
-                    ),
-                  ),
-                  SizedBox(height: 16),
-                  Builder(
-                    builder: (context) {
-                      return _FilterSection(
-                        onSearchChanged: (value) {
-                          search = value;
-                          context.read<ProfileBloc>().add(
-                            GetStoreEmployeesEvent(
-                              params: GetStoreEmployeesParams(
-                                storeId: 1,
-                                search: search,
-                              ),
-                            ),
-                          );
-                        },
-                        onFilterPressed: () {},
-                        onSortingPressed: () {},
-                      );
-                    },
-                  ),
-                  SizedBox(height: 3),
-                ],
-              ),
-            ),
-            Expanded(
-              child: BlocBuilder<ProfileBloc, ProfileState>(
-                buildWhen: (previous, current) =>
-                    previous.storeEmployeesStatus !=
-                    current.storeEmployeesStatus,
-                builder: (context, state) {
-                  if (state.storeEmployeesStatus == BlocStatus.loading) {
-                    return EmployeeLoading();
-                  } else if (state.storeEmployeesStatus == BlocStatus.failed) {
-                    return Center(
-                      child: FailureWidget(
-                        message: state.errorMessage.toString(),
-                        onRetry: () {
-                          context.read<ProfileBloc>().add(
-                            GetStoreEmployeesEvent(
-                              params: GetStoreEmployeesParams(
-                                storeId: 1,
-                                search: search,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    );
-                  } else if (state.storeEmployeesStatus == BlocStatus.success) {
-                    return ListView.separated(
-                      padding: EdgeInsets.all(16),
-                      itemCount:
-                          state.storeEmployees?.data?.employees?.length ?? 0,
-                      itemBuilder: (context, index) => _EmployeeCard(
-                        employee: state.storeEmployees!.data!.employees![index],
-                      ),
-                      separatorBuilder: (context, index) =>
-                          SizedBox(height: 13),
-                    );
-                  }
-
-                  return SizedBox();
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
 class EmployeeLoading extends StatelessWidget {
   const EmployeeLoading({super.key});
@@ -181,146 +54,18 @@ class EmployeeLoading extends StatelessWidget {
   }
 }
 
-class _FilterSection extends StatelessWidget {
-  const _FilterSection({
-    required this.onSortingPressed,
-    required this.onFilterPressed,
-    required this.onSearchChanged,
-  });
-
-  final void Function() onSortingPressed;
-  final void Function() onFilterPressed;
-  final void Function(String value) onSearchChanged;
+@AutoRoutePage(path: "/profile/employees")
+class EmployeeManagementScreen extends StatefulWidget {
+  const EmployeeManagementScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.all(Radius.circular(16)),
-        border: Border.all(color: Color(0xFFF3F4F6)),
-        boxShadow: [AppShadows.shadow],
-      ),
-      child: Column(
-        children: [
-          TextField(
-            style: TextStyle(
-              color: Color(0xFF111287),
-              fontWeight: FontWeight.w500,
-              fontSize: 14,
-            ),
-            onSubmitted: onSearchChanged,
-            decoration: InputDecoration(
-              prefixIcon: Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: Icon(Icons.search, color: Color(0xFF9CA3AF)),
-              ),
-              contentPadding: EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 10,
-              ),
-              filled: true,
-              fillColor: Color(0xFFF9FAFB),
-              hintText: "ابحث عن موظف...",
-              hintStyle: TextStyle(
-                color: Color(0xFF9CA3AF),
-                fontWeight: FontWeight.w500,
-                fontSize: 14,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Color(0xFFE5E7EB)),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Color(0xFFE5E7EB)),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Color(0xFFE5E7EB)),
-              ),
-            ),
-          ),
-          SizedBox(height: 12),
-          Row(
-            spacing: 8,
-            children: [
-              Expanded(
-                child: GestureDetector(
-                  onTap: onFilterPressed,
-                  child: Container(
-                    padding: EdgeInsets.symmetric(vertical: 11),
-                    decoration: BoxDecoration(
-                      color: Color(0xFFF9FAFB),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          FontAwesomeIcons.filter,
-                          color: AppColors.accent,
-                          size: 14,
-                        ),
-                        SizedBox(width: 8),
-                        AppText(
-                          "حسب الحالة",
-                          style: TextStyle(
-                            color: AppColors.accent,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 14,
-                            height: 1.42,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              Expanded(
-                child: GestureDetector(
-                  onTap: onSortingPressed,
-                  child: Container(
-                    padding: EdgeInsets.symmetric(vertical: 11),
-                    decoration: BoxDecoration(
-                      color: Color(0xFFF9FAFB),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          FontAwesomeIcons.sort,
-                          color: AppColors.accent,
-                          size: 14,
-                        ),
-                        SizedBox(width: 8),
-                        AppText(
-                          "ترتيب",
-                          style: TextStyle(
-                            color: AppColors.accent,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 14,
-                            height: 1.42,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
+  State<EmployeeManagementScreen> createState() =>
+      _EmployeeManagementScreenState();
 }
 
 class _EmployeeCard extends StatelessWidget {
-  const _EmployeeCard({required this.employee});
   final GetStoreEmployeesModelDataEmployeesItem employee;
+  const _EmployeeCard({required this.employee});
 
   @override
   Widget build(BuildContext context) {
@@ -506,16 +251,16 @@ class _EmployeeCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                ]
-                else AppText(
-                      "لا يوجد صلاحيات محددة",
-                      style: TextStyle(
-                        color: context.primary,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        height: 1.6667,
-                      ),
-                    )
+                ] else
+                  AppText(
+                    "لا يوجد صلاحيات محددة",
+                    style: TextStyle(
+                      color: context.primary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      height: 1.6667,
+                    ),
+                  ),
               ],
             ),
           ),
@@ -571,6 +316,264 @@ class _EmployeeCard extends StatelessWidget {
                 ],
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _EmployeeManagementScreenState extends State<EmployeeManagementScreen> {
+  String? search;
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF5F5F5),
+      body: BlocProvider(
+        create: (context) => getIt<ProfileBloc>()
+          ..add(
+            GetStoreEmployeesEvent(params: GetStoreEmployeesParams(storeId: 1)),
+          ),
+        child: Column(
+          children: [
+            AppSimpleAppBar(title: "إدارة الموظفين"),
+            SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    width: context.width,
+                    child: Builder(
+                      builder: (context) {
+                        return BigButtonWithIcon(
+                          icon: AppImage.asset(AppSvgs.add, size: 22),
+                          title: "إضافة موظف جديد",
+                          onPressed: () async {
+                            final refresh = await context.pushRoute(
+                              "/profile/employees/create_employee",
+                            );
+                            if (refresh is! bool) return;
+                            if (!refresh || !context.mounted) return;
+                            context.read<ProfileBloc>().add(
+                              GetStoreEmployeesEvent(
+                                params: GetStoreEmployeesParams(
+                                  storeId: 1,
+                                  search: search,
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  Builder(
+                    builder: (context) {
+                      return _FilterSection(
+                        onSearchChanged: (value) {
+                          search = value;
+                          context.read<ProfileBloc>().add(
+                            GetStoreEmployeesEvent(
+                              params: GetStoreEmployeesParams(
+                                storeId: 1,
+                                search: search,
+                              ),
+                            ),
+                          );
+                        },
+                        onFilterPressed: null,
+                        onSortingPressed: null,
+                      );
+                    },
+                  ),
+                  SizedBox(height: 3),
+                ],
+              ),
+            ),
+            Expanded(
+              child: BlocBuilder<ProfileBloc, ProfileState>(
+                buildWhen: (previous, current) =>
+                    previous.storeEmployeesStatus !=
+                    current.storeEmployeesStatus,
+                builder: (context, state) {
+                  if (state.storeEmployeesStatus == BlocStatus.loading) {
+                    return EmployeeLoading();
+                  } else if (state.storeEmployeesStatus == BlocStatus.failed) {
+                    return Center(
+                      child: FailureWidget(
+                        message: state.errorMessage.toString(),
+                        onRetry: () {
+                          context.read<ProfileBloc>().add(
+                            GetStoreEmployeesEvent(
+                              params: GetStoreEmployeesParams(
+                                storeId: 1,
+                                search: search,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  } else if (state.storeEmployeesStatus == BlocStatus.success) {
+                    return ListView.separated(
+                      padding: EdgeInsets.all(16),
+                      itemCount:
+                          state.storeEmployees?.data?.employees?.length ?? 0,
+                      itemBuilder: (context, index) => _EmployeeCard(
+                        employee: state.storeEmployees!.data!.employees![index],
+                      ),
+                      separatorBuilder: (context, index) =>
+                          SizedBox(height: 13),
+                    );
+                  }
+
+                  return SizedBox();
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FilterSection extends StatelessWidget {
+  final void Function()? onSortingPressed;
+
+  final void Function()? onFilterPressed;
+  final void Function(String value) onSearchChanged;
+  const _FilterSection({
+    required this.onSortingPressed,
+    required this.onFilterPressed,
+    required this.onSearchChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.all(Radius.circular(16)),
+        border: Border.all(color: Color(0xFFF3F4F6)),
+        boxShadow: [AppShadows.shadow],
+      ),
+      child: Column(
+        children: [
+          TextField(
+            style: TextStyle(
+              color: Color(0xFF111287),
+              fontWeight: FontWeight.w500,
+              fontSize: 14,
+            ),
+            onSubmitted: onSearchChanged,
+            decoration: InputDecoration(
+              prefixIcon: Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: Icon(Icons.search, color: Color(0xFF9CA3AF)),
+              ),
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 10,
+              ),
+              filled: true,
+              fillColor: Color(0xFFF9FAFB),
+              hintText: "ابحث عن موظف...",
+              hintStyle: TextStyle(
+                color: Color(0xFF9CA3AF),
+                fontWeight: FontWeight.w500,
+                fontSize: 14,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Color(0xFFE5E7EB)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Color(0xFFE5E7EB)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Color(0xFFE5E7EB)),
+              ),
+            ),
+          ),
+          if (onFilterPressed != null || onSortingPressed != null)
+            SizedBox(height: 12),
+          Row(
+            spacing: 8,
+            children: [
+              if (onFilterPressed != null)
+                Expanded(
+                  child: GestureDetector(
+                    onTap: onFilterPressed,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(vertical: 11),
+                      decoration: BoxDecoration(
+                        color: Color(0xFFF9FAFB),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            FontAwesomeIcons.filter,
+                            color: AppColors.accent,
+                            size: 14,
+                          ),
+                          SizedBox(width: 8),
+                          AppText(
+                            "حسب الحالة",
+                            style: TextStyle(
+                              color: AppColors.accent,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
+                              height: 1.42,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              if (onSortingPressed != null)
+                Expanded(
+                  child: GestureDetector(
+                    onTap: onSortingPressed,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(vertical: 11),
+                      decoration: BoxDecoration(
+                        color: Color(0xFFF9FAFB),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            FontAwesomeIcons.sort,
+                            color: AppColors.accent,
+                            size: 14,
+                          ),
+                          SizedBox(width: 8),
+                          AppText(
+                            "ترتيب",
+                            style: TextStyle(
+                              color: AppColors.accent,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
+                              height: 1.42,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+            ],
           ),
         ],
       ),

@@ -21,46 +21,158 @@ class CouponsStatistics extends StatefulWidget {
   State<CouponsStatistics> createState() => _CouponsStatisticsState();
 }
 
+class CouponStatisticsLoading extends StatelessWidget {
+  const CouponStatisticsLoading({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey.shade100,
+      highlightColor: Colors.grey.shade300,
+      child: Column(
+        children: [
+          SizedBox(height: 30),
+          Container(
+            width: context.width,
+            height: 150,
+            decoration: BoxDecoration(
+              color: AppColors.white,
+              borderRadius: BorderRadius.all(Radius.circular(12)),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Row(
+            spacing: 8,
+            children: [
+              SizedBox(width: 2),
+              Row(
+                children: [
+                  CircleAvatar(radius: 4, backgroundColor: AppColors.white),
+                  const SizedBox(width: 4),
+                  Text(
+                    "كوبونات نشطة",
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black,
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  CircleAvatar(radius: 4, backgroundColor: AppColors.white),
+                  const SizedBox(width: 4),
+                  Text(
+                    "كوبونات منتهية",
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          SizedBox(height: 12),
+          StatePointer(
+            title: 'إجمالي الخصومات (ل.س)',
+            value: 123450.formatWithComma(),
+            containerBorderColor: Color(0xffF59E0B).withAlpha(51),
+            containerColor: Color(0xffF59E0B).withAlpha(25),
+            icon: FontAwesomeIcons.database,
+            iconCardColor: Color(0xffF59E0B).withAlpha(51),
+            iconColor: Color(0xffF59E0B),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class StatePointer extends StatelessWidget {
+  final String title;
+
+  final String value;
+  final IconData icon;
+  final Color containerColor;
+  final Color containerBorderColor;
+  final Color iconCardColor;
+  final Color iconColor;
+  const StatePointer({
+    super.key,
+    required this.title,
+    required this.value,
+    required this.containerColor,
+    required this.containerBorderColor,
+    required this.iconCardColor,
+    required this.iconColor,
+    required this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(17),
+      decoration: BoxDecoration(
+        color: containerColor,
+        borderRadius: BorderRadius.all(Radius.circular(16)),
+        border: Border.all(color: containerBorderColor),
+        boxShadow: [
+          BoxShadow(
+            offset: Offset(0, 0),
+            blurRadius: 15,
+            color: Color(0x07000000),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              color: iconCardColor,
+            ),
+            padding: EdgeInsetsDirectional.all(11),
+            child: Icon(icon, color: iconColor, size: 18),
+          ),
+          SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AppText(
+                  value.toString(),
+                  style: TextStyle(
+                    color: Color(0xFF111827),
+                    fontSize: 24,
+                    fontWeight: FontWeight.w700,
+                    height: 1.333,
+                  ),
+                ),
+                SizedBox(height: 2),
+                AppText.labelMedium(
+                  title,
+                  color: Color(0xff4B5563),
+                  fontWeight: FontWeight.w500,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _CouponsStatisticsState extends State<CouponsStatistics>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _sizeAnimation;
   late Animation<double> _rotationAnimation;
   bool _isExpanded = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
-    _sizeAnimation = CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    );
-    _rotationAnimation = Tween<double>(begin: 0.5, end: 0.0).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
-    );
-    _animationController.value = 0.0;
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
-
-  void _toggleExpansion() {
-    setState(() {
-      _isExpanded = !_isExpanded;
-      if (_isExpanded) {
-        _animationController.forward();
-      } else {
-        _animationController.reverse();
-      }
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -144,6 +256,32 @@ class _CouponsStatisticsState extends State<CouponsStatistics>
                   );
                 } else if (state.couponWeekAnalysisStatus ==
                     BlocStatus.success) {
+                  final allDays = state.couponWeekAnalysis?.data?.days ?? [];
+
+                  double getVal(String day, bool active) {
+                    final d = allDays.firstWhere((e) => e.day == day);
+                    return active
+                        ? (d.activeCoupons?.toDouble() ?? 0)
+                        : (d.inactiveCoupons?.toDouble() ?? 0);
+                  }
+
+                  final dayKeys = [
+                    'Fri',
+                    'Thu',
+                    'Wed',
+                    'Tue',
+                    'Mon',
+                    'Sun',
+                    'Sat',
+                  ];
+
+                  final allValues = dayKeys.expand(
+                    (key) => [getVal(key, true), getVal(key, false)],
+                  );
+
+                  final maxY = allValues.isEmpty
+                      ? 10.0
+                      : allValues.reduce(max) * 1.2;
                   return Column(
                     children: [
                       SizedBox(height: 30),
@@ -152,11 +290,12 @@ class _CouponsStatisticsState extends State<CouponsStatistics>
                         child: BarChart(
                           BarChartData(
                             alignment: BarChartAlignment.spaceAround,
-                            maxY: 40,
+                            maxY: maxY == 0 ? 10 : maxY,
+                            groupsSpace: 12,
                             barTouchData: BarTouchData(enabled: false),
                             borderData: FlBorderData(show: false),
                             gridData: FlGridData(
-                              getDrawingHorizontalLine: (value) => FlLine(
+                              getDrawingHorizontalLine: (value) => const FlLine(
                                 color: Color(0xFFF1F1F1),
                                 strokeWidth: 1,
                                 dashArray: [2, 2],
@@ -165,22 +304,19 @@ class _CouponsStatisticsState extends State<CouponsStatistics>
                             ),
                             titlesData: FlTitlesData(
                               topTitles: const AxisTitles(
-                                sideTitles: SideTitles(),
+                                sideTitles: SideTitles(showTitles: false),
                               ),
                               leftTitles: const AxisTitles(
-                                sideTitles: SideTitles(),
+                                sideTitles: SideTitles(showTitles: false),
                               ),
                               rightTitles: AxisTitles(
                                 sideTitles: SideTitles(
                                   showTitles: true,
                                   reservedSize: 30,
-                                  // interval: 5,
                                   getTitlesWidget: (value, meta) {
-                                    // if (value % 10 != 0 &&
-                                    //     value !=
-                                    //         maxOrdersEachDay.reduce(max).toDouble()) {
-                                    //   return const SizedBox.shrink();
-                                    // }
+                                    if (value % 10 != 0 && value != maxY) {
+                                      return const SizedBox.shrink();
+                                    }
                                     return SideTitleWidget(
                                       meta: meta,
                                       child: Text(
@@ -199,7 +335,7 @@ class _CouponsStatisticsState extends State<CouponsStatistics>
                                   showTitles: true,
                                   reservedSize: 30,
                                   getTitlesWidget: (value, meta) {
-                                    const days = [
+                                    const dayLabels = [
                                       'جمعة',
                                       'خميس',
                                       'أربعاء',
@@ -208,15 +344,16 @@ class _CouponsStatisticsState extends State<CouponsStatistics>
                                       'أحد',
                                       'سبت',
                                     ];
-                                    if (value.toInt() < 0 ||
-                                        value.toInt() >= days.length) {
+                                    final index = value.toInt();
+                                    if (index < 0 ||
+                                        index >= dayLabels.length) {
                                       return const SizedBox.shrink();
                                     }
                                     return SideTitleWidget(
                                       meta: meta,
                                       space: 8,
                                       child: Text(
-                                        days[value.toInt()],
+                                        dayLabels[index],
                                         style: const TextStyle(
                                           color: Colors.black87,
                                           fontWeight: FontWeight.bold,
@@ -229,74 +366,35 @@ class _CouponsStatisticsState extends State<CouponsStatistics>
                               ),
                             ),
                             barGroups: List.generate(7, (index) {
-                              // select the date
-                              final selectedDay = switch (index + 1) {
-                                1 =>
-                                  state.couponWeekAnalysis?.data?.days
-                                      ?.where((element) => element.day == "Fri")
-                                      .firstOrNull,
-                                2 =>
-                                  state.couponWeekAnalysis?.data?.days
-                                      ?.where((element) => element.day == "Thu")
-                                      .firstOrNull,
-                                3 =>
-                                  state.couponWeekAnalysis?.data?.days
-                                      ?.where((element) => element.day == "Wed")
-                                      .firstOrNull,
-                                4 =>
-                                  state.couponWeekAnalysis?.data?.days
-                                      ?.where((element) => element.day == "Tue")
-                                      .firstOrNull,
-                                5 =>
-                                  state.couponWeekAnalysis?.data?.days
-                                      ?.where((element) => element.day == "Mon")
-                                      .firstOrNull,
-                                6 =>
-                                  state.couponWeekAnalysis?.data?.days
-                                      ?.where((element) => element.day == "Sun")
-                                      .firstOrNull,
-                                7 =>
-                                  state.couponWeekAnalysis?.data?.days
-                                      ?.where((element) => element.day == "Sat")
-                                      .firstOrNull,
-                                _ => null,
-                              };
+                              final key = dayKeys[index];
+                              final day = allDays.firstWhere(
+                                (e) => e.day == key,
+                              );
+
+                              final activeY =
+                                  day.activeCoupons?.toDouble() ?? 0;
+                              final inactiveY =
+                                  day.inactiveCoupons?.toDouble() ?? 0;
+
                               return BarChartGroupData(
                                 x: index,
+                                barsSpace: 4,
                                 barRods: [
                                   BarChartRodData(
-                                    toY: max(
-                                      selectedDay?.activeCoupons?.toDouble() ??
-                                          0,
-                                      selectedDay?.inactiveCoupons
-                                              ?.toDouble() ??
-                                          0,
+                                    toY: inactiveY,
+                                    color: grey,
+                                    width: 8,
+                                    borderRadius: const BorderRadius.vertical(
+                                      top: Radius.circular(2),
                                     ),
-                                    width: 20,
-                                    borderRadius: BorderRadius.vertical(
-                                      top: Radius.circular(6),
+                                  ),
+                                  BarChartRodData(
+                                    toY: activeY,
+                                    color: green,
+                                    width: 8,
+                                    borderRadius: const BorderRadius.vertical(
+                                      top: Radius.circular(2),
                                     ),
-                                    rodStackItems: [
-                                      BarChartRodStackItem(
-                                        0,
-                                        selectedDay?.inactiveCoupons
-                                                ?.toDouble() ??
-                                            5,
-                                        green,
-                                      ),
-                                      BarChartRodStackItem(
-                                        (selectedDay?.inactiveCoupons
-                                                ?.toDouble() ??
-                                            5),
-                                        (selectedDay?.inactiveCoupons
-                                                    ?.toDouble() ??
-                                                5) +
-                                            (selectedDay?.activeCoupons
-                                                    ?.toDouble() ??
-                                                5),
-                                        grey,
-                                      ),
-                                    ],
                                   ),
                                 ],
                               );
@@ -366,150 +464,38 @@ class _CouponsStatisticsState extends State<CouponsStatistics>
       ),
     );
   }
-}
-
-class CouponStatisticsLoading extends StatelessWidget {
-  const CouponStatisticsLoading({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: Colors.grey.shade100,
-      highlightColor: Colors.grey.shade300,
-      child: Column(
-        children: [
-          SizedBox(height: 30),
-          Container(
-            width: context.width,
-            height: 150,
-            decoration: BoxDecoration(
-              color: AppColors.white,
-              borderRadius: BorderRadius.all(Radius.circular(12)),
-            ),
-          ),
-          const SizedBox(height: 24),
-          Row(
-            spacing: 8,
-            children: [
-              SizedBox(width: 2),
-              Row(
-                children: [
-                  CircleAvatar(radius: 4, backgroundColor: AppColors.white),
-                  const SizedBox(width: 4),
-                  Text(
-                    "كوبونات نشطة",
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black,
-                    ),
-                  ),
-                ],
-              ),
-              Row(
-                children: [
-                  CircleAvatar(radius: 4, backgroundColor: AppColors.white),
-                  const SizedBox(width: 4),
-                  Text(
-                    "كوبونات منتهية",
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          SizedBox(height: 12),
-          StatePointer(
-            title: 'إجمالي الخصومات (ل.س)',
-            value: 123450.formatWithComma(),
-            containerBorderColor: Color(0xffF59E0B).withAlpha(51),
-            containerColor: Color(0xffF59E0B).withAlpha(25),
-            icon: FontAwesomeIcons.database,
-            iconCardColor: Color(0xffF59E0B).withAlpha(51),
-            iconColor: Color(0xffF59E0B),
-          ),
-        ],
-      ),
-    );
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
-}
-
-class StatePointer extends StatelessWidget {
-  const StatePointer({
-    super.key,
-    required this.title,
-    required this.value,
-    required this.containerColor,
-    required this.containerBorderColor,
-    required this.iconCardColor,
-    required this.iconColor,
-    required this.icon,
-  });
-
-  final String title;
-  final String value;
-  final IconData icon;
-  final Color containerColor;
-  final Color containerBorderColor;
-  final Color iconCardColor;
-  final Color iconColor;
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(17),
-      decoration: BoxDecoration(
-        color: containerColor,
-        borderRadius: BorderRadius.all(Radius.circular(16)),
-        border: Border.all(color: containerBorderColor),
-        boxShadow: [
-          BoxShadow(
-            offset: Offset(0, 0),
-            blurRadius: 15,
-            color: Color(0x07000000),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              color: iconCardColor,
-            ),
-            padding: EdgeInsetsDirectional.all(11),
-            child: Icon(icon, color: iconColor, size: 18),
-          ),
-          SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                AppText(
-                  value.toString(),
-                  style: TextStyle(
-                    color: Color(0xFF111827),
-                    fontSize: 24,
-                    fontWeight: FontWeight.w700,
-                    height: 1.333,
-                  ),
-                ),
-                SizedBox(height: 2),
-                AppText.labelMedium(
-                  title,
-                  color: Color(0xff4B5563),
-                  fontWeight: FontWeight.w500,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
     );
+    _sizeAnimation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    );
+    _rotationAnimation = Tween<double>(begin: 0.5, end: 0.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+    _animationController.value = 0.0;
+  }
+
+  void _toggleExpansion() {
+    setState(() {
+      _isExpanded = !_isExpanded;
+      if (_isExpanded) {
+        _animationController.forward();
+      } else {
+        _animationController.reverse();
+      }
+    });
   }
 }

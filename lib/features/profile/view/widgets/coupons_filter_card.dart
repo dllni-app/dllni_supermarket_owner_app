@@ -3,14 +3,27 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/themes/app_shadows.dart';
 
+Map<String, String> sortMapper = {
+  'name': 'حسب الاسم',
+  '-name': 'حسب الاسم تنازليا',
+  'startsAt': 'حسب التاريخ البدء',
+  '-startsAt': 'حسب التاريخ البدء تنازليا',
+  'endsAt': 'حسب التاريخ الانتهاء',
+  '-endsAt': 'حسب التاريخ الانتهاء تنازليا',
+  'createdAt': 'حسب التاريخ الإنشاء',
+  '-createdAt': 'حسب التاريخ الإنشاء تنازليا',
+};
+
 class CouponsFilterCard extends StatefulWidget {
+  final void Function(String value) onSearchChanged;
+  final void Function(int index) onTabChanged;
+  final void Function(String sort) onSortChanged;
   const CouponsFilterCard({
     super.key,
     required this.onSearchChanged,
     required this.onTabChanged,
+    required this.onSortChanged,
   });
-  final void Function(String value) onSearchChanged;
-  final void Function(int index) onTabChanged;
 
   @override
   State<CouponsFilterCard> createState() => _CouponsFilterCardState();
@@ -18,6 +31,7 @@ class CouponsFilterCard extends StatefulWidget {
 
 class _CouponsFilterCardState extends State<CouponsFilterCard> {
   int selectedIndex = 0;
+  String selectedSort = '';
 
   List<Color> colors = [
     Color(0xff10B981),
@@ -124,8 +138,34 @@ class _CouponsFilterCardState extends State<CouponsFilterCard> {
             ),
           ),
           SizedBox(height: 12),
-          InkWell(
-            onTap: () {},
+          PopupMenuButton(
+            onSelected: (value) {
+              if (value == selectedSort) return;
+              widget.onSortChanged(value);
+              setState(() => selectedSort = value);
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: '',
+                child: AppText.bodyMedium(
+                  'لا شيء',
+                  overflow: TextOverflow.ellipsis,
+                  color: Color(0xff374151),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              ...sortMapper.entries.map(
+                (entry) => PopupMenuItem(
+                  value: entry.key,
+                  child: AppText.bodyMedium(
+                    entry.value,
+                    overflow: TextOverflow.ellipsis,
+                    color: Color(0xff374151),
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
@@ -141,10 +181,13 @@ class _CouponsFilterCardState extends State<CouponsFilterCard> {
                     size: 14,
                   ),
                   SizedBox(width: 8),
-                  AppText.bodyMedium(
-                    'فلترة حسب التاريخ',
-                    color: Color(0xff374151),
-                    fontWeight: FontWeight.bold,
+                  Flexible(
+                    child: AppText.bodyMedium(
+                      sortMapper[selectedSort] ?? 'ترتيب',
+                      overflow: TextOverflow.ellipsis,
+                      color: Color(0xff374151),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
               ),

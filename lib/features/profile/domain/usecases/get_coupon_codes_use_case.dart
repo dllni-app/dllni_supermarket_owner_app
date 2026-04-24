@@ -22,12 +22,14 @@ class GetCouponCodesParams with Params {
   final int storeId;
   final bool? isActive;
   final int page;
+  final String? sort;
 
   GetCouponCodesParams({
     required this.storeId,
     this.search,
     this.isActive,
     this.page = 1,
+    this.sort,
   });
 
   @override
@@ -36,5 +38,6 @@ class GetCouponCodesParams with Params {
     "filter[storeId]": storeId,
     if (isActive != null) "filter[isActive]": isActive! ? 1 : 0,
     "page": page,
+    if (sort != null) "sort": sort,
   };
 }

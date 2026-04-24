@@ -24,7 +24,7 @@ class OffersManagementScreen extends StatefulWidget {
 }
 
 class _OffersManagementScreenState extends State<OffersManagementScreen> {
-  String? search;
+  String? search, sort;
   int selectedTab = 0;
   List<int> selectedProductIds = [];
   @override
@@ -92,6 +92,24 @@ class _OffersManagementScreenState extends State<OffersManagementScreen> {
             Builder(
               builder: (context) {
                 return CouponsFilterCard(
+                  onSortChanged: (sort) {
+                    this.sort = sort;
+                    context.read<ProfileBloc>().add(
+                      GetOfferCodesEvent(
+                        isReload: true,
+                        params: GetOfferCodesParams(
+                          storeId: 1,
+                          search: search,
+                          sort: sort,
+                          isActive: selectedTab == 1
+                              ? true
+                              : selectedTab == 2
+                              ? false
+                              : null,
+                        ),
+                      ),
+                    );
+                  },
                   onSearchChanged: (value) {
                     search = value;
                     context.read<ProfileBloc>().add(
@@ -100,6 +118,7 @@ class _OffersManagementScreenState extends State<OffersManagementScreen> {
                         params: GetOfferCodesParams(
                           storeId: 1,
                           search: search,
+                          sort: sort,
                           isActive: selectedTab == 1
                               ? true
                               : selectedTab == 2

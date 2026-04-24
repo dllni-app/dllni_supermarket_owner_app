@@ -152,6 +152,21 @@ class _OffersStatisticsGridState extends State<OffersStatisticsGrid>
                   );
                 } else if (state.offersWeeklySummaryStatus ==
                     BlocStatus.success) {
+                  // Replace the entire SizedBox(height: 150, ...) block with this:
+
+                  // First, compute dynamic maxY — put this ABOVE the SizedBox, inside the BlocStatus.success branch:
+                  final allSeriesValues =
+                      (state.offersWeeklySummary?.data?.series ?? []).expand(
+                        (day) => [
+                          day.scheduledOffers?.toDouble() ?? 0,
+                          day.ordersUsedOffers?.toDouble() ?? 0,
+                          day.activeOffers?.toDouble() ?? 0,
+                        ],
+                      );
+
+                  final maxY = allSeriesValues.isEmpty
+                      ? 10.0
+                      : allSeriesValues.reduce(max) * 1.2;
                   return Column(
                     children: [
                       SizedBox(height: 16),
@@ -160,11 +175,12 @@ class _OffersStatisticsGridState extends State<OffersStatisticsGrid>
                         child: BarChart(
                           BarChartData(
                             alignment: BarChartAlignment.spaceAround,
-                            maxY: 40,
+                            maxY: maxY == 0 ? 10 : maxY,
+                            groupsSpace: 12,
                             barTouchData: BarTouchData(enabled: false),
                             borderData: FlBorderData(show: false),
                             gridData: FlGridData(
-                              getDrawingHorizontalLine: (value) => FlLine(
+                              getDrawingHorizontalLine: (value) => const FlLine(
                                 color: Color(0xFFF1F1F1),
                                 strokeWidth: 1,
                                 dashArray: [2, 2],
@@ -173,22 +189,19 @@ class _OffersStatisticsGridState extends State<OffersStatisticsGrid>
                             ),
                             titlesData: FlTitlesData(
                               topTitles: const AxisTitles(
-                                sideTitles: SideTitles(),
+                                sideTitles: SideTitles(showTitles: false),
                               ),
                               leftTitles: const AxisTitles(
-                                sideTitles: SideTitles(),
+                                sideTitles: SideTitles(showTitles: false),
                               ),
                               rightTitles: AxisTitles(
                                 sideTitles: SideTitles(
                                   showTitles: true,
                                   reservedSize: 30,
-                                  // interval: 5,
                                   getTitlesWidget: (value, meta) {
-                                    // if (value % 10 != 0 &&
-                                    //     value !=
-                                    //         maxOrdersEachDay.reduce(max).toDouble()) {
-                                    //   return const SizedBox.shrink();
-                                    // }
+                                    if (value % 10 != 0 && value != maxY) {
+                                      return const SizedBox.shrink();
+                                    }
                                     return SideTitleWidget(
                                       meta: meta,
                                       child: Text(
@@ -216,15 +229,15 @@ class _OffersStatisticsGridState extends State<OffersStatisticsGrid>
                                       'أحد',
                                       'سبت',
                                     ];
-                                    if (value.toInt() < 0 ||
-                                        value.toInt() >= days.length) {
+                                    final index = value.toInt();
+                                    if (index < 0 || index >= days.length) {
                                       return const SizedBox.shrink();
                                     }
                                     return SideTitleWidget(
                                       meta: meta,
                                       space: 8,
                                       child: Text(
-                                        days[value.toInt()],
+                                        days[index],
                                         style: const TextStyle(
                                           color: Colors.black87,
                                           fontWeight: FontWeight.bold,
@@ -237,12 +250,11 @@ class _OffersStatisticsGridState extends State<OffersStatisticsGrid>
                               ),
                             ),
                             barGroups: List.generate(7, (index) {
-                              // select the date
-                              GetOffersWeeklySummaryModelDataSeriesItem
-                              selectedDay = state
+                              final selectedDay = state
                                   .offersWeeklySummary!
                                   .data!
                                   .series![index];
+
                               final double scheduledOffers =
                                   selectedDay.scheduledOffers?.toDouble() ?? 0;
                               final double ordersUsedOffers =
@@ -252,33 +264,31 @@ class _OffersStatisticsGridState extends State<OffersStatisticsGrid>
 
                               return BarChartGroupData(
                                 x: index,
+                                barsSpace: 4,
                                 barRods: [
                                   BarChartRodData(
-                                    toY: max(
-                                      activeOffers,
-                                      max(ordersUsedOffers, scheduledOffers),
+                                    toY: activeOffers,
+                                    color: green,
+                                    width: 8,
+                                    borderRadius: const BorderRadius.vertical(
+                                      top: Radius.circular(2),
                                     ),
-                                    width: 20,
-                                    borderRadius: BorderRadius.vertical(
-                                      top: Radius.circular(6),
+                                  ),
+                                  BarChartRodData(
+                                    toY: ordersUsedOffers,
+                                    color: grey,
+                                    width: 8,
+                                    borderRadius: const BorderRadius.vertical(
+                                      top: Radius.circular(2),
                                     ),
-                                    rodStackItems: [
-                                      BarChartRodStackItem(
-                                        0,
-                                        activeOffers,
-                                        green,
-                                      ),
-                                      BarChartRodStackItem(
-                                        activeOffers,
-                                        scheduledOffers,
-                                        yellow,
-                                      ),
-                                      BarChartRodStackItem(
-                                        scheduledOffers,
-                                        ordersUsedOffers,
-                                        grey,
-                                      ),
-                                    ],
+                                  ),
+                                  BarChartRodData(
+                                    toY: scheduledOffers,
+                                    color: yellow,
+                                    width: 8,
+                                    borderRadius: const BorderRadius.vertical(
+                                      top: Radius.circular(2),
+                                    ),
                                   ),
                                 ],
                               );

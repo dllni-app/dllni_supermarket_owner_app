@@ -22,12 +22,13 @@ class GetOfferCodesParams with Params {
   final String? search;
   final bool? isActive;
   final int page;
-
+  final String? sort;
   GetOfferCodesParams({
     required this.storeId,
     this.search,
     this.isActive,
     this.page = 1,
+    this.sort,
   });
 
   @override
@@ -36,5 +37,6 @@ class GetOfferCodesParams with Params {
     if (search != null && search != "") "filter[search]": search,
     if (isActive != null) "filter[isActive]": isActive! ? 1 : 0,
     "page": page,
+    if (sort != null) "sort": sort,
   };
 }
