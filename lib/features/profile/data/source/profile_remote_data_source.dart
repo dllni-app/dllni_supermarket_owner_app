@@ -6,7 +6,6 @@ import '../../domain/usecases/get_coupon_codes_use_case.dart';
 import '../../domain/usecases/get_employee_permissions_use_case.dart';
 import '../../domain/usecases/get_offers_weekly_summary_use_case.dart';
 import '../../domain/usecases/get_store_employees_use_case.dart';
-import '../../domain/usecases/get_operating_hours_use_case.dart';
 import '../../domain/usecases/update_operating_hours_use_case.dart';
 import '../../domain/usecases/get_store_profile_use_case.dart';
 import '../../domain/usecases/update_store_data_use_case.dart';
@@ -42,7 +41,7 @@ class ProfileRemoteDataSource with HandlingApiManager {
   Future<GetStoreProfileModel> getStoreProfile(GetStoreProfileParams params) {
     return wrapHandlingApi(
       tryCall: () => dioNetwork.getData(
-        endPoint: '/api/v1/store-owner/stores/${params.storeId}',
+        endPoint: '/api/v1/store-owner/store',
         params: params.getParams(),
         data: params.getBody().isEmpty ? null : params.getBody(),
       ),
@@ -53,7 +52,7 @@ class ProfileRemoteDataSource with HandlingApiManager {
   Future<UpdateStoreDataModel> updateStoreData(UpdateStoreDataParams params) {
     return wrapHandlingApi(
       tryCall: () => dioNetwork.putData(
-        endPoint: '/api/v1/store-owner/stores/1',
+        endPoint: '/api/v1/store-owner/store',
         data: params.getBody(),
         params: params.getParams(),
       ),
