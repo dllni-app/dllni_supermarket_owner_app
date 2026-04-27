@@ -101,8 +101,7 @@ class HomeRemoteDataSource with HandlingApiManager {
   ) {
     return wrapHandlingApi(
       tryCall: () => dioNetwork.getData(
-        endPoint:
-            '/api/v1/sm-reports/performance?startDate=2026-1-1&endDate=2026-1-1',
+        endPoint: '/api/v1/store-owner/dashboard/top-selling-products',
         params: params.getParams(),
         data: params.getBody().isEmpty ? null : params.getBody(),
       ),

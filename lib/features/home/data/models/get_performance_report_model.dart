@@ -32,147 +32,224 @@ num? _asNum(dynamic value) {
   return null;
 }
 
-bool? _asBool(dynamic value) {
-  if (value == null) return null;
-  if (value is bool) return value;
-  if (value is num) {
-    if (value == 1) return true;
-    if (value == 0) return false;
-  }
-  if (value is String) {
-    final normalized = value.trim().toLowerCase();
-    if (normalized == 'true' || normalized == '1') return true;
-    if (normalized == 'false' || normalized == '0') return false;
-  }
-  return null;
+GetPerformanceReportModel getPerformanceReportModelFromJson(dynamic str) {
+  final map = str is Map<String, dynamic>
+      ? str
+      : Map<String, dynamic>.from(str as Map);
+  return GetPerformanceReportModel.fromJson(map);
 }
 
-List<dynamic>? _asDynamicList(dynamic value) {
-  if (value is! List) return null;
-  return value.map(_asDynamic).toList();
-}
-
-dynamic _asDynamic(dynamic value) {
-  if (value == null) return null;
-  if (value is List) {
-    return value.map(_asDynamic).toList();
-  }
-  if (value is Map) {
-    final map = <String, dynamic>{};
-    value.forEach((key, nestedValue) {
-      map['$key'] = _asDynamic(nestedValue);
-    });
-    return map;
-  }
-  if (value is String || value is num || value is bool) {
-    return value;
-  }
-  return value.toString();
-}
-
-GetPerformanceReportModel getPerformanceReportModelFromJson(str) => GetPerformanceReportModel.fromJson(str);
-
-String getPerformanceReportModelToJson(GetPerformanceReportModel data) => json.encode(data.toJson());
-
-
-GetPerformanceReportModelPeriod getPerformanceReportModelPeriodFromJson(str) => GetPerformanceReportModelPeriod.fromJson(str);
-
-String getPerformanceReportModelPeriodToJson(GetPerformanceReportModelPeriod data) => json.encode(data.toJson());
-
-
-GetPerformanceReportModelOperationalMetrics getPerformanceReportModelOperationalMetricsFromJson(str) => GetPerformanceReportModelOperationalMetrics.fromJson(str);
-
-String getPerformanceReportModelOperationalMetricsToJson(GetPerformanceReportModelOperationalMetrics data) => json.encode(data.toJson());
-
+String getPerformanceReportModelToJson(GetPerformanceReportModel data) =>
+    json.encode(data.toJson());
 
 class GetPerformanceReportModel {
-  List<dynamic>? topProducts;
-  List<dynamic>? topStores;
-  GetPerformanceReportModelOperationalMetrics? operationalMetrics;
-  List<dynamic>? trends;
-  GetPerformanceReportModelPeriod? period;
+  PerformanceReportRange? range;
+  PerformanceReportSupermarket? supermarket;
+  List<TopProduct> topProducts;
+  OffersImpact? offersImpact;
+  BestOfferPerformance? bestOfferPerformance;
 
   GetPerformanceReportModel({
-    this.topProducts,
-    this.topStores,
-    this.operationalMetrics,
-    this.trends,
-    this.period,
+    this.range,
+    this.supermarket,
+    this.topProducts = const [],
+    this.offersImpact,
+    this.bestOfferPerformance,
   });
 
   factory GetPerformanceReportModel.fromJson(Map<String, dynamic> json) {
+    final raw = json['topProducts'];
+    final list = <TopProduct>[];
+    if (raw is List) {
+      for (final e in raw) {
+        if (e is Map) {
+          list.add(TopProduct.fromJson(Map<String, dynamic>.from(e)));
+        }
+      }
+    }
     return GetPerformanceReportModel(
-      topProducts: _asDynamicList(json['top_products']),
-      topStores: _asDynamicList(json['top_stores']),
-      operationalMetrics: json['operational_metrics'] is Map ? GetPerformanceReportModelOperationalMetrics.fromJson(Map<String, dynamic>.from(json['operational_metrics'] as Map)) : null,
-      trends: _asDynamicList(json['trends']),
-      period: json['period'] is Map ? GetPerformanceReportModelPeriod.fromJson(Map<String, dynamic>.from(json['period'] as Map)) : null,
+      range: json['range'] is Map
+          ? PerformanceReportRange.fromJson(
+              Map<String, dynamic>.from(json['range'] as Map),
+            )
+          : null,
+      supermarket: json['supermarket'] is Map
+          ? PerformanceReportSupermarket.fromJson(
+              Map<String, dynamic>.from(json['supermarket'] as Map),
+            )
+          : null,
+      topProducts: list,
+      offersImpact: json['offersImpact'] is Map
+          ? OffersImpact.fromJson(
+              Map<String, dynamic>.from(json['offersImpact'] as Map),
+            )
+          : null,
+      bestOfferPerformance: json['bestOfferPerformance'] == null
+          ? null
+          : (json['bestOfferPerformance'] is Map
+                ? BestOfferPerformance.fromJson(
+                    Map<String, dynamic>.from(
+                      json['bestOfferPerformance'] as Map,
+                    ),
+                  )
+                : null),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'top_products': topProducts,
-      'top_stores': topStores,
-      'operational_metrics': operationalMetrics?.toJson(),
-      'trends': trends,
-      'period': period?.toJson(),
+      'range': range?.toJson(),
+      'supermarket': supermarket?.toJson(),
+      'topProducts': topProducts.map((e) => e.toJson()).toList(),
+      'offersImpact': offersImpact?.toJson(),
+      'bestOfferPerformance': bestOfferPerformance?.toJson(),
     };
   }
 }
 
-class GetPerformanceReportModelPeriod {
-  String? startDate;
-  String? endDate;
+class PerformanceReportRange {
+  String? key;
+  String? from;
+  String? to;
 
-  GetPerformanceReportModelPeriod({
-    this.startDate,
-    this.endDate,
-  });
+  PerformanceReportRange({this.key, this.from, this.to});
 
-  factory GetPerformanceReportModelPeriod.fromJson(Map<String, dynamic> json) {
-    return GetPerformanceReportModelPeriod(
-      startDate: _asString(json['start_date']),
-      endDate: _asString(json['end_date']),
+  factory PerformanceReportRange.fromJson(Map<String, dynamic> json) {
+    return PerformanceReportRange(
+      key: _asString(json['key']),
+      from: _asString(json['from']),
+      to: _asString(json['to']),
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'start_date': startDate,
-      'end_date': endDate,
-    };
-  }
+  Map<String, dynamic> toJson() => {'key': key, 'from': from, 'to': to};
 }
 
-class GetPerformanceReportModelOperationalMetrics {
-  int? averageBasketValue;
-  int? completionRate;
-  int? cancellationRate;
-  int? totalOrders;
+class PerformanceReportSupermarket {
+  int? id;
+  String? name;
 
-  GetPerformanceReportModelOperationalMetrics({
-    this.averageBasketValue,
-    this.completionRate,
-    this.cancellationRate,
-    this.totalOrders,
-  });
+  PerformanceReportSupermarket({this.id, this.name});
 
-  factory GetPerformanceReportModelOperationalMetrics.fromJson(Map<String, dynamic> json) {
-    return GetPerformanceReportModelOperationalMetrics(
-      averageBasketValue: _asInt(json['average_basket_value']),
-      completionRate: _asInt(json['completion_rate']),
-      cancellationRate: _asInt(json['cancellation_rate']),
-      totalOrders: _asInt(json['total_orders']),
+  factory PerformanceReportSupermarket.fromJson(Map<String, dynamic> json) {
+    return PerformanceReportSupermarket(
+      id: _asInt(json['id']),
+      name: _asString(json['name']),
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'average_basket_value': averageBasketValue,
-      'completion_rate': completionRate,
-      'cancellation_rate': cancellationRate,
-      'total_orders': totalOrders,
-    };
+  Map<String, dynamic> toJson() => {'id': id, 'name': name};
+}
+
+class TopProduct {
+  int? productId;
+  String? name;
+  int? quantity;
+  num? revenue;
+
+  TopProduct({this.productId, this.name, this.quantity, this.revenue});
+
+  factory TopProduct.fromJson(Map<String, dynamic> json) {
+    return TopProduct(
+      productId: _asInt(json['productId']),
+      name: _asString(json['name']),
+      quantity: _asInt(json['quantity']),
+      revenue: _asNum(json['revenue']),
+    );
   }
+
+  Map<String, dynamic> toJson() => {
+    'productId': productId,
+    'name': name,
+    'quantity': quantity,
+    'revenue': revenue,
+  };
+}
+
+class OffersImpact {
+  int? ordersUsedOffers;
+  double? utilizationRatePercent;
+  num? offersRevenue;
+  int? discountedOrdersCount;
+  double? conversionRatePercent;
+  num? discountedRevenue;
+  num? totalSavings;
+
+  OffersImpact({
+    this.ordersUsedOffers,
+    this.utilizationRatePercent,
+    this.offersRevenue,
+    this.discountedOrdersCount,
+    this.conversionRatePercent,
+    this.discountedRevenue,
+    this.totalSavings,
+  });
+
+  factory OffersImpact.fromJson(Map<String, dynamic> json) {
+    return OffersImpact(
+      ordersUsedOffers: _asInt(json['ordersUsedOffers']),
+      utilizationRatePercent: _asDouble(json['utilizationRatePercent']),
+      offersRevenue: _asNum(json['offersRevenue']),
+      discountedOrdersCount: _asInt(json['discountedOrdersCount']),
+      conversionRatePercent: _asDouble(json['conversionRatePercent']),
+      discountedRevenue: _asNum(json['discountedRevenue']),
+      totalSavings: _asNum(json['totalSavings']),
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'ordersUsedOffers': ordersUsedOffers,
+    'utilizationRatePercent': utilizationRatePercent,
+    'offersRevenue': offersRevenue,
+    'discountedOrdersCount': discountedOrdersCount,
+    'conversionRatePercent': conversionRatePercent,
+    'discountedRevenue': discountedRevenue,
+    'totalSavings': totalSavings,
+  };
+}
+
+class BestOfferPerformance {
+  int? offerId;
+  String? name;
+  String? offerType;
+  num? discountValue;
+  num? discountPercent;
+  int? usesCount;
+  num? revenue;
+  num? totalSavings;
+
+  BestOfferPerformance({
+    this.offerId,
+    this.name,
+    this.offerType,
+    this.discountValue,
+    this.discountPercent,
+    this.usesCount,
+    this.revenue,
+    this.totalSavings,
+  });
+
+  factory BestOfferPerformance.fromJson(Map<String, dynamic> json) {
+    return BestOfferPerformance(
+      offerId: _asInt(json['offerId']),
+      name: _asString(json['name']),
+      offerType: _asString(json['offerType']),
+      discountValue: _asNum(json['discountValue']),
+      discountPercent: _asNum(json['discountPercent']),
+      usesCount: _asInt(json['usesCount']),
+      revenue: _asNum(json['revenue']),
+      totalSavings: _asNum(json['totalSavings']),
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'offerId': offerId,
+    'name': name,
+    'offerType': offerType,
+    'discountValue': discountValue,
+    'discountPercent': discountPercent,
+    'usesCount': usesCount,
+    'revenue': revenue,
+    'totalSavings': totalSavings,
+  };
 }
