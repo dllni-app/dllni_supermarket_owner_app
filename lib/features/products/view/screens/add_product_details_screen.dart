@@ -2,14 +2,19 @@ import 'dart:developer' show log;
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:barcode_widget/barcode_widget.dart' as bw;
 import 'package:common_package/common_package.dart';
+import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:google_mlkit_barcode_scanning/google_mlkit_barcode_scanning.dart';
+import 'package:google_mlkit_barcode_scanning/google_mlkit_barcode_scanning.dart'
+    as mlkit;
 import 'package:toastification/toastification.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/themes/app_colors.dart';
+import '../../../../core/themes/app_shadows.dart';
 import '../../../../core/widgets/app_app_bars.dart';
 import '../../../../core/widgets/app_buttons.dart';
 import '../../../../core/widgets/failure_widget.dart';
@@ -35,7 +40,7 @@ class AddProductDetailsScreen extends StatefulWidget {
 }
 
 class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
-  late BarcodeScanner _barcodeScanner;
+  late mlkit.BarcodeScanner _barcodeScanner;
   late AddProductDetailsParams params;
   bool get isEdit => params.editingProductId != null;
 
@@ -50,7 +55,7 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
   @override
   void initState() {
     super.initState();
-    _barcodeScanner = BarcodeScanner();
+    _barcodeScanner = mlkit.BarcodeScanner();
     if (widget.params != null) {
       params = widget.params!;
     } else {
@@ -77,6 +82,25 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
           ? ''
           : '${params.discountedPrice}',
     );
+    _prepareMainImageFromGeneratedBytes();
+  }
+
+  Future<void> _prepareMainImageFromGeneratedBytes() async {
+    if (params.mainImagePath != null || params.mainImage64Based == null) {
+      return;
+    }
+    try {
+      final filePath =
+          '${Directory.systemTemp.path}/generated_product_${DateTime.now().microsecondsSinceEpoch}.png';
+      final file = File(filePath);
+      await file.writeAsBytes(params.mainImage64Based!, flush: true);
+      if (!mounted) return;
+      setState(() {
+        params.mainImagePath = file.path;
+      });
+    } catch (_) {
+      // Keep form usable even if temp write fails; user can still pick manually.
+    }
   }
 
   @override
@@ -101,6 +125,101 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
     params.price = num.tryParse(_priceController.text.trim());
     final d = _discountedController.text.trim();
     params.discountedPrice = d.isEmpty ? null : num.tryParse(d);
+  }
+
+  bool _isNumeric13(String value) {
+    return RegExp(r'^\d{13}$').hasMatch(value);
+  }
+
+  bw.Barcode _barcodeTypeFor(String value) {
+    if (_isNumeric13(value)) {
+      return bw.Barcode.ean13();
+    }
+    return bw.Barcode.code128();
+  }
+
+  Widget _buildBarcodeFieldPreview() {
+    return ValueListenableBuilder<TextEditingValue>(
+      valueListenable: _barcodeController,
+      builder: (context, value, _) {
+        final raw = value.text.trim();
+        if (raw.isEmpty) {
+          return DottedBorder(
+            options: RoundedRectDottedBorderOptions(
+              dashPattern: const [8, 8],
+              strokeWidth: 2,
+              color: const Color(0x1F2F2B3D),
+              radius: const Radius.circular(16),
+            ),
+            child: Container(
+              width: double.infinity,
+              height: 190,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF9FAFB),
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: AppColors.white,
+                      borderRadius: BorderRadius.all(Radius.circular(24)),
+                      boxShadow: [AppShadows.shadow],
+                    ),
+                    child: Icon(
+                      FontAwesomeIcons.barcode,
+                      size: 18,
+                      color: const Color(0xFF9CA3AF),
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  AppText(
+                    "اضغط لرفع صورة باركود",
+                    style: TextStyle(
+                      color: const Color(0xE52F2B3D),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      height: 1.333,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+        return DottedBorder(
+          options: RoundedRectDottedBorderOptions(
+            dashPattern: const [8, 8],
+            strokeWidth: 2,
+            color: const Color(0x1F2F2B3D),
+            radius: const Radius.circular(16),
+          ),
+          child: Container(
+            width: double.infinity,
+            height: 190,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF9FAFB),
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: bw.BarcodeWidget(
+              data: raw,
+              barcode: _barcodeTypeFor(raw),
+              drawText: true,
+              errorBuilder: (context, error) {
+                return AppText(
+                  "تعذر عرض الباركود. تأكد من قيمة الباركود.",
+                  style: TextStyle(color: Color(0xFFEF4444), fontSize: 12),
+                );
+              },
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -191,20 +310,10 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
                                 };
                               },
                             ),
-                            SizedBox(height: 20),
-                            AppTextField(
-                              title: "الباركود",
-                              hintText: "امسح أو اكتب رمز الباركود",
-                              isRequired: true,
-                              controller: _barcodeController,
-                              onChanged: (v) {
-                                params.barcode = v;
-                              },
-                            ),
-                            SizedBox(height: 20),
                             ProductPickMainImage(
                               title: "صورة رئيسية",
                               isRequired: !isEdit,
+                              initialImagePath: params.mainImagePath,
                               networkImageUrl: params.initialMainImageUrl,
                               icon: FontAwesomeIcons.solidCamera,
                               onPickImage: (imagePath) {
@@ -223,12 +332,14 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
                             SizedBox(height: 24),
                             ProductPickMainImage(
                               title: "صورة  الباركود",
-                              isRequired: !isEdit,
+                              isRequired: true,
                               icon: FontAwesomeIcons.barcode,
+                              emptyChild: _buildBarcodeFieldPreview(),
                               onPickImage: (imagePath) async {
-                                List<Barcode> barcodes = await _barcodeScanner
+                                List<mlkit.Barcode> barcodes =
+                                    await _barcodeScanner
                                     .processImage(
-                                      InputImage.fromFilePath(imagePath),
+                                      mlkit.InputImage.fromFilePath(imagePath),
                                     );
                                 if (!context.mounted) return;
                                 if (barcodes.isEmpty) {
@@ -581,7 +692,7 @@ bool validateProductFields(
   if (params.barcode == null || params.barcode!.isEmpty) {
     AppToast.showToast(
       context: context,
-      message: "يرجى إدخال رمز الباركود",
+      message: "يرجى إضافة صورة باركود صالحة",
       type: ToastificationType.error,
     );
     return false;

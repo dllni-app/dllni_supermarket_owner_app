@@ -70,7 +70,7 @@ class UpdateStoreProductBody {
       if (stockQuantity != null) 'stockQuantity': stockQuantity,
       if (lowStockThreshold != null) 'lowStockThreshold': lowStockThreshold,
       if (expiresAt != null) 'expiresAt': expiresAt,
-      'isAvailable': isAvailable ?? true,
+      'isAvailable': (isAvailable ?? true) ? 1 : 0,
       if (image is File) 'image': image,
       if (imgs != null && imgs.isNotEmpty) 'images': imgs,
     };
