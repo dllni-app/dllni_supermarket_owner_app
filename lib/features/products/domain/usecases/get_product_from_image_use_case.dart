@@ -26,5 +26,9 @@ class GetProductFromImageParams with Params {
 
   GetProductFromImageParams({required this.imagePath});
   @override
-  BodyMap getBody() => {"image": File(imagePath), "locale": "ar"};
+  BodyMap getBody() => {
+    "image": File(imagePath),
+    "locale": "ar",
+    "module": "supermarket",
+  };
 }

@@ -83,7 +83,7 @@ class ProductsRemoteDataSource with HandlingApiManager {
   ) {
     return wrapHandlingApi(
       tryCall: () => dioNetwork.postData(
-        endPoint: '/api/v1/sm-products/ai/extract-from-image',
+        endPoint: '/api/v1/products/ai/extract-from-image',
         data: params.getBody(),
         params: params.getParams(),
       ),
@@ -96,7 +96,7 @@ class ProductsRemoteDataSource with HandlingApiManager {
   ) {
     return wrapHandlingApi(
       tryCall: () => dioNetwork.postData(
-        endPoint: '/api/v1/sm-products/ai/generate-image',
+        endPoint: '/api/v1/products/ai/generate-image',
         data: params.getBody(),
         params: params.getParams(),
       ),

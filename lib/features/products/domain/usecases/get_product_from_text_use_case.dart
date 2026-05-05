@@ -27,5 +27,6 @@ class GetProductFromTextParams with Params {
   BodyMap getBody() => {
     "title": title, // "Classic Burger",
     "description": description, // "Tasty burger description.",
+    "module": "supermarket"
   };
 }
