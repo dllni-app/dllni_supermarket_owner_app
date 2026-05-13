@@ -42,7 +42,7 @@ class OrdersRemoteDataSource with HandlingApiManager {
   Future<RejectOrderModel> rejectOrder(RejectOrderParams params) {
     return wrapHandlingApi(
       tryCall: () => dioNetwork.postData(
-        endPoint: '/api/v1/store-owner/orders/{order}/reject',
+        endPoint: '/api/v1/store-owner/orders/${params.orderId}/reject',
         data: params.getBody(),
         params: params.getParams(),
       ),
