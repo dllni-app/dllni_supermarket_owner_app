@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-
 class AppTheme {
   const AppTheme._();
   static final ThemeData light = ThemeData(
     fontFamily: "Cairo",
+    scaffoldBackgroundColor: Color(0xFFEFEFEF),
     colorScheme: ColorScheme(
       brightness: Brightness.light,
       primary: Color(0xff1E2A78),
@@ -14,7 +14,7 @@ class AppTheme {
       error: Color(0xffBF393D),
       onError: Color(0xffFFFFFF),
       surface: Color(0xffF0F0F0),
-      onSurface: Color(0xffFFFFFF),
+      onSurface: Colors.black,
       primaryContainer: Color(0xffFF7A00),
       onPrimaryContainer: Color(0xffFFFFFF),
     ),

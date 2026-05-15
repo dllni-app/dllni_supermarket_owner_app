@@ -244,6 +244,7 @@ class GetCategoriesModelDataItem {
   int? sortOrder;
   dynamic imagePath;
   bool? isActive;
+  int? productsCount;
   String? createdAt;
   String? updatedAt;
 
@@ -256,6 +257,7 @@ class GetCategoriesModelDataItem {
     this.sortOrder,
     this.imagePath,
     this.isActive,
+    this.productsCount,
     this.createdAt,
     this.updatedAt,
   });
@@ -270,6 +272,7 @@ class GetCategoriesModelDataItem {
       sortOrder: _asInt(json['sortOrder']),
       imagePath: _asDynamic(json['imagePath']),
       isActive: _asBool(json['isActive']),
+      productsCount: _asInt(json['productsCount']),
       createdAt: _asString(json['createdAt']),
       updatedAt: _asString(json['updatedAt']),
     );
@@ -285,6 +288,7 @@ class GetCategoriesModelDataItem {
       'sortOrder': sortOrder,
       'imagePath': imagePath,
       'isActive': isActive,
+      'productsCount': productsCount,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
     };

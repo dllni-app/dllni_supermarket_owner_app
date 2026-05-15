@@ -1,4 +1,5 @@
 import 'package:common_package/common_package.dart';
+import 'package:dllni_supermarket_owner_app/core/session/session_expired_handler.dart';
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
 
@@ -25,9 +26,13 @@ abstract class InjectableModule {
     interceptors: [
       TokenInterceptor(
         tokenKey: 'token',
-        fcmKey: 'fcm',
-        lang: '',
+        fcmKey: 'fcm_token',
+        lang: 'ar',
         onRequestFunction: null,
+      ),
+      UnauthorizedInterceptor(
+        onUnauthorized: SessionExpiredHandler.handle,
+        excludedPathSuffixes: const ['/api/v1/user/login', '/api/login'],
       ),
     ],
   );

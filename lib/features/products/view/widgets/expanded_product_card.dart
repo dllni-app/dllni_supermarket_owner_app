@@ -99,8 +99,8 @@ class _ExpandedProductCardState extends State<ExpandedProductCard> {
                   ),
                 ),
                 RotatedBox(
-                  quarterTurns: isOpen ? 30 : 0,
-                  child: AppImage.asset(AppSvgs.arrowDownIos, size: 14),
+                  quarterTurns: isOpen ? -15 : 15,
+                  child: AppImage.asset(AppSvgs.arrowBackIos, size: 16),
                 ),
               ],
             ),

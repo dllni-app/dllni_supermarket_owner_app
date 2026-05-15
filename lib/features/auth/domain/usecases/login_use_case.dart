@@ -27,5 +27,6 @@ class LoginParams with Params {
   BodyMap getBody() => {
         'phone': phone,
         'password': password,
+        'module': 'supermarket',
       };
 }

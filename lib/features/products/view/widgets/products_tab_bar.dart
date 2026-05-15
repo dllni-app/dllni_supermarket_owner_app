@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/themes/app_colors.dart';
+import '../../../../core/themes/app_gradients.dart';
 
 class ProductsTabBarItem {
   final String title;
@@ -43,7 +44,7 @@ class _ProductsTabBarState extends State<ProductsTabBar> {
               widget.onChanged(index);
             }
           },
-          child: CategoryChip(
+          child: _CategoryChip(
             isSelected: index == selectedIndex,
             item: widget.items[index],
           ),
@@ -55,8 +56,8 @@ class _ProductsTabBarState extends State<ProductsTabBar> {
   }
 }
 
-class CategoryChip extends StatelessWidget {
-  const CategoryChip({super.key, required this.item, required this.isSelected});
+class _CategoryChip extends StatelessWidget {
+  const _CategoryChip({required this.item, required this.isSelected});
 
   final ProductsTabBarItem item;
   final bool isSelected;
@@ -66,7 +67,8 @@ class CategoryChip extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: 16),
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: isSelected ? AppColors.primary : AppColors.white,
+        color: isSelected ? null : AppColors.white,
+        gradient: isSelected ? AppGradients.gradient : null,
         borderRadius: BorderRadius.all(Radius.circular(20)),
         border: isSelected ? null : Border.all(color: Color(0xFFE5E7EB)),
       ),

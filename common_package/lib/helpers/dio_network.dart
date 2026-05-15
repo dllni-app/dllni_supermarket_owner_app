@@ -204,7 +204,9 @@ class DioNetwork {
     Map<String, dynamic>? params,
     Map<String, dynamic>? data,
   }) async {
+    print("setting headers");
     dio.options.headers.addAll(headers ?? {});
+    print("end headers");
     return await dio.get(endPoint, queryParameters: params, data: data);
   }
 }

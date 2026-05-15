@@ -6,5 +6,10 @@ class AppImages {
   static const String image1 = "assets/images/image1.png";
   static const String burgerImage = "assets/images/burger_image.png";
   static const String databases = "assets/images/databases.png";
+  static const String instagram = "assets/images/instagram.png";
+  static const String facebook = "assets/images/facebook.png";
+  static const String whatsapp = "assets/images/whatsapp.png";
+  static const String avatar = "assets/images/avatar.png";
+
 
 }

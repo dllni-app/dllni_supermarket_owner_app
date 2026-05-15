@@ -1,0 +1,390 @@
+import 'package:common_package/common_package.dart';
+import 'package:dotted_border/dotted_border.dart';
+import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
+import '../../../../core/themes/app_colors.dart';
+import '../../../../core/widgets/app_buttons.dart';
+import '../../data/models/get_orders_model.dart';
+
+class OrderCard extends StatelessWidget {
+  final OrderStatus status;
+  final GetOrdersModelDataItem order;
+  final void Function() onAcceptTap;
+  final void Function() onRejectTap;
+  final void Function() onViewDetailsTap;
+  final void Function() onCourierHandoverTap;
+  final bool isCourierHandoverLoading;
+  const OrderCard({
+    super.key,
+    required this.status,
+    required this.order,
+    required this.onAcceptTap,
+    required this.onRejectTap,
+    required this.onViewDetailsTap,
+    required this.onCourierHandoverTap,
+    this.isCourierHandoverLoading = false,
+  });
+
+  Widget get leadingStatusTag => switch (status) {
+    OrderStatus.pending => CircleAvatar(
+      radius: 4,
+      backgroundColor: AppColors.primary,
+    ),
+    OrderStatus.preparing => Icon(
+      FontAwesomeIcons.fireBurner,
+      size: 12,
+      color: statusFontColor,
+    ),
+    OrderStatus.readyForPickup => Icon(
+      FontAwesomeIcons.solidCircleCheck,
+      size: 12,
+      color: statusFontColor,
+    ),
+    _ => SizedBox(),
+  };
+
+  String get orderDelay {
+    final Duration diffDate = DateTime.now().difference(
+      DateTime.parse(order.updatedAt!),
+    );
+    if (diffDate.inDays != 0) return "${diffDate.inDays} يوم";
+    if (diffDate.inHours != 0) return "${diffDate.inHours} ساعة";
+    if (diffDate.inMinutes != 0) return "${diffDate.inMinutes} دقيقة";
+    return "${diffDate.inSeconds} ثانية";
+  }
+
+  Color get statusColor => switch (status) {
+    OrderStatus.completed ||
+    OrderStatus.readyForPickup => const Color(0xFF28C76F),
+    OrderStatus.preparing => AppColors.accent,
+    _ => AppColors.primary,
+  };
+
+  Color get statusFontColor => switch (status) {
+    OrderStatus.completed ||
+    OrderStatus.readyForPickup => const Color(0xFF24B364),
+    OrderStatus.preparing => AppColors.accent,
+    _ => AppColors.primary,
+  };
+
+  String get statusLabel => switch (status) {
+    OrderStatus.pending => "طلب جديد",
+    OrderStatus.preparing => "قيد التحضير",
+    OrderStatus.readyForPickup => "جاهز للتسليم",
+    OrderStatus.completed => "مكتمل",
+    OrderStatus.rejected => "مرفوض",
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    return DottedBorder(
+      options: RoundedRectDottedBorderOptions(
+        radius: Radius.circular(8),
+        dashPattern: [10, 10],
+        color: status == OrderStatus.completed
+            ? Color(0xFF10B981)
+            : Color(0xFF8591E0),
+      ),
+      child: Container(
+        clipBehavior: Clip.antiAliasWithSaveLayer,
+        decoration: BoxDecoration(
+          color: status == OrderStatus.completed
+              ? AppColors.white
+              : Color(0x1F8591E0),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                decoration: BoxDecoration(
+                  color: statusColor.withValues(alpha: .08),
+                  border: Border(
+                    bottom: BorderSide(
+                      color: statusColor.withValues(alpha: .16),
+                    ),
+                    right: BorderSide(
+                      color: statusColor.withValues(alpha: .16),
+                    ),
+                  ),
+                  borderRadius: BorderRadius.only(
+                    bottomRight: Radius.circular(8),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    leadingStatusTag,
+                    if (status != OrderStatus.completed) SizedBox(width: 4),
+                    AppText.labelSmall(
+                      statusLabel,
+                      style: TextStyle(
+                        color: statusFontColor,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        height: 1.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.fromLTRB(
+                13,
+                2,
+                13,
+                status == OrderStatus.completed ? 16 : 26,
+              ),
+              child: status == OrderStatus.completed
+                  ? Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 20,
+                          backgroundColor: statusColor.withValues(alpha: .16),
+                          child: Icon(
+                            FontAwesomeIcons.check,
+                            size: 16,
+                            color: statusFontColor,
+                          ),
+                        ),
+                        SizedBox(width: 12),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            AppText(
+                              "#${order.orderNumber}",
+                              style: TextStyle(
+                                color: Color(0xE52F2B3D),
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                height: 1.42,
+                              ),
+                            ),
+                            AppText(
+                              "منذ $orderDelay",
+                              textDirection: TextDirection.ltr,
+                              style: TextStyle(
+                                color: Color(0x992F2B3D),
+                                fontSize: 10,
+                                fontWeight: FontWeight.w500,
+                                height: 1.5,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Spacer(),
+                        AppText(
+                          "${order.totalAmount} ل.س",
+                          style: TextStyle(
+                            color: context.primary,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            height: 1.42,
+                          ),
+                        ),
+                      ],
+                    )
+                  : Column(
+                      spacing: 16,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Container(
+                              width: 40,
+                              height: 40,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(12),
+                                ),
+                                color: const Color(0xFF1F2937),
+                              ),
+                              child: Icon(
+                                FontAwesomeIcons.user,
+                                size: 16,
+                                color: const Color(0xFF9CA3AF),
+                              ),
+                            ),
+                            SizedBox(width: 12),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                AppText(
+                                  "عميل السوبرماركت",
+                                  style: TextStyle(
+                                    color: Color(0xE5000000),
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w700,
+                                    height: 1.42,
+                                  ),
+                                ),
+                                AppText(
+                                  "#${order.orderNumber} • منذ $orderDelay",
+                                  textDirection: TextDirection.ltr,
+                                  style: TextStyle(
+                                    color: Color(0x992F2B3D),
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w500,
+                                    height: 1.5,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Spacer(),
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 2.5),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  AppText(
+                                    "${order.totalAmount} ل.س",
+                                    style: TextStyle(
+                                      color: AppColors.accent,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      height: 1.54,
+                                    ),
+                                  ),
+                                  SizedBox(width: 8),
+                                  AppText(
+                                    "نقدي",
+                                    style: TextStyle(
+                                      color: AppColors.accent,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      height: 1.3,
+                                    ),
+                                  ),
+                                  SizedBox(width: 6),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        Container(
+                          width: context.width,
+                          padding: EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: AppColors.white,
+                            borderRadius: BorderRadius.all(Radius.circular(8)),
+                          ),
+                          child: Column(
+                            spacing: 12,
+                            children: List.generate(
+                              order.items!.length,
+                              (index) => _RequirementRow(
+                                label: "${index + 1}- ${order.items![index]}",
+                              ),
+                            ),
+                          ),
+                        ),
+                        if (status == OrderStatus.pending)
+                          Row(
+                            spacing: 16,
+                            children: [
+                              Expanded(
+                                child: AppButton(
+                                  title: "قبول الطلب",
+                                  onTap: onAcceptTap,
+                                ),
+                              ),
+                              AppOutlinedButton(
+                                color: const Color(0xFFFF4C51),
+                                title: "رفض",
+                                onTap: onRejectTap,
+                              ),
+                            ],
+                          )
+                        else if (status == OrderStatus.preparing)
+                          SizedBox(
+                            width: context.width,
+                            child: AppButton(
+                              icon: Icons.arrow_forward_rounded,
+                              title: "عرض التفاصيل",
+                              onTap: () {
+                                print("show details");
+                                context.pushRoute(
+                                  "/orders/order_details",
+                                  arguments: order.id!,
+                                );
+                                // Navigator.of(context).push(
+                                //   MaterialPageRoute(
+                                //     builder: (_) => OrderDetailsScreen(),
+                                //   ),
+                                // );
+                              },
+                            ),
+                          )
+                        else if (status == OrderStatus.readyForPickup)
+                          isCourierHandoverLoading
+                              ? Center(
+                                  child: SizedBox(
+                                    width: 24,
+                                    height: 24,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2.5,
+                                      color: Color(0xFF24B364),
+                                    ),
+                                  ),
+                                )
+                              : SizedBox(
+                                  width: context.width,
+                                  child: AppButton(
+                                    color: const Color(0xFF24B364),
+                                    title: "تسليم للمندوب",
+                                    onTap: onCourierHandoverTap,
+                                  ),
+                                ),
+                      ],
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+enum OrderStatus { pending, preparing, readyForPickup, completed, rejected }
+
+enum PaymentWay { cash }
+
+class _RequirementRow extends StatelessWidget {
+  final String label;
+
+  const _RequirementRow({required this.label});
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        AppText(
+          label,
+          style: TextStyle(
+            color: Color(0xE52F2B3D),
+            fontSize: 12,
+            height: 1.333,
+          ),
+        ),
+        Spacer(),
+        CircleAvatar(radius: 9.5, backgroundColor: Color(0xFFD9D9D9)),
+        SizedBox(width: 12),
+        GestureDetector(
+          onTap: () {},
+          child: Icon(
+            FontAwesomeIcons.circleQuestion,
+            color: Color(0xFFFFAF66),
+            size: 18,
+          ),
+        ),
+      ],
+    );
+  }
+}

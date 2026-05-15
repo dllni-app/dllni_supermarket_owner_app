@@ -3,13 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../core/widgets/app_nav_bar.dart';
-import 'home/view/home_screen.dart';
+import 'home/view/screens/home_screen.dart';
+import 'inventory/view/screens/inventory_screen.dart';
+import 'orders/view/screens/orders_screen.dart';
 import 'products/view/screens/products_screen.dart';
+import 'profile/view/screens/more_screen.dart';
 
 @AutoRoutePage(path: "/")
 class MainPage extends StatefulWidget {
-  const MainPage({super.key});
-
+  final int? initialPage;
+  const MainPage({super.key, this.initialPage});
   @override
   State<MainPage> createState() => _MainPageState();
 }
@@ -19,12 +22,6 @@ class _MainPageState extends State<MainPage>
   int selectedTab = 0;
   late TabController tabController;
   @override
-  void initState() {
-    super.initState();
-    tabController = TabController(length: 5, vsync: this);
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: TabBarView(
@@ -32,19 +29,19 @@ class _MainPageState extends State<MainPage>
         controller: tabController,
         children: [
           HomeScreen(),
-          Center(child: Text("قيد التطوير")),
+          OrdersScreen(),
           ProductsScreen(),
-          Center(child: Text("قيد التطوير")),
-          Center(child: Text("قيد التطوير")),
+          InventoryScreen(),
+          MoreScreen(),
         ],
       ),
       bottomNavigationBar: AppNavBar(
         items: [
-          AppNavBarItem(title: "الرئيسية", icon: Icons.home_rounded),
+          AppNavBarItem(title: "الرئيسية", icon: FontAwesomeIcons.solidHouse),
           AppNavBarItem(title: "الطلبات", icon: FontAwesomeIcons.receipt),
-          AppNavBarItem(title: "المنتجات", icon: FontAwesomeIcons.carrot),
-          AppNavBarItem(title: "المخزون", icon: FontAwesomeIcons.fileInvoice),
-          AppNavBarItem(title: "المزيد", icon: Icons.menu),
+          AppNavBarItem(title: "المنتجات", icon: FontAwesomeIcons.cubes),
+          AppNavBarItem(title: "المخزون", icon: FontAwesomeIcons.boxesStacked),
+          AppNavBarItem(title: "المزيد", icon: FontAwesomeIcons.bars),
         ],
         selectedIndex: selectedTab,
         onChanged: (index) {
@@ -55,6 +52,17 @@ class _MainPageState extends State<MainPage>
           }
         },
       ),
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialPage != null) selectedTab = widget.initialPage!;
+    tabController = TabController(
+      length: 5,
+      vsync: this,
+      initialIndex: selectedTab,
     );
   }
 }

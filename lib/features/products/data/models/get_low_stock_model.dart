@@ -17,21 +17,6 @@ int? _asInt(dynamic value) {
   return null;
 }
 
-double? _asDouble(dynamic value) {
-  if (value == null) return null;
-  if (value is double) return value;
-  if (value is num) return value.toDouble();
-  if (value is String) return double.tryParse(value);
-  return null;
-}
-
-num? _asNum(dynamic value) {
-  if (value == null) return null;
-  if (value is num) return value;
-  if (value is String) return num.tryParse(value);
-  return null;
-}
-
 bool? _asBool(dynamic value) {
   if (value == null) return null;
   if (value is bool) return value;
@@ -47,29 +32,6 @@ bool? _asBool(dynamic value) {
   return null;
 }
 
-List<dynamic>? _asDynamicList(dynamic value) {
-  if (value is! List) return null;
-  return value.map(_asDynamic).toList();
-}
-
-dynamic _asDynamic(dynamic value) {
-  if (value == null) return null;
-  if (value is List) {
-    return value.map(_asDynamic).toList();
-  }
-  if (value is Map) {
-    final map = <String, dynamic>{};
-    value.forEach((key, nestedValue) {
-      map['$key'] = _asDynamic(nestedValue);
-    });
-    return map;
-  }
-  if (value is String || value is num || value is bool) {
-    return value;
-  }
-  return value.toString();
-}
-
 GetLowStockModel getLowStockModelFromJson(str) => GetLowStockModel.fromJson(str);
 
 String getLowStockModelToJson(GetLowStockModel data) => json.encode(data.toJson());
@@ -79,6 +41,18 @@ GetLowStockModelData getLowStockModelDataFromJson(str) => GetLowStockModelData.f
 
 String getLowStockModelDataToJson(GetLowStockModelData data) => json.encode(data.toJson());
 
+List<GetLowStockModelDataItem>? _asLowStockProductList(dynamic value) {
+  if (value is! List) return null;
+  return value
+      .map((e) {
+        if (e is! Map) return null;
+        return GetLowStockModelDataItem.fromJson(
+          Map<String, dynamic>.from(e),
+        );
+      })
+      .whereType<GetLowStockModelDataItem>()
+      .toList();
+}
 
 class GetLowStockModel {
   bool? success;
@@ -104,8 +78,48 @@ class GetLowStockModel {
   }
 }
 
+class GetLowStockModelDataItem {
+  int? productId;
+  String? productName;
+  int? currentStock;
+  int? threshold;
+  String? category;
+  String? barcode;
+
+  GetLowStockModelDataItem({
+    this.productId,
+    this.productName,
+    this.currentStock,
+    this.threshold,
+    this.category,
+    this.barcode,
+  });
+
+  factory GetLowStockModelDataItem.fromJson(Map<String, dynamic> json) {
+    return GetLowStockModelDataItem(
+      productId: _asInt(json['product_id']),
+      productName: _asString(json['product_name']),
+      currentStock: _asInt(json['current_stock']),
+      threshold: _asInt(json['threshold']),
+      category: _asString(json['category']),
+      barcode: _asString(json['barcode']),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'product_id': productId,
+      'product_name': productName,
+      'current_stock': currentStock,
+      'threshold': threshold,
+      'category': category,
+      'barcode': barcode,
+    };
+  }
+}
+
 class GetLowStockModelData {
-  List<dynamic>? products;
+  List<GetLowStockModelDataItem>? products;
   int? total;
 
   GetLowStockModelData({
@@ -115,14 +129,14 @@ class GetLowStockModelData {
 
   factory GetLowStockModelData.fromJson(Map<String, dynamic> json) {
     return GetLowStockModelData(
-      products: _asDynamicList(json['products']),
+      products: _asLowStockProductList(json['products']),
       total: _asInt(json['total']),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'products': products,
+      'products': products?.map((e) => e.toJson()).toList(),
       'total': total,
     };
   }

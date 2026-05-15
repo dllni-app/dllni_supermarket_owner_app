@@ -1,5 +1,4 @@
 import 'package:common_package/common_package.dart';
-import 'package:dllni_supermarket_owner_app/features/main_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -9,7 +8,7 @@ import '../../../../core/di/injection.dart';
 import '../../domain/usecases/login_use_case.dart';
 import '../manager/bloc/auth_bloc.dart';
 
-@AutoRoutePage()
+@AutoRoutePage(path: "/login")
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -50,7 +49,7 @@ class _LoginScreenState extends State<LoginScreen> {
               break;
             case BlocStatus.success:
               Loading.close();
-              Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (_)=> MainPage()), (route) => false);
+              context.pushRouteAndRemoveUntil("/");
               break;
             case BlocStatus.loading:
               Loading.show(context);

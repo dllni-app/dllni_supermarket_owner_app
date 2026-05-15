@@ -17,7 +17,12 @@ class Loading {
             children: [
               CircularProgressIndicator(color: context.primary),
               const SizedBox(width: 10),
-              Text(context.locale == const Locale('ar') ? 'يتم التحميل...' : 'Loading...', style: const TextStyle(color: Color(0xff000000))),
+              Text(
+                context.locale == const Locale('ar')
+                    ? 'يتم التحميل...'
+                    : 'Loading...',
+                style: const TextStyle(color: Color(0xff000000)),
+              ),
             ],
           ),
         );
@@ -37,7 +42,11 @@ class Loading {
     return value
         ? Container(
             alignment: Alignment.center,
-            child: SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: context.primaryColor)),
+            child: SizedBox(
+              height: 20,
+              width: 20,
+              child: CircularProgressIndicator(color: context.primaryColor),
+            ),
           )
         : const SizedBox(height: 5, width: 5);
   }
