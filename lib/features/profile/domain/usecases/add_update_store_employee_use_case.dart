@@ -8,17 +8,13 @@ import '../../data/models/get_store_employees_model.dart';
 import '../repository/profile_repo.dart';
 
 @lazySingleton
-class AddUpdateStoreEmployeeUseCase
-    implements
-        UseCase<AddUpdateStoreEmployeeModel, AddUpdateStoreEmployeeParams> {
+class AddUpdateStoreEmployeeUseCase implements UseCase<AddUpdateStoreEmployeeModel, AddUpdateStoreEmployeeParams> {
   final ProfileRepo profile;
 
   AddUpdateStoreEmployeeUseCase({required this.profile});
 
   @override
-  DataResponse<AddUpdateStoreEmployeeModel> call(
-    AddUpdateStoreEmployeeParams params,
-  ) {
+  DataResponse<AddUpdateStoreEmployeeModel> call(AddUpdateStoreEmployeeParams params) {
     return profile.addUpdateStoreEmployee(params);
   }
 }
@@ -32,21 +28,16 @@ class AddUpdateStoreEmployeeParams with Params {
   final String? imagePath;
   final GetStoreEmployeesModelDataEmployeesItem employee;
 
-  AddUpdateStoreEmployeeParams({
-    required this.method,
-    required this.storeId,
-    this.userId,
-    this.imagePath,
-    required this.employee,
-  });
+  AddUpdateStoreEmployeeParams({required this.method, required this.storeId, this.userId, this.imagePath, required this.employee});
+
   @override
   BodyMap getBody() => {
     "storeId": storeId,
     "name": employee.user!.name,
     "email": employee.user!.email,
     "phone": employee.user!.phone,
-    "permissionIds": employee.permissionIds,
-    "isActive": employee.isActive ?? false,
+    "permissionIds[]": employee.permissionIds,
+    "isActive": employee.isActive == false ? 0 : 1,
     if (imagePath != null) "profileImage": File(imagePath!),
   };
 }

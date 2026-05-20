@@ -31,6 +31,8 @@ import '../models/add_offer_model.dart';
 import '../../domain/usecases/add_offer_use_case.dart';
 import '../../domain/usecases/get_activity_logs_use_case.dart';
 import '../models/get_activity_logs_model.dart';
+import '../../domain/usecases/update_store_employee_password_use_case.dart';
+import '../models/update_store_employee_password_model.dart';
 
 @lazySingleton
 class ProfileRemoteDataSource with HandlingApiManager {
@@ -150,6 +152,19 @@ class ProfileRemoteDataSource with HandlingApiManager {
               params: params.getParams(),
             ),
       jsonConvert: addUpdateStoreEmployeeModelFromJson,
+    );
+  }
+
+  Future<UpdateStoreEmployeePasswordModel> updateStoreEmployeePassword(
+    UpdateStoreEmployeePasswordParams params,
+  ) {
+    return wrapHandlingApi(
+      tryCall: () => dioNetwork.patchData(
+        endPoint: '/api/v1/store-owner/employees/${params.staffId}/password',
+        data: params.getBody(),
+        params: params.getParams(),
+      ),
+      jsonConvert: updateStoreEmployeePasswordModelFromJson,
     );
   }
 

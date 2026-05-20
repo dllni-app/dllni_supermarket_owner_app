@@ -2,9 +2,12 @@ import 'package:common_package/common_package.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:toastification/toastification.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/helpers/phone_number_helper.dart';
+import '../../../../core/widgets/app_phone_number_field.dart';
 import '../../domain/usecases/login_use_case.dart';
 import '../manager/bloc/auth_bloc.dart';
 
@@ -18,15 +21,47 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _phoneController = TextEditingController();
+  final _phoneFieldKey = GlobalKey<AppPhoneNumberFieldState>();
   final _passwordController = TextEditingController();
+  PhoneNumber? _phone;
   bool _obscurePassword = true;
 
   @override
   void dispose() {
-    _phoneController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _submit(AuthBloc bloc) async {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+
+    final phoneError = await _phoneFieldKey.currentState?.validate();
+    if (phoneError != null) {
+      if (!mounted) return;
+      AppToast.showToast(
+        context: context,
+        message: phoneError,
+        type: ToastificationType.error,
+      );
+      return;
+    }
+
+    final phone = formatPhoneForApi(_phone);
+    if (phone == null) {
+      if (!mounted) return;
+      AppToast.showToast(
+        context: context,
+        message: 'الرجاء إدخال رقم الجوال',
+        type: ToastificationType.error,
+      );
+      return;
+    }
+
+    bloc.add(
+      LoginEvent(
+        params: LoginParams(phone: phone, password: _passwordController.text),
+      ),
+    );
   }
 
   @override
@@ -129,60 +164,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                 textAlign: TextAlign.start,
                               ),
                               SizedBox(height: 8),
-                              TextFormField(
-                                controller: _phoneController,
-                                keyboardType: TextInputType.phone,
-                                textDirection: TextDirection.ltr,
-                                style: TextStyle(color: Colors.black),
-                                decoration: InputDecoration(
-                                  hintText: 'أدخل رقم الجوال',
-                                  hintStyle: TextStyle(
-                                    color: Colors.grey.shade400,
-                                    fontSize: 14,
-                                  ),
-                                  filled: true,
-                                  fillColor: context.onPrimary,
-                                  contentPadding:
-                                      EdgeInsetsDirectional.symmetric(
-                                        horizontal: 16,
-                                        vertical: 16,
-                                      ),
-                                  prefixIcon: Icon(
-                                    Icons.person_outline,
-                                    color: Colors.grey.shade400,
-                                    size: 20,
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(14),
-                                    borderSide: BorderSide(
-                                      color: Colors.grey.shade300,
-                                    ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(14),
-                                    borderSide: BorderSide(
-                                      color: context.secondary,
-                                    ),
-                                  ),
-                                  errorBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(14),
-                                    borderSide: BorderSide(
-                                      color: context.error,
-                                    ),
-                                  ),
-                                  focusedErrorBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(14),
-                                    borderSide: BorderSide(
-                                      color: context.error,
-                                    ),
-                                  ),
-                                ),
-                                validator: (value) {
-                                  if (value == null || value.trim().isEmpty) {
-                                    return 'الرجاء إدخال رقم الجوال';
-                                  }
-                                  return null;
-                                },
+                              AppPhoneNumberField(
+                                key: _phoneFieldKey,
+                                label: 'رقم الجوال',
+                                isRequired: true,
+                                variant: AppPhoneFieldVariant.ownerLogin,
+                                onChanged: (number) => _phone = number,
                               ),
                             ],
                           ),
@@ -274,14 +261,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               return InkWell(
                                 borderRadius: BorderRadius.circular(16),
                                 onTap: () {
-                                  context.read<AuthBloc>().add(
-                                    LoginEvent(
-                                      params: LoginParams(
-                                        phone: _phoneController.text,
-                                        password: _passwordController.text,
-                                      ),
-                                    ),
-                                  );
+                                  _submit(context.read<AuthBloc>());
                                 },
                                 child: Container(
                                   decoration: BoxDecoration(

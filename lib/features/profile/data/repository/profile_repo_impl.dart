@@ -8,7 +8,6 @@ import '../../domain/usecases/get_store_profile_use_case.dart';
 import '../models/get_store_profile_model.dart';
 import '../../domain/usecases/update_store_data_use_case.dart';
 import '../models/update_store_data_model.dart';
-import '../../domain/usecases/get_operating_hours_use_case.dart';
 import '../models/operating_hours_model.dart';
 import '../../domain/usecases/update_operating_hours_use_case.dart';
 import '../../domain/usecases/get_coupon_codes_use_case.dart';
@@ -35,6 +34,8 @@ import '../../domain/usecases/add_offer_use_case.dart';
 import '../models/add_offer_model.dart';
 import '../../domain/usecases/get_activity_logs_use_case.dart';
 import '../models/get_activity_logs_model.dart';
+import '../../domain/usecases/update_store_employee_password_use_case.dart';
+import '../models/update_store_employee_password_model.dart';
 
 @LazySingleton(as: ProfileRepo)
 class ProfileRepoImpl with HandlingException implements ProfileRepo {
@@ -43,15 +44,18 @@ class ProfileRepoImpl with HandlingException implements ProfileRepo {
   ProfileRepoImpl({required this.profileRemoteDataSource});
 
   @override
-  DataResponse<GetStoreProfileModel> getStoreProfile(GetStoreProfileParams params) {
+  DataResponse<GetStoreProfileModel> getStoreProfile(
+    GetStoreProfileParams params,
+  ) {
     return wrapHandlingException(
       tryCall: () => profileRemoteDataSource.getStoreProfile(params),
     );
   }
 
-
   @override
-  DataResponse<UpdateStoreDataModel> updateStoreData(UpdateStoreDataParams params) {
+  DataResponse<UpdateStoreDataModel> updateStoreData(
+    UpdateStoreDataParams params,
+  ) {
     return wrapHandlingException(
       tryCall: () => profileRemoteDataSource.updateStoreData(params),
     );
@@ -74,37 +78,57 @@ class ProfileRepoImpl with HandlingException implements ProfileRepo {
   }
 
   @override
-  DataResponse<GetCouponCodesModel> getCouponCodes(GetCouponCodesParams params) {
+  DataResponse<GetCouponCodesModel> getCouponCodes(
+    GetCouponCodesParams params,
+  ) {
     return wrapHandlingException(
       tryCall: () => profileRemoteDataSource.getCouponCodes(params),
     );
   }
 
   @override
-  DataResponse<GetEmployeePermissionsModel> getEmployeePermissions(GetEmployeePermissionsParams params) {
+  DataResponse<GetEmployeePermissionsModel> getEmployeePermissions(
+    GetEmployeePermissionsParams params,
+  ) {
     return wrapHandlingException(
       tryCall: () => profileRemoteDataSource.getEmployeePermissions(params),
     );
   }
 
   @override
-  DataResponse<GetOffersWeeklySummaryModel> getOffersWeeklySummary(GetOffersWeeklySummaryParams params) {
+  DataResponse<GetOffersWeeklySummaryModel> getOffersWeeklySummary(
+    GetOffersWeeklySummaryParams params,
+  ) {
     return wrapHandlingException(
       tryCall: () => profileRemoteDataSource.getOffersWeeklySummary(params),
     );
   }
 
   @override
-  DataResponse<GetStoreEmployeesModel> getStoreEmployees(GetStoreEmployeesParams params) {
+  DataResponse<GetStoreEmployeesModel> getStoreEmployees(
+    GetStoreEmployeesParams params,
+  ) {
     return wrapHandlingException(
       tryCall: () => profileRemoteDataSource.getStoreEmployees(params),
     );
   }
 
   @override
-  DataResponse<AddUpdateStoreEmployeeModel> addUpdateStoreEmployee(AddUpdateStoreEmployeeParams params) {
+  DataResponse<AddUpdateStoreEmployeeModel> addUpdateStoreEmployee(
+    AddUpdateStoreEmployeeParams params,
+  ) {
     return wrapHandlingException(
       tryCall: () => profileRemoteDataSource.addUpdateStoreEmployee(params),
+    );
+  }
+
+  @override
+  DataResponse<UpdateStoreEmployeePasswordModel> updateStoreEmployeePassword(
+    UpdateStoreEmployeePasswordParams params,
+  ) {
+    return wrapHandlingException(
+      tryCall: () =>
+          profileRemoteDataSource.updateStoreEmployeePassword(params),
     );
   }
 
@@ -123,7 +147,9 @@ class ProfileRepoImpl with HandlingException implements ProfileRepo {
   }
 
   @override
-  DataResponse<GetProductsCountModel> getProductsCount(GetProductsCountParams params) {
+  DataResponse<GetProductsCountModel> getProductsCount(
+    GetProductsCountParams params,
+  ) {
     return wrapHandlingException(
       tryCall: () => profileRemoteDataSource.getProductsCount(params),
     );
@@ -137,7 +163,9 @@ class ProfileRepoImpl with HandlingException implements ProfileRepo {
   }
 
   @override
-  DataResponse<GetCouponWeekAnalysisModel> getCouponWeekAnalysis(GetCouponWeekAnalysisParams params) {
+  DataResponse<GetCouponWeekAnalysisModel> getCouponWeekAnalysis(
+    GetCouponWeekAnalysisParams params,
+  ) {
     return wrapHandlingException(
       tryCall: () => profileRemoteDataSource.getCouponWeekAnalysis(params),
     );
@@ -159,4 +187,3 @@ class ProfileRepoImpl with HandlingException implements ProfileRepo {
     );
   }
 }
-

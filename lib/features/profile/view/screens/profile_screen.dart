@@ -7,13 +7,16 @@ import 'package:dllni_supermarket_owner_app/features/profile/domain/usecases/get
 import 'package:dllni_supermarket_owner_app/features/profile/domain/usecases/update_store_data_use_case.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:toastification/toastification.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/helpers/phone_number_helper.dart';
 import '../../../../core/utils/app_images.dart';
 import '../../../../core/widgets/app_app_bars.dart';
 import '../../../../core/widgets/app_buttons.dart';
+import '../../../../core/widgets/app_phone_number_field.dart';
 import '../../../../core/widgets/step_details.dart';
 import '../../../products/view/widgets/product_text_field.dart';
 import '../manager/bloc/profile_bloc.dart';
@@ -30,6 +33,86 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   ProfileParams params = ProfileParams();
+  final _phoneFieldKey = GlobalKey<AppPhoneNumberFieldState>();
+  final _whatsappFieldKey = GlobalKey<AppPhoneNumberFieldState>();
+
+  PhoneNumber? _phone;
+  PhoneNumber? _initialPhone;
+  PhoneNumber? _whatsapp;
+  PhoneNumber? _initialWhatsapp;
+
+  String? _lastPhoneRaw;
+  String? _lastWhatsappRaw;
+
+  Future<void> _loadInitialPhones({
+    required String? phone,
+    required String? whatsapp,
+  }) async {
+    if (_lastPhoneRaw == phone && _lastWhatsappRaw == whatsapp) return;
+
+    _lastPhoneRaw = phone;
+    _lastWhatsappRaw = whatsapp;
+
+    final parsedPhone = await parseInitialPhone(phone);
+    final parsedWhatsapp = await parseInitialPhone(whatsapp);
+
+    if (!mounted) return;
+    setState(() {
+      _initialPhone = parsedPhone;
+      _phone = parsedPhone;
+      _initialWhatsapp = parsedWhatsapp;
+      _whatsapp = parsedWhatsapp;
+    });
+  }
+
+  Future<String?> _validateOptionalPhone(PhoneNumber? number) async {
+    final raw = number?.phoneNumber?.trim() ?? '';
+    if (raw.isEmpty) return null;
+    return validatePhoneNumber(number);
+  }
+
+  Future<void> _onSavePressed(ProfileBloc bloc) async {
+    final phoneError = await _phoneFieldKey.currentState?.validate();
+    if (phoneError != null) {
+      if (!mounted) return;
+      AppToast.showToast(
+        context: context,
+        message: phoneError,
+        type: ToastificationType.error,
+      );
+      return;
+    }
+
+    final whatsappError = await _whatsappFieldKey.currentState?.validate();
+    if (whatsappError != null) {
+      if (!mounted) return;
+      AppToast.showToast(
+        context: context,
+        message: whatsappError,
+        type: ToastificationType.error,
+      );
+      return;
+    }
+
+    final phone = formatPhoneForApi(_phone);
+    if (phone == null) {
+      if (!mounted) return;
+      AppToast.showToast(
+        context: context,
+        message: 'الرجاء إدخال رقم الجوال',
+        type: ToastificationType.error,
+      );
+      return;
+    }
+
+    params.phone = phone;
+    params.whatsapp = formatPhoneForApi(_whatsapp);
+
+    bloc.add(
+      UpdateStoreDataEvent(params: UpdateStoreDataParams(params: params)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -38,9 +121,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Scaffold(
         body: Column(
           children: [
-            
             AppSimpleAppBar(title: "معلومات السوبر ماركت"),
-            
+
             Expanded(
               child: BlocConsumer<ProfileBloc, ProfileState>(
                 buildWhen: (previous, current) =>
@@ -61,6 +143,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       state.storeProfile?.data?.longitude ?? "",
                     );
                     params.phone = state.storeProfile?.data?.phone;
+                    _loadInitialPhones(
+                      phone: params.phone,
+                      whatsapp: params.whatsapp,
+                    );
                   }
                 },
                 builder: (context, state) {
@@ -92,7 +178,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   number: 1,
                                   title: "الهوية الأساسية",
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       PickImage(
                                         title: 'شعار السوبر ماركت',
@@ -103,7 +190,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           final bytes = File(
                                             imagePath,
                                           ).readAsBytesSync();
-                                          params.logo64Based = base64Encode(bytes);
+                                          params.logo64Based = base64Encode(
+                                            bytes,
+                                          );
                                         },
                                       ),
                                       SizedBox(height: 20),
@@ -116,7 +205,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           final bytes = File(
                                             imagePath,
                                           ).readAsBytesSync();
-                                          params.cover64Based = base64Encode(bytes);
+                                          params.cover64Based = base64Encode(
+                                            bytes,
+                                          );
                                         },
                                       ),
                                       SizedBox(height: 20),
@@ -150,7 +241,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   number: 2,
                                   title: "العنوان والموقع",
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Row(
                                         children: [
@@ -235,48 +327,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         ],
                                       ),
                                       SizedBox(height: 8),
-                                      TextFormField(
-                                        controller: TextEditingController(
-                                          text: params.phone,
-                                        ),
-                                        onChanged: (value) {
-                                          params.phone = value;
-                                        },
-                                        style: TextStyle(
-                                          color: Color(0xff2F2B3D),
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w400,
-                                        ),
-                                        keyboardType: TextInputType.phone,
-                                        decoration: InputDecoration(
-                                          filled: true,
-                                          prefixIcon: Icon(
-                                            Icons.phone,
-                                            color: Color(0xff064E3B),
-                                          ),
-                                          fillColor: Color(0xffF9FAFB),
-                                          border: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(16),
-                                            borderSide: BorderSide(
-                                              color: Color(0xffE5E7EB),
-                                              width: 1,
-                                            ),
-                                          ),
-                                          focusedBorder: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(16),
-                                            borderSide: BorderSide(
-                                              color: Color(0xffE5E7EB),
-                                              width: 1,
-                                            ),
-                                          ),
-                                          enabledBorder: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(16),
-                                            borderSide: BorderSide(
-                                              color: Color(0xffE5E7EB),
-                                              width: 1,
-                                            ),
-                                          ),
-                                        ),
+                                      AppPhoneNumberField(
+                                        key: _phoneFieldKey,
+                                        showLabel: false,
+                                        isRequired: true,
+                                        initialValue: _initialPhone,
+                                        variant:
+                                            AppPhoneFieldVariant.ownerProfile,
+                                        onChanged: (phone) => _phone = phone,
                                       ),
                                       SizedBox(height: 20),
                                       Row(
@@ -290,53 +348,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           AppText.labelLarge(
                                             '(اختياري)',
                                             fontWeight: FontWeight.w400,
-                                            color: Color(0xff2F2B3D).withAlpha(175),
+                                            color: Color(
+                                              0xff2F2B3D,
+                                            ).withAlpha(175),
                                           ),
                                         ],
                                       ),
                                       SizedBox(height: 8),
-                                      TextFormField(
-                                        controller: TextEditingController(
-                                          text: params.whatsapp,
-                                        ),
-                                        onChanged: (value) {
-                                          params.whatsapp = value;
-                                        },
-                                        style: TextStyle(
-                                          color: Color(0xff2F2B3D),
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w400,
-                                        ),
-                                        keyboardType: TextInputType.phone,
-                                        decoration: InputDecoration(
-                                          filled: true,
-                                          prefixIcon: Transform.scale(
-                                            scale: .5,
-                                            child: AppImage.asset(AppImages.whatsapp),
-                                          ),
-                                          fillColor: Color(0xffF9FAFB),
-                                          border: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(16),
-                                            borderSide: BorderSide(
-                                              color: Color(0xffE5E7EB),
-                                              width: 1,
-                                            ),
-                                          ),
-                                          focusedBorder: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(16),
-                                            borderSide: BorderSide(
-                                              color: Color(0xffE5E7EB),
-                                              width: 1,
-                                            ),
-                                          ),
-                                          enabledBorder: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(16),
-                                            borderSide: BorderSide(
-                                              color: Color(0xffE5E7EB),
-                                              width: 1,
-                                            ),
-                                          ),
-                                        ),
+                                      AppPhoneNumberField(
+                                        key: _whatsappFieldKey,
+                                        showLabel: false,
+                                        hintText: 'أدخل رقم الواتساب',
+                                        initialValue: _initialWhatsapp,
+                                        variant:
+                                            AppPhoneFieldVariant.ownerProfile,
+                                        validator: _validateOptionalPhone,
+                                        onChanged: (phone) => _whatsapp = phone,
                                       ),
                                       SizedBox(height: 8),
                                       Row(
@@ -369,7 +396,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           AppText.labelLarge(
                                             '(اختياري)',
                                             fontWeight: FontWeight.w400,
-                                            color: Color(0xff2F2B3D).withAlpha(175),
+                                            color: Color(
+                                              0xff2F2B3D,
+                                            ).withAlpha(175),
                                           ),
                                         ],
                                       ),
@@ -386,7 +415,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           fontSize: 14,
                                           fontWeight: FontWeight.w400,
                                         ),
-                                        keyboardType: TextInputType.phone,
+                                        keyboardType: TextInputType.text,
                                         decoration: InputDecoration(
                                           hintText: 'اسم المستخدم في انستغرام',
                                           hintStyle: TextStyle(
@@ -403,21 +432,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           ),
                                           fillColor: Color(0xffF9FAFB),
                                           border: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(16),
+                                            borderRadius: BorderRadius.circular(
+                                              16,
+                                            ),
                                             borderSide: BorderSide(
                                               color: Color(0xffE5E7EB),
                                               width: 1,
                                             ),
                                           ),
                                           focusedBorder: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(16),
+                                            borderRadius: BorderRadius.circular(
+                                              16,
+                                            ),
                                             borderSide: BorderSide(
                                               color: Color(0xffE5E7EB),
                                               width: 1,
                                             ),
                                           ),
                                           enabledBorder: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(16),
+                                            borderRadius: BorderRadius.circular(
+                                              16,
+                                            ),
                                             borderSide: BorderSide(
                                               color: Color(0xffE5E7EB),
                                               width: 1,
@@ -438,7 +473,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           fontSize: 14,
                                           fontWeight: FontWeight.w400,
                                         ),
-                                        keyboardType: TextInputType.phone,
+                                        keyboardType: TextInputType.text,
                                         decoration: InputDecoration(
                                           filled: true,
                                           hintText: 'اسم الصفحة في فيسبوك',
@@ -449,25 +484,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           ),
                                           prefixIcon: Transform.scale(
                                             scale: .3,
-                                            child: AppImage.asset(AppImages.facebook),
+                                            child: AppImage.asset(
+                                              AppImages.facebook,
+                                            ),
                                           ),
                                           fillColor: Color(0xffF9FAFB),
                                           border: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(16),
+                                            borderRadius: BorderRadius.circular(
+                                              16,
+                                            ),
                                             borderSide: BorderSide(
                                               color: Color(0xffE5E7EB),
                                               width: 1,
                                             ),
                                           ),
                                           focusedBorder: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(16),
+                                            borderRadius: BorderRadius.circular(
+                                              16,
+                                            ),
                                             borderSide: BorderSide(
                                               color: Color(0xffE5E7EB),
                                               width: 1,
                                             ),
                                           ),
                                           enabledBorder: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(16),
+                                            borderRadius: BorderRadius.circular(
+                                              16,
+                                            ),
                                             borderSide: BorderSide(
                                               color: Color(0xffE5E7EB),
                                               width: 1,
@@ -502,7 +545,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             }
                           },
                           buildWhen: (previous, current) =>
-                              previous.storeDataStatus != current.storeDataStatus,
+                              previous.storeDataStatus !=
+                              current.storeDataStatus,
                           builder: (context, state) {
                             if (state.storeDataStatus == BlocStatus.loading) {
                               return Center(child: CircularProgressIndicator());
@@ -517,15 +561,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   Expanded(
                                     child: AppButton(
                                       title: "حفظ التغييرات",
-                                      onTap: () {
-                                        context.read<ProfileBloc>().add(
-                                          UpdateStoreDataEvent(
-                                            params: UpdateStoreDataParams(
-                                              params: params,
-                                            ),
-                                          ),
+                                      onTap: () async {
+                                        await _onSavePressed(
+                                          context.read<ProfileBloc>(),
                                         );
-                                        print("accept");
                                       },
                                     ),
                                   ),

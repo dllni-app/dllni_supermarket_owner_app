@@ -136,6 +136,8 @@ import '../../features/profile/domain/usecases/get_store_profile_use_case.dart'
     as _i712;
 import '../../features/profile/domain/usecases/update_operating_hours_use_case.dart'
     as _i393;
+import '../../features/profile/domain/usecases/update_store_employee_password_use_case.dart'
+    as _i1112;
 import '../../features/profile/domain/usecases/update_store_data_use_case.dart'
     as _i78;
 import '../../features/profile/view/manager/bloc/profile_bloc.dart' as _i821;
@@ -347,6 +349,11 @@ _i174.GetIt $initGetIt(
   );
   gh.lazySingleton<_i393.UpdateOperatingHoursUseCase>(
     () => _i393.UpdateOperatingHoursUseCase(profile: gh<_i275.ProfileRepo>()),
+  );
+  gh.lazySingleton<_i1112.UpdateStoreEmployeePasswordUseCase>(
+    () => _i1112.UpdateStoreEmployeePasswordUseCase(
+      profile: gh<_i275.ProfileRepo>(),
+    ),
   );
   gh.lazySingleton<_i78.UpdateStoreDataUseCase>(
     () => _i78.UpdateStoreDataUseCase(profile: gh<_i275.ProfileRepo>()),

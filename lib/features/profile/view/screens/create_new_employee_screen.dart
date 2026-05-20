@@ -1,19 +1,23 @@
-import 'package:common_package/common_package.dart';
+﻿import 'package:common_package/common_package.dart';
 import 'package:dllni_supermarket_owner_app/core/widgets/failure_widget.dart';
 import 'package:dllni_supermarket_owner_app/features/products/view/widgets/product_image_field.dart';
 import 'package:dllni_supermarket_owner_app/features/profile/domain/usecases/add_update_store_employee_use_case.dart';
 import 'package:dllni_supermarket_owner_app/features/profile/domain/usecases/get_employee_permissions_use_case.dart';
+import 'package:dllni_supermarket_owner_app/features/profile/domain/usecases/update_store_employee_password_use_case.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:toastification/toastification.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/helpers/phone_number_helper.dart';
 import '../../../../core/themes/app_colors.dart';
 import '../../../../core/themes/app_shadows.dart';
 import '../../../../core/widgets/app_app_bars.dart';
 import '../../../../core/widgets/app_buttons.dart';
+import '../../../../core/widgets/app_phone_number_field.dart';
 import '../../../../core/widgets/app_switch.dart';
 import '../../../products/view/widgets/product_text_field.dart';
 import '../../data/models/get_store_employees_model.dart';
@@ -32,12 +36,268 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
   GetStoreEmployeesModelDataEmployeesItem params =
       GetStoreEmployeesModelDataEmployeesItem();
   String? imagePath;
+  final _phoneFieldKey = GlobalKey<AppPhoneNumberFieldState>();
+  PhoneNumber? _phone;
+  PhoneNumber? _initialPhone;
+  late final TextEditingController _newPasswordController;
+  late final TextEditingController _confirmPasswordController;
+  bool _obscureNewPassword = true;
+  bool _obscureConfirmPassword = true;
+  bool _passwordMismatch = false;
+  bool _isUpdatingPassword = false;
+
   @override
   void initState() {
+    super.initState();
+    _newPasswordController = TextEditingController();
+    _confirmPasswordController = TextEditingController();
     if (widget.params != null) params = widget.params!;
     params.user ??= GetStoreEmployeesModelDataEmployeesItemUser();
     params.permissionIds ??= [];
-    super.initState();
+    _loadInitialPhone();
+  }
+
+  @override
+  void dispose() {
+    _newPasswordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadInitialPhone() async {
+    final parsed = await parseInitialPhone(params.user?.phone);
+    if (!mounted) return;
+    setState(() {
+      _initialPhone = parsed;
+      _phone = parsed;
+    });
+  }
+
+  bool get _isCreateMode => widget.params == null;
+
+  bool get _shouldSendPassword {
+    if (_isCreateMode) return true;
+    return _newPasswordController.text.trim().isNotEmpty ||
+        _confirmPasswordController.text.trim().isNotEmpty;
+  }
+
+  void _syncPasswordMismatch() {
+    final newPassword = _newPasswordController.text.trim();
+    final confirmation = _confirmPasswordController.text.trim();
+    final mismatch =
+        newPassword.isNotEmpty &&
+        confirmation.isNotEmpty &&
+        newPassword != confirmation;
+    if (_passwordMismatch != mismatch) {
+      setState(() {
+        _passwordMismatch = mismatch;
+      });
+    }
+  }
+
+  String? _validatePasswordSection() {
+    final newPassword = _newPasswordController.text.trim();
+    final confirmation = _confirmPasswordController.text.trim();
+    final hasAnyPasswordInput =
+        newPassword.isNotEmpty || confirmation.isNotEmpty;
+
+    if (!_isCreateMode && !hasAnyPasswordInput) {
+      _passwordMismatch = false;
+      return null;
+    }
+
+    if (newPassword.isEmpty || confirmation.isEmpty) {
+      _passwordMismatch = false;
+      return "الرجاء إدخال كلمة المرور وتأكيدها";
+    }
+
+    if (newPassword.length < 8) {
+      _passwordMismatch = false;
+      return "كلمة المرور يجب أن تكون 8 أحرف على الأقل";
+    }
+
+    if (newPassword != confirmation) {
+      _passwordMismatch = true;
+      return "كلمتا المرور غير متطابقتين";
+    }
+
+    _passwordMismatch = false;
+    return null;
+  }
+
+  Future<void> _updateEmployeePassword({required int staffId}) async {
+    setState(() {
+      _isUpdatingPassword = true;
+    });
+
+    final result = await getIt<UpdateStoreEmployeePasswordUseCase>()(
+      UpdateStoreEmployeePasswordParams(
+        staffId: staffId,
+        newPassword: _newPasswordController.text.trim(),
+        newPasswordConfirmation: _confirmPasswordController.text.trim(),
+      ),
+    );
+
+    if (!mounted) return;
+    setState(() {
+      _isUpdatingPassword = false;
+    });
+
+    await result.fold(
+      (l) async {
+        AppToast.showToast(
+          context: context,
+          message: "تم حفظ الموظف، لكن فشل تحديث كلمة المرور: ${l.message}",
+          type: ToastificationType.warning,
+        );
+        context.pop(true);
+      },
+      (r) async {
+        AppToast.showToast(
+          context: context,
+          message: r.message ?? "تم الحفظ بنجاح",
+          type: ToastificationType.success,
+        );
+        context.pop(true);
+      },
+    );
+  }
+
+  Widget _buildPasswordField({
+    required String title,
+    required String hintText,
+    required TextEditingController controller,
+    required bool obscureText,
+    required VoidCallback onToggle,
+    bool hasError = false,
+  }) {
+    return Column(
+      spacing: 8,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text.rich(
+          TextSpan(
+            text: title,
+            children: const [
+              TextSpan(
+                text: "*",
+                style: TextStyle(
+                  color: Color(0xFFEF4444),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  height: 1.42,
+                ),
+              ),
+            ],
+          ),
+          style: const TextStyle(
+            color: Color(0xFF374151),
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            height: 1.42,
+          ),
+        ),
+        TextField(
+          controller: controller,
+          obscureText: obscureText,
+          onChanged: (_) => _syncPasswordMismatch(),
+          onTapOutside: (_) => FocusScope.of(context).unfocus(),
+          style: const TextStyle(color: Color(0xB22F2B3D), fontSize: 14),
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: const Color(0xFFF9FAFB),
+            hintText: hintText,
+            hintStyle: const TextStyle(color: Color(0xFF9CA3AF), fontSize: 14),
+            suffixIcon: IconButton(
+              icon: Icon(
+                obscureText
+                    ? Icons.visibility_off_outlined
+                    : Icons.visibility_outlined,
+                color: const Color(0xFF6B7280),
+              ),
+              onPressed: onToggle,
+            ),
+            border: OutlineInputBorder(
+              borderSide: BorderSide(
+                color: hasError
+                    ? const Color(0xFFEF4444)
+                    : const Color(0xFFE5E7EB),
+              ),
+              borderRadius: const BorderRadius.all(Radius.circular(16)),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderSide: BorderSide(
+                color: hasError
+                    ? const Color(0xFFEF4444)
+                    : const Color(0xFFE5E7EB),
+              ),
+              borderRadius: const BorderRadius.all(Radius.circular(16)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderSide: BorderSide(
+                color: hasError
+                    ? const Color(0xFFEF4444)
+                    : const Color(0xFFE5E7EB),
+              ),
+              borderRadius: const BorderRadius.all(Radius.circular(16)),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _onSavePressed(ProfileBloc bloc) async {
+    if (_isUpdatingPassword) return;
+
+    _syncPasswordMismatch();
+    final phoneError = await _phoneFieldKey.currentState?.validate();
+    if (phoneError != null) {
+      if (!mounted) return;
+      AppToast.showToast(
+        context: context,
+        message: phoneError,
+        type: ToastificationType.error,
+      );
+      return;
+    }
+
+    final phone = formatPhoneForApi(_phone);
+    if (phone == null) {
+      if (!mounted) return;
+      AppToast.showToast(
+        context: context,
+        message: "الرجاء إدخال رقم الهاتف",
+        type: ToastificationType.error,
+      );
+      return;
+    }
+
+    final passwordError = _validatePasswordSection();
+    if (passwordError != null) {
+      if (!mounted) return;
+      setState(() {});
+      AppToast.showToast(
+        context: context,
+        message: passwordError,
+        type: ToastificationType.error,
+      );
+      return;
+    }
+
+    params.user?.phone = phone;
+
+    bloc.add(
+      AddUpdateStoreEmployeeEvent(
+        params: AddUpdateStoreEmployeeParams(
+          method: params.id != null ? RequestMethod.put : RequestMethod.post,
+          userId: params.userId,
+          storeId: 1,
+          employee: params,
+          imagePath: imagePath,
+        ),
+      ),
+    );
   }
 
   @override
@@ -69,7 +329,7 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
                           AppImageField(
                             initialNetworkImage: params.user?.profileImageUrl,
                             onPickImage: (imagePath) {
-                              imagePath = imagePath;
+                              this.imagePath = imagePath;
                             },
                             title: "صورة الموظف",
                           ),
@@ -98,30 +358,14 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
                             },
                           ),
                           SizedBox(height: 16),
-                          AppTextField(
-                            title: "رقم الهاتف",
+                          AppPhoneNumberField(
+                            key: _phoneFieldKey,
+                            label: 'رقم الهاتف',
                             hintText: "9xxxxxxxx",
                             isRequired: true,
-                            keyboardType: TextInputType.phone,
-                            controller: TextEditingController(
-                              text: params.user?.phone,
-                            ),
-                            onChanged: (value) {
-                              params.user?.phone = value;
-                            },
-                            suffixIcon: Padding(
-                              padding: EdgeInsets.only(top: 15),
-                              child: Text(
-                                "   +963",
-                                textDirection: TextDirection.ltr,
-                                style: TextStyle(
-                                  color: Color(0xFF4B5563),
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w700,
-                                  height: 1.42,
-                                ),
-                              ),
-                            ),
+                            initialValue: _initialPhone,
+                            variant: AppPhoneFieldVariant.ownerProfile,
+                            onChanged: (phone) => _phone = phone,
                           ),
                         ],
                       ),
@@ -224,6 +468,68 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
                     ),
                     SizedBox(height: 16),
                     _ProfileForm(
+                      title: "بيانات كلمة المرور",
+                      subtitle: _isCreateMode
+                          ? "كلمة المرور مطلوبة عند إنشاء موظف جديد"
+                          : "اختياري في التعديل - اترك الحقول فارغة إذا لا تريد تغيير كلمة المرور",
+                      icon: FontAwesomeIcons.lock,
+                      iconColor: Color(0xFF1E3A8A),
+                      child: Column(
+                        children: [
+                          _buildPasswordField(
+                            title: "كلمة المرور الجديدة",
+                            hintText: "8 أحرف على الأقل",
+                            controller: _newPasswordController,
+                            obscureText: _obscureNewPassword,
+                            hasError: _passwordMismatch,
+                            onToggle: () {
+                              setState(() {
+                                _obscureNewPassword = !_obscureNewPassword;
+                              });
+                            },
+                          ),
+                          SizedBox(height: 16),
+                          _buildPasswordField(
+                            title: "تأكيد كلمة المرور",
+                            hintText: "أعد إدخال كلمة المرور",
+                            controller: _confirmPasswordController,
+                            obscureText: _obscureConfirmPassword,
+                            hasError: _passwordMismatch,
+                            onToggle: () {
+                              setState(() {
+                                _obscureConfirmPassword =
+                                    !_obscureConfirmPassword;
+                              });
+                            },
+                          ),
+                          if (_passwordMismatch) ...[
+                            SizedBox(height: 10),
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.info_outline,
+                                  size: 16,
+                                  color: Color(0xFFEF4444),
+                                ),
+                                SizedBox(width: 6),
+                                Expanded(
+                                  child: AppText(
+                                    "كلمتا المرور غير متطابقتين",
+                                    style: TextStyle(
+                                      color: Color(0xFFEF4444),
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    _ProfileForm(
                       title: "حالة الحساب",
                       icon: FontAwesomeIcons.toggleOn,
                       iconColor: Color(0xFF10B981),
@@ -293,7 +599,7 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
                       listenWhen: (previous, current) =>
                           previous.addUpdateStoreEmployeeStatus !=
                           current.addUpdateStoreEmployeeStatus,
-                      listener: (context, state) {
+                      listener: (context, state) async {
                         if (state.addUpdateStoreEmployeeStatus ==
                             BlocStatus.failed) {
                           AppToast.showToast(
@@ -303,6 +609,24 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
                           );
                         } else if (state.addUpdateStoreEmployeeStatus ==
                             BlocStatus.success) {
+                          if (_shouldSendPassword) {
+                            final staffId =
+                                state.addUpdateStoreEmployee?.data?.id ??
+                                params.id;
+                            if (staffId == null) {
+                              AppToast.showToast(
+                                context: context,
+                                message:
+                                    "تم حفظ الموظف، لكن تعذر تحديث كلمة المرور لعدم توفر معرف الموظف",
+                                type: ToastificationType.warning,
+                              );
+                              context.pop(true);
+                              return;
+                            }
+                            await _updateEmployeePassword(staffId: staffId);
+                            return;
+                          }
+
                           AppToast.showToast(
                             context: context,
                             message:
@@ -317,7 +641,8 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
                           current.addUpdateStoreEmployeeStatus,
                       builder: (context, state) {
                         if (state.addUpdateStoreEmployeeStatus ==
-                            BlocStatus.loading) {
+                                BlocStatus.loading ||
+                            _isUpdatingPassword) {
                           return Center(child: CircularProgressIndicator());
                         }
                         return Row(
@@ -325,27 +650,9 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
                             Expanded(
                               child: AppButton(
                                 title: "حفظ وتفعيل",
-                                onTap: () {
-                                  // print(params.id);
-                                  // print(params.user?.id);
-                                  // print(params.user?.name);
-                                  // print(params.user?.email);
-                                  // print(params.user?.phone);
-                                  // print(imagePath);
-                                  // print(params.permissionIds);
-                                  // return;
-                                  context.read<ProfileBloc>().add(
-                                    AddUpdateStoreEmployeeEvent(
-                                      params: AddUpdateStoreEmployeeParams(
-                                        method: params.id != null
-                                            ? RequestMethod.put
-                                            : RequestMethod.post,
-                                        userId: params.userId,
-                                        storeId: 1,
-                                        employee: params,
-                                        imagePath: imagePath,
-                                      ),
-                                    ),
+                                onTap: () async {
+                                  await _onSavePressed(
+                                    context.read<ProfileBloc>(),
                                   );
                                 },
                               ),
@@ -558,29 +865,32 @@ class _ProfileForm extends StatelessWidget {
                   ),
                   child: Icon(icon, size: 18, color: iconColor),
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  spacing: 2,
-                  children: [
-                    AppText(
-                      title,
-                      style: TextStyle(
-                        color: Color(0xFF111827),
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        height: 1.5,
-                      ),
-                    ),
-                    if (subtitle != null)
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: 2,
+                    children: [
                       AppText(
-                        subtitle!,
+                        title,
                         style: TextStyle(
-                          color: Color(0xFF6B7280),
-                          fontSize: 12,
-                          height: 1.333,
+                          color: Color(0xFF111827),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          height: 1.5,
                         ),
                       ),
-                  ],
+                      if (subtitle != null)
+                        AppText(
+                          subtitle!,
+                          textAlign: TextAlign.start,
+                          style: TextStyle(
+                            color: Color(0xFF6B7280),
+                            fontSize: 12,
+                            height: 1.333,
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
               ],
             ),

@@ -3,7 +3,6 @@ import '../usecases/get_store_profile_use_case.dart';
 import '../../data/models/get_store_profile_model.dart';
 import '../usecases/update_store_data_use_case.dart';
 import '../../data/models/update_store_data_model.dart';
-import '../usecases/get_operating_hours_use_case.dart';
 import '../../data/models/operating_hours_model.dart';
 import '../usecases/update_operating_hours_use_case.dart';
 import '../usecases/get_coupon_codes_use_case.dart';
@@ -30,11 +29,17 @@ import '../usecases/add_offer_use_case.dart';
 import '../../data/models/add_offer_model.dart';
 import '../usecases/get_activity_logs_use_case.dart';
 import '../../data/models/get_activity_logs_model.dart';
+import '../usecases/update_store_employee_password_use_case.dart';
+import '../../data/models/update_store_employee_password_model.dart';
+
 abstract class ProfileRepo {
-  DataResponse<GetStoreProfileModel> getStoreProfile(GetStoreProfileParams params);
+  DataResponse<GetStoreProfileModel> getStoreProfile(
+    GetStoreProfileParams params,
+  );
 
-
-  DataResponse<UpdateStoreDataModel> updateStoreData(UpdateStoreDataParams params);
+  DataResponse<UpdateStoreDataModel> updateStoreData(
+    UpdateStoreDataParams params,
+  );
 
   DataResponse<OperatingHoursModel> getOperatingHours(NoParams params);
 
@@ -42,28 +47,45 @@ abstract class ProfileRepo {
     UpdateOperatingHoursParams params,
   );
 
-
   DataResponse<GetCouponCodesModel> getCouponCodes(GetCouponCodesParams params);
 
-  DataResponse<GetEmployeePermissionsModel> getEmployeePermissions(GetEmployeePermissionsParams params);
+  DataResponse<GetEmployeePermissionsModel> getEmployeePermissions(
+    GetEmployeePermissionsParams params,
+  );
 
-  DataResponse<GetOffersWeeklySummaryModel> getOffersWeeklySummary(GetOffersWeeklySummaryParams params);
+  DataResponse<GetOffersWeeklySummaryModel> getOffersWeeklySummary(
+    GetOffersWeeklySummaryParams params,
+  );
 
-  DataResponse<GetStoreEmployeesModel> getStoreEmployees(GetStoreEmployeesParams params);
+  DataResponse<GetStoreEmployeesModel> getStoreEmployees(
+    GetStoreEmployeesParams params,
+  );
 
-  DataResponse<AddUpdateStoreEmployeeModel> addUpdateStoreEmployee(AddUpdateStoreEmployeeParams params);
+  DataResponse<AddUpdateStoreEmployeeModel> addUpdateStoreEmployee(
+    AddUpdateStoreEmployeeParams params,
+  );
+
+  DataResponse<UpdateStoreEmployeePasswordModel> updateStoreEmployeePassword(
+    UpdateStoreEmployeePasswordParams params,
+  );
 
   DataResponse<GetOfferCodesModel> getOfferCodes(GetOfferCodesParams params);
 
   DataResponse<GetProductsModel> getProducts(GetProductsParams params);
 
-  DataResponse<GetProductsCountModel> getProductsCount(GetProductsCountParams params);
+  DataResponse<GetProductsCountModel> getProductsCount(
+    GetProductsCountParams params,
+  );
 
   DataResponse<AddCouponCodeModel> addCouponCode(AddCouponCodeParams params);
 
-  DataResponse<GetCouponWeekAnalysisModel> getCouponWeekAnalysis(GetCouponWeekAnalysisParams params);
+  DataResponse<GetCouponWeekAnalysisModel> getCouponWeekAnalysis(
+    GetCouponWeekAnalysisParams params,
+  );
 
   DataResponse<AddOfferModel> addOffer(AddOfferParams params);
 
-  DataResponse<GetActivityLogsModel> getActivityLogs(GetActivityLogsParams params);
+  DataResponse<GetActivityLogsModel> getActivityLogs(
+    GetActivityLogsParams params,
+  );
 }
