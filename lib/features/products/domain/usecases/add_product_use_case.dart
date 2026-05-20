@@ -30,7 +30,6 @@ class AddProductParams with Params {
     "categoryId": params.categoryId,
     "name": params.title,
     if (params.description != null) "description": params.description,
-    "barcode": params.barcode,
     "sourceType": "manual",
     "price": params.price,
     "discountedPrice": params.discountedPrice,

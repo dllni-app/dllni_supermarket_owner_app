@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:common_package/common_package.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -146,13 +148,19 @@ class _CatalogProductCard extends StatelessWidget {
 class _SearchField extends StatelessWidget {
   final TextEditingController controller;
 
+  final void Function(String) onChanged;
   final void Function(String) onSubmitted;
-  const _SearchField({required this.controller, required this.onSubmitted});
+  const _SearchField({
+    required this.controller,
+    required this.onChanged,
+    required this.onSubmitted,
+  });
 
   @override
   Widget build(BuildContext context) {
     return TextField(
       controller: controller,
+      onChanged: onChanged,
       onSubmitted: onSubmitted,
       textDirection: TextDirection.rtl,
       onTapOutside: (_) => FocusScope.of(context).unfocus(),
@@ -199,14 +207,35 @@ class _SearchField extends StatelessWidget {
 
 class _SearchFromCatalogScreenState extends State<SearchFromCatalogScreen> {
   final TextEditingController _searchController = TextEditingController();
+  Timer? _searchDebounce;
+  static const Duration _searchDebounceDuration = Duration(milliseconds: 400);
 
   /// Selected catalog rows keyed by [SearchMasterProductsDataItem.masterProductId] only.
   final Set<int> _selectedIds = {};
 
+  void _dispatchSearch(BuildContext context, String value) {
+    if (!context.mounted) return;
+    context.read<ProductsBloc>().add(SearchMasterProductsSubmitted(value));
+  }
+
+  void _onSearchChanged(BuildContext context, String value) {
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(_searchDebounceDuration, () {
+      _dispatchSearch(context, value);
+    });
+  }
+
+  void _onSearchSubmitted(BuildContext context, String value) {
+    _searchDebounce?.cancel();
+    _dispatchSearch(context, value);
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => getIt<ProductsBloc>(),
+      create: (_) =>
+          getIt<ProductsBloc>()
+            ..add(FetchMasterProductsSearchEvent(isReload: true)),
       child: Builder(
         builder: (context) {
           return Scaffold(
@@ -248,124 +277,103 @@ class _SearchFromCatalogScreenState extends State<SearchFromCatalogScreen> {
                       const SizedBox(height: 16),
                       _SearchField(
                         controller: _searchController,
-                        onSubmitted: (value) {
-                          if (context.mounted) {
-                            context.read<ProductsBloc>().add(
-                              SearchMasterProductsSubmitted(value),
-                            );
-                          }
-                          setState(() {});
-                        },
+                        onChanged: (value) => _onSearchChanged(context, value),
+                        onSubmitted: (value) =>
+                            _onSearchSubmitted(context, value),
                       ),
                       const SizedBox(height: 4),
                     ],
                   ),
                 ),
                 Expanded(
-                  child: _searchController.text.trim().isEmpty
-                      ? Center(
+                  child: BlocBuilder<ProductsBloc, ProductsState>(
+                    buildWhen: (previous, current) =>
+                        previous.catalogMasterProducts !=
+                        current.catalogMasterProducts,
+                    builder: (context, state) {
+                      return state.catalogMasterProducts!.builder(
+                        loadingWidget: const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(24),
+                            child: CircularProgressIndicator.adaptive(),
+                          ),
+                        ),
+                        emptyWidget: Center(
                           child: AppText.labelMedium(
-                            'ابحث عن منتج...',
+                            'لا يوجد منتجات',
                             fontWeight: FontWeight.w400,
                           ),
-                        )
-                      : BlocBuilder<ProductsBloc, ProductsState>(
-                          buildWhen: (previous, current) =>
-                              previous.catalogMasterProducts !=
-                              current.catalogMasterProducts,
-                          builder: (context, state) {
-                            return state.catalogMasterProducts!.builder(
-                              loadingWidget: const Center(
-                                child: Padding(
-                                  padding: EdgeInsets.all(24),
-                                  child: CircularProgressIndicator.adaptive(),
-                                ),
-                              ),
-                              emptyWidget: Center(
-                                child: AppText.labelMedium(
-                                  'لا يوجد منتجات',
-                                  fontWeight: FontWeight.w400,
-                                ),
-                              ),
-                              successWidget: () {
-                                return ListView.separated(
-                                  padding: const EdgeInsets.all(20),
-                                  itemBuilder: (context, index) {
-                                    if (state.catalogMasterProducts!.length <=
-                                        index) {
-                                      if (state.catalogMasterProducts!.length ==
-                                          index) {
-                                        context.read<ProductsBloc>().add(
-                                          FetchMasterProductsSearchEvent(
-                                            isReload: false,
-                                          ),
-                                        );
-                                      }
-                                      return const SizedBox(
-                                        width: 30,
-                                        height: 30,
-                                        child: FittedBox(
-                                          child:
-                                              CircularProgressIndicator.adaptive(
-                                                strokeWidth: 3,
-                                              ),
-                                        ),
-                                      );
-                                    }
-                                    final product = state
-                                        .catalogMasterProducts!
-                                        .list[index];
-                                    final masterProductId =
-                                        product.masterProductId;
-                                    final selected =
-                                        masterProductId != null &&
-                                        _selectedIds.contains(masterProductId);
-                                    return _CatalogProductCard(
-                                      product: product,
-                                      selected: selected,
-                                      onToggle: () {
-                                        if (masterProductId == null) return;
-                                        setState(() {
-                                          if (selected) {
-                                            _selectedIds.remove(
-                                              masterProductId,
-                                            );
-                                          } else {
-                                            _selectedIds.add(masterProductId);
-                                          }
-                                        });
-                                      },
-                                    );
-                                  },
-                                  separatorBuilder: (_, _) =>
-                                      const SizedBox(height: 12),
-                                  itemCount: state.catalogMasterProducts!
-                                      .listLength(1),
-                                );
-                              },
-                              failedWidget: Center(
-                                child: FailureWidget(
-                                  message:
-                                      state.errorMessage ?? 'Unknown Error',
-                                  onRetry: () {
-                                    context.read<ProductsBloc>().add(
-                                      FetchMasterProductsSearchEvent(
-                                        isReload: true,
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                              onTapRetry: () {
-                                context.read<ProductsBloc>().add(
-                                  FetchMasterProductsSearchEvent(
-                                    isReload: true,
+                        ),
+                        successWidget: () {
+                          return ListView.separated(
+                            padding: const EdgeInsets.all(20),
+                            itemBuilder: (context, index) {
+                              if (state.catalogMasterProducts!.length <=
+                                  index) {
+                                if (state.catalogMasterProducts!.length ==
+                                    index) {
+                                  context.read<ProductsBloc>().add(
+                                    FetchMasterProductsSearchEvent(
+                                      isReload: false,
+                                    ),
+                                  );
+                                }
+                                return const SizedBox(
+                                  width: 30,
+                                  height: 30,
+                                  child: FittedBox(
+                                    child: CircularProgressIndicator.adaptive(
+                                      strokeWidth: 3,
+                                    ),
                                   ),
                                 );
-                              },
-                            );
-                          },
+                              }
+                              final product =
+                                  state.catalogMasterProducts!.list[index];
+                              final masterProductId = product.masterProductId;
+                              final selected =
+                                  masterProductId != null &&
+                                  _selectedIds.contains(masterProductId);
+                              return _CatalogProductCard(
+                                product: product,
+                                selected: selected,
+                                onToggle: () {
+                                  if (masterProductId == null) return;
+                                  setState(() {
+                                    if (selected) {
+                                      _selectedIds.remove(masterProductId);
+                                    } else {
+                                      _selectedIds.add(masterProductId);
+                                    }
+                                  });
+                                },
+                              );
+                            },
+                            separatorBuilder: (_, _) =>
+                                const SizedBox(height: 12),
+                            itemCount: state.catalogMasterProducts!.listLength(
+                              1,
+                            ),
+                          );
+                        },
+                        failedWidget: Center(
+                          child: FailureWidget(
+                            message: state.errorMessage ?? 'Unknown Error',
+                            onRetry: () {
+                              context.read<ProductsBloc>().add(
+                                FetchMasterProductsSearchEvent(isReload: true),
+                              );
+                            },
+                          ),
                         ),
+                        onTapRetry: () {
+                          context.read<ProductsBloc>().add(
+                            FetchMasterProductsSearchEvent(isReload: true),
+                          );
+                        },
+                      );
+                    },
+                  ),
                 ),
                 const SizedBox(height: 16),
                 if (_selectedIds.isNotEmpty)
@@ -414,6 +422,7 @@ class _SearchFromCatalogScreenState extends State<SearchFromCatalogScreen> {
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
     _searchController.dispose();
     super.dispose();
   }

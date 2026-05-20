@@ -1,20 +1,13 @@
-import 'dart:developer' show log;
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:barcode_widget/barcode_widget.dart' as bw;
 import 'package:common_package/common_package.dart';
-import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:google_mlkit_barcode_scanning/google_mlkit_barcode_scanning.dart'
-    as mlkit;
 import 'package:toastification/toastification.dart';
 
 import '../../../../core/di/injection.dart';
-import '../../../../core/themes/app_colors.dart';
-import '../../../../core/themes/app_shadows.dart';
 import '../../../../core/widgets/app_app_bars.dart';
 import '../../../../core/widgets/app_buttons.dart';
 import '../../../../core/widgets/failure_widget.dart';
@@ -40,13 +33,11 @@ class AddProductDetailsScreen extends StatefulWidget {
 }
 
 class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
-  late mlkit.BarcodeScanner _barcodeScanner;
   late AddProductDetailsParams params;
   bool get isEdit => params.editingProductId != null;
 
   late final TextEditingController _titleController;
   late final TextEditingController _descriptionController;
-  late final TextEditingController _barcodeController;
   late final TextEditingController _quantityController;
   late final TextEditingController _lowStockController;
   late final TextEditingController _priceController;
@@ -55,7 +46,6 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
   @override
   void initState() {
     super.initState();
-    _barcodeScanner = mlkit.BarcodeScanner();
     if (widget.params != null) {
       params = widget.params!;
     } else {
@@ -65,22 +55,17 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
     _descriptionController = TextEditingController(
       text: params.description ?? '',
     );
-    _barcodeController = TextEditingController(text: params.barcode ?? '');
     _quantityController = TextEditingController(
       text: params.quantity == null ? '' : '${params.quantity}',
     );
     _lowStockController = TextEditingController(
-      text: params.lowStockQuantity == null
-          ? ''
-          : '${params.lowStockQuantity}',
+      text: params.lowStockQuantity == null ? '' : '${params.lowStockQuantity}',
     );
     _priceController = TextEditingController(
       text: params.price == null ? '' : '${params.price}',
     );
     _discountedController = TextEditingController(
-      text: params.discountedPrice == null
-          ? ''
-          : '${params.discountedPrice}',
+      text: params.discountedPrice == null ? '' : '${params.discountedPrice}',
     );
     _prepareMainImageFromGeneratedBytes();
   }
@@ -105,10 +90,8 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
 
   @override
   void dispose() {
-    _barcodeScanner.close();
     _titleController.dispose();
     _descriptionController.dispose();
-    _barcodeController.dispose();
     _quantityController.dispose();
     _lowStockController.dispose();
     _priceController.dispose();
@@ -119,107 +102,11 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
   void _syncParamsFromControllers() {
     params.title = _titleController.text.trim();
     params.description = _descriptionController.text.trim();
-    params.barcode = _barcodeController.text.trim();
     params.quantity = int.tryParse(_quantityController.text.trim());
     params.lowStockQuantity = int.tryParse(_lowStockController.text.trim());
     params.price = num.tryParse(_priceController.text.trim());
     final d = _discountedController.text.trim();
     params.discountedPrice = d.isEmpty ? null : num.tryParse(d);
-  }
-
-  bool _isNumeric13(String value) {
-    return RegExp(r'^\d{13}$').hasMatch(value);
-  }
-
-  bw.Barcode _barcodeTypeFor(String value) {
-    if (_isNumeric13(value)) {
-      return bw.Barcode.ean13();
-    }
-    return bw.Barcode.code128();
-  }
-
-  Widget _buildBarcodeFieldPreview() {
-    return ValueListenableBuilder<TextEditingValue>(
-      valueListenable: _barcodeController,
-      builder: (context, value, _) {
-        final raw = value.text.trim();
-        if (raw.isEmpty) {
-          return DottedBorder(
-            options: RoundedRectDottedBorderOptions(
-              dashPattern: const [8, 8],
-              strokeWidth: 2,
-              color: const Color(0x1F2F2B3D),
-              radius: const Radius.circular(16),
-            ),
-            child: Container(
-              width: double.infinity,
-              height: 190,
-              decoration: BoxDecoration(
-                color: const Color(0xFFF9FAFB),
-                borderRadius: BorderRadius.circular(24),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: AppColors.white,
-                      borderRadius: BorderRadius.all(Radius.circular(24)),
-                      boxShadow: [AppShadows.shadow],
-                    ),
-                    child: Icon(
-                      FontAwesomeIcons.barcode,
-                      size: 18,
-                      color: const Color(0xFF9CA3AF),
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  AppText(
-                    "اضغط لرفع صورة باركود",
-                    style: TextStyle(
-                      color: const Color(0xE52F2B3D),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      height: 1.333,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        }
-        return DottedBorder(
-          options: RoundedRectDottedBorderOptions(
-            dashPattern: const [8, 8],
-            strokeWidth: 2,
-            color: const Color(0x1F2F2B3D),
-            radius: const Radius.circular(16),
-          ),
-          child: Container(
-            width: double.infinity,
-            height: 190,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF9FAFB),
-              borderRadius: BorderRadius.circular(24),
-            ),
-            child: bw.BarcodeWidget(
-              data: raw,
-              barcode: _barcodeTypeFor(raw),
-              drawText: true,
-              errorBuilder: (context, error) {
-                return AppText(
-                  "تعذر عرض الباركود. تأكد من قيمة الباركود.",
-                  style: TextStyle(color: Color(0xFFEF4444), fontSize: 12),
-                );
-              },
-            ),
-          ),
-        );
-      },
-    );
   }
 
   @override
@@ -231,9 +118,7 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
       child: Scaffold(
         body: Column(
           children: [
-            AppSimpleAppBar(
-              title: isEdit ? "تعديل المنتج" : "إضافة منتج جديد",
-            ),
+            AppSimpleAppBar(title: isEdit ? "تعديل المنتج" : "إضافة منتج جديد"),
             Expanded(
               child: SingleChildScrollView(
                 child: Padding(
@@ -299,9 +184,7 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
                                         child: AppText(
                                           state.categories!.data![index].name ??
                                               "null",
-                                          style: TextStyle(
-                                            fontFamily: "Cairo",
-                                          ),
+                                          style: TextStyle(fontFamily: "Cairo"),
                                         ),
                                       ),
                                     ),
@@ -327,36 +210,6 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
                               onPickImage: (imagesPath) {
                                 print(imagesPath);
                                 params.additionalImagesPath = imagesPath;
-                              },
-                            ),
-                            SizedBox(height: 24),
-                            ProductPickMainImage(
-                              title: "صورة  الباركود",
-                              isRequired: true,
-                              icon: FontAwesomeIcons.barcode,
-                              emptyChild: _buildBarcodeFieldPreview(),
-                              onPickImage: (imagePath) async {
-                                List<mlkit.Barcode> barcodes =
-                                    await _barcodeScanner
-                                    .processImage(
-                                      mlkit.InputImage.fromFilePath(imagePath),
-                                    );
-                                if (!context.mounted) return;
-                                if (barcodes.isEmpty) {
-                                  AppToast.showToast(
-                                    context: context,
-                                    message: "الصورة ليست barcode",
-                                    type: ToastificationType.error,
-                                  );
-                                  return;
-                                }
-                                final value = barcodes.first.rawValue ?? "";
-                                _barcodeController.text = value;
-                                params.barcode = value;
-                                log(
-                                  'Detected Barcode: ${barcodes.first.rawValue}',
-                                );
-                                log('Barcode Type: ${barcodes.first.type}');
                               },
                             ),
                             SizedBox(height: 24),
@@ -513,7 +366,8 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
                                 current.addProductStatus ||
                             previous.productStatus != current.productStatus,
                         builder: (context, state) {
-                          final busy = (!isEdit &&
+                          final busy =
+                              (!isEdit &&
                                   state.addProductStatus ==
                                       BlocStatus.loading) ||
                               (isEdit &&
@@ -588,10 +442,7 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
   }
 }
 
-int? _categoryDropdownValue(
-  GetCategoriesModel? categories,
-  int? categoryId,
-) {
+int? _categoryDropdownValue(GetCategoriesModel? categories, int? categoryId) {
   if (categories?.data == null || categoryId == null) {
     return null;
   }
@@ -628,9 +479,6 @@ UpdateStoreProductBody buildUpdateStoreProductBody(
     categoryId: params.categoryId!,
     masterProductId: params.masterProductId,
     name: params.title!.trim(),
-    barcode: (params.barcode == null || params.barcode!.isEmpty)
-        ? null
-        : params.barcode,
     description: (params.description == null || params.description!.isEmpty)
         ? null
         : params.description,
@@ -674,7 +522,8 @@ bool validateProductFields(
     return false;
   }
 
-  final hasMainImage = params.mainImagePath != null ||
+  final hasMainImage =
+      params.mainImagePath != null ||
       params.mainImage64Based != null ||
       (params.editingProductId != null &&
           (params.initialMainImageUrl != null &&
@@ -684,15 +533,6 @@ bool validateProductFields(
     AppToast.showToast(
       context: context,
       message: "يجب إضافة صورة أساسية للمنتج",
-      type: ToastificationType.error,
-    );
-    return false;
-  }
-
-  if (params.barcode == null || params.barcode!.isEmpty) {
-    AppToast.showToast(
-      context: context,
-      message: "يرجى إضافة صورة باركود صالحة",
       type: ToastificationType.error,
     );
     return false;
@@ -762,7 +602,6 @@ class AddProductDetailsParams {
   String? initialMainImageUrl;
   List<String> existingAdditionalImageUrls;
   List<String>? additionalImagesPath;
-  String? barcode;
   String? unit;
   int? quantity, lowStockQuantity;
   DateTime? expiredAt;
@@ -779,7 +618,6 @@ class AddProductDetailsParams {
     this.initialMainImageUrl,
     this.existingAdditionalImageUrls = const [],
     this.additionalImagesPath,
-    this.barcode,
     this.unit,
     this.quantity,
     this.lowStockQuantity,
@@ -812,7 +650,8 @@ class AddProductDetailsParams {
         ex = DateTime.tryParse(p.expiresAt.toString());
       }
     }
-    final urlList = p.imageUrls
+    final urlList =
+        p.imageUrls
             ?.map((e) => e?.toString() ?? '')
             .where((s) => s.isNotEmpty)
             .toList() ??
@@ -831,9 +670,6 @@ class AddProductDetailsParams {
       title: p.name,
       description: desc,
       categoryId: p.categoryId,
-      barcode: p.barcode is String
-          ? p.barcode as String?
-          : p.barcode?.toString() ?? '',
       mainImagePath: null,
       initialMainImageUrl: mainU,
       existingAdditionalImageUrls: rest,

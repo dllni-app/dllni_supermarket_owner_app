@@ -31,7 +31,7 @@ class SearchMasterProductsParams with Params {
     return {
       'page': page,
       'perPage': 10,
-      if (trimmed != null && trimmed.isNotEmpty) 'index': trimmed,
+      'index': trimmed ?? '',
     };
   }
 }
