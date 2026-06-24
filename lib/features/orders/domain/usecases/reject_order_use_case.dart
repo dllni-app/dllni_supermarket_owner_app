@@ -19,14 +19,20 @@ class RejectOrderUseCase
 
 class RejectOrderParams with Params {
   final int orderId;
-  final String rejectType, reason;
+  final String reason;
+  final String message;
 
   RejectOrderParams({
-    required this.rejectType,
     required this.reason,
+    required this.message,
     required this.orderId,
   });
 
   @override
-  BodyMap getBody() => {"rejectionType": rejectType, "reason": reason};
+  BodyMap getBody() {
+    return <String, dynamic>{
+      'reason': reason,
+      'message': message,
+    };
+  }
 }
