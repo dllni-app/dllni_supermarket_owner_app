@@ -11,16 +11,24 @@ class GetOrdersEvent extends OrdersEvent with EventWithReload {
   GetOrdersEvent({required this.params, this.isReload = false});
 }
 
+class ChangeOrdersStatusTabEvent extends OrdersEvent {
+  final String? status;
+
+  ChangeOrdersStatusTabEvent({this.status});
+}
+
 class AcceptOrderEvent extends OrdersEvent {
   final AcceptOrderParams params;
+  final String? ordersListStatus;
 
-  AcceptOrderEvent({required this.params});
+  AcceptOrderEvent({required this.params, this.ordersListStatus});
 }
 
 class RejectOrderEvent extends OrdersEvent {
   final RejectOrderParams params;
+  final String? ordersListStatus;
 
-  RejectOrderEvent({required this.params});
+  RejectOrderEvent({required this.params, this.ordersListStatus});
 }
 
 class GetOrderDetailsEvent extends OrdersEvent {
@@ -33,10 +41,7 @@ class CourierHandoverEvent extends OrdersEvent {
   final CourierHandoverParams params;
   final String? ordersListStatus;
 
-  CourierHandoverEvent({
-    required this.params,
-    this.ordersListStatus,
-  });
+  CourierHandoverEvent({required this.params, this.ordersListStatus});
 }
 
 class GetOrderCountsEvent extends OrdersEvent {
