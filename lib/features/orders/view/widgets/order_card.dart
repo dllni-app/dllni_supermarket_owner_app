@@ -1,9 +1,6 @@
 import 'package:common_package/common_package.dart';
-import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-import '../../../../core/themes/app_colors.dart';
 import '../../../../core/widgets/app_buttons.dart';
 import '../../data/models/get_orders_model.dart';
 
@@ -15,6 +12,7 @@ class OrderCard extends StatelessWidget {
   final void Function() onViewDetailsTap;
   final void Function() onCourierHandoverTap;
   final bool isCourierHandoverLoading;
+
   const OrderCard({
     super.key,
     required this.status,
@@ -26,366 +24,99 @@ class OrderCard extends StatelessWidget {
     this.isCourierHandoverLoading = false,
   });
 
-  Widget get leadingStatusTag => switch (status) {
-    OrderStatus.pending => CircleAvatar(
-      radius: 4,
-      backgroundColor: AppColors.primary,
-    ),
-    OrderStatus.preparing => Icon(
-      FontAwesomeIcons.fireBurner,
-      size: 12,
-      color: statusFontColor,
-    ),
-    OrderStatus.readyForPickup => Icon(
-      FontAwesomeIcons.solidCircleCheck,
-      size: 12,
-      color: statusFontColor,
-    ),
-    _ => SizedBox(),
-  };
-
-  String get orderDelay {
-    final Duration diffDate = DateTime.now().difference(
-      DateTime.parse(order.updatedAt!),
-    );
-    if (diffDate.inDays != 0) return "${diffDate.inDays} يوم";
-    if (diffDate.inHours != 0) return "${diffDate.inHours} ساعة";
-    if (diffDate.inMinutes != 0) return "${diffDate.inMinutes} دقيقة";
-    return "${diffDate.inSeconds} ثانية";
-  }
-
-  Color get statusColor => switch (status) {
-    OrderStatus.completed ||
-    OrderStatus.readyForPickup => const Color(0xFF28C76F),
-    OrderStatus.preparing => AppColors.accent,
-    _ => AppColors.primary,
-  };
-
-  Color get statusFontColor => switch (status) {
-    OrderStatus.completed ||
-    OrderStatus.readyForPickup => const Color(0xFF24B364),
-    OrderStatus.preparing => AppColors.accent,
-    _ => AppColors.primary,
-  };
+  bool get canAccept => status == OrderStatus.pending;
+  bool get canReject => status == OrderStatus.pending;
+  bool get canCourierHandover =>
+      status == OrderStatus.accepted ||
+      status == OrderStatus.preparing ||
+      status == OrderStatus.readyForPickup;
 
   String get statusLabel => switch (status) {
-    OrderStatus.pending => "طلب جديد",
-    OrderStatus.preparing => "قيد التحضير",
-    OrderStatus.readyForPickup => "جاهز للتسليم",
-    OrderStatus.completed => "مكتمل",
-    OrderStatus.rejected => "مرفوض",
-  };
+        OrderStatus.pending => 'Pending',
+        OrderStatus.accepted => 'Accepted',
+        OrderStatus.preparing => 'Preparing',
+        OrderStatus.readyForPickup => 'Ready',
+        OrderStatus.pickedUp => 'Picked up',
+        OrderStatus.completed => 'Completed',
+        OrderStatus.cancelled => 'Cancelled',
+        OrderStatus.rejected => 'Rejected',
+        OrderStatus.unknown => 'Unknown',
+      };
+
+  bool get hasUnavailableItems =>
+      (order.availableItems ?? const <bool>[]).any((value) => value == false);
 
   @override
   Widget build(BuildContext context) {
-    return DottedBorder(
-      options: RoundedRectDottedBorderOptions(
-        radius: Radius.circular(8),
-        dashPattern: [10, 10],
-        color: status == OrderStatus.completed
-            ? Color(0xFF10B981)
-            : Color(0xFF8591E0),
+    final items = order.items ?? const <String>[];
+    final availableItems = order.availableItems ?? const <bool>[];
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE5E7EB)),
       ),
-      child: Container(
-        clipBehavior: Clip.antiAliasWithSaveLayer,
-        decoration: BoxDecoration(
-          color: status == OrderStatus.completed
-              ? AppColors.white
-              : Color(0x1F8591E0),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                decoration: BoxDecoration(
-                  color: statusColor.withValues(alpha: .08),
-                  border: Border(
-                    bottom: BorderSide(
-                      color: statusColor.withValues(alpha: .16),
-                    ),
-                    right: BorderSide(
-                      color: statusColor.withValues(alpha: .16),
-                    ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(child: AppText.bodyMedium('#${order.orderNumber ?? order.id}', fontWeight: FontWeight.w700)),
+              AppText.labelSmall(statusLabel, fontWeight: FontWeight.w700),
+            ],
+          ),
+          const SizedBox(height: 8),
+          AppText.labelMedium('Supermarket customer', color: const Color(0xFF6B7280)),
+          const SizedBox(height: 8),
+          AppText.bodyMedium('${order.totalAmount ?? '0'} SYP', fontWeight: FontWeight.w700),
+          const SizedBox(height: 12),
+          ...List.generate(items.length, (index) {
+            final available = availableItems.length > index ? availableItems[index] : true;
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Row(
+                children: [
+                  Icon(
+                    available ? Icons.check_circle : Icons.warning_amber_rounded,
+                    size: 16,
+                    color: available ? const Color(0xFF24B364) : const Color(0xFFFF4C51),
                   ),
-                  borderRadius: BorderRadius.only(
-                    bottomRight: Radius.circular(8),
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    leadingStatusTag,
-                    if (status != OrderStatus.completed) SizedBox(width: 4),
-                    AppText.labelSmall(
-                      statusLabel,
-                      style: TextStyle(
-                        color: statusFontColor,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700,
-                        height: 1.5,
-                      ),
-                    ),
-                  ],
-                ),
+                  const SizedBox(width: 8),
+                  Expanded(child: AppText.labelMedium('${index + 1}- ${items[index]}')),
+                ],
               ),
-            ),
-            Padding(
-              padding: EdgeInsets.fromLTRB(
-                13,
-                2,
-                13,
-                status == OrderStatus.completed ? 16 : 26,
-              ),
-              child: status == OrderStatus.completed
-                  ? Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 20,
-                          backgroundColor: statusColor.withValues(alpha: .16),
-                          child: Icon(
-                            FontAwesomeIcons.check,
-                            size: 16,
-                            color: statusFontColor,
-                          ),
-                        ),
-                        SizedBox(width: 12),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            AppText(
-                              "#${order.orderNumber}",
-                              style: TextStyle(
-                                color: Color(0xE52F2B3D),
-                                fontSize: 14,
-                                fontWeight: FontWeight.w700,
-                                height: 1.42,
-                              ),
-                            ),
-                            AppText(
-                              "منذ $orderDelay",
-                              textDirection: TextDirection.ltr,
-                              style: TextStyle(
-                                color: Color(0x992F2B3D),
-                                fontSize: 10,
-                                fontWeight: FontWeight.w500,
-                                height: 1.5,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Spacer(),
-                        AppText(
-                          "${order.totalAmount} ل.س",
-                          style: TextStyle(
-                            color: context.primary,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                            height: 1.42,
-                          ),
-                        ),
-                      ],
-                    )
-                  : Column(
-                      spacing: 16,
-                      children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Container(
-                              width: 40,
-                              height: 40,
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(12),
-                                ),
-                                color: const Color(0xFF1F2937),
-                              ),
-                              child: Icon(
-                                FontAwesomeIcons.user,
-                                size: 16,
-                                color: const Color(0xFF9CA3AF),
-                              ),
-                            ),
-                            SizedBox(width: 12),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                AppText(
-                                  "عميل السوبرماركت",
-                                  style: TextStyle(
-                                    color: Color(0xE5000000),
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w700,
-                                    height: 1.42,
-                                  ),
-                                ),
-                                AppText(
-                                  "#${order.orderNumber} • منذ $orderDelay",
-                                  textDirection: TextDirection.ltr,
-                                  style: TextStyle(
-                                    color: Color(0x992F2B3D),
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w500,
-                                    height: 1.5,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Spacer(),
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 2.5),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  AppText(
-                                    "${order.totalAmount} ل.س",
-                                    style: TextStyle(
-                                      color: AppColors.accent,
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w600,
-                                      height: 1.54,
-                                    ),
-                                  ),
-                                  SizedBox(width: 8),
-                                  AppText(
-                                    "نقدي",
-                                    style: TextStyle(
-                                      color: AppColors.accent,
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w600,
-                                      height: 1.3,
-                                    ),
-                                  ),
-                                  SizedBox(width: 6),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        Container(
-                          width: context.width,
-                          padding: EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: AppColors.white,
-                            borderRadius: BorderRadius.all(Radius.circular(8)),
-                          ),
-                          child: Column(
-                            spacing: 12,
-                            children: List.generate(
-                              order.items!.length,
-                              (index) => _RequirementRow(
-                                label: "${index + 1}- ${order.items![index]}",
-                                isAvailable: order.availableItems![index],
-                              ),
-                            ),
-                          ),
-                        ),
-                        if (status == OrderStatus.pending)
-                          Row(
-                            spacing: 16,
-                            children: [
-                              Expanded(
-                                child: AppButton(
-                                  title: "قبول الطلب",
-                                  onTap: onAcceptTap,
-                                ),
-                              ),
-                              AppOutlinedButton(
-                                color: const Color(0xFFFF4C51),
-                                title: "رفض",
-                                onTap: onRejectTap,
-                              ),
-                            ],
-                          )
-                        else if (status == OrderStatus.preparing)
-                          SizedBox(
-                            width: context.width,
-                            child: AppButton(
-                              icon: Icons.arrow_forward_rounded,
-                              title: "عرض التفاصيل",
-                              onTap: () {
-                                print("show details");
-                                context.pushRoute(
-                                  "/orders/order_details",
-                                  arguments: order.id!,
-                                );
-                                // Navigator.of(context).push(
-                                //   MaterialPageRoute(
-                                //     builder: (_) => OrderDetailsScreen(),
-                                //   ),
-                                // );
-                              },
-                            ),
-                          )
-                        else if (status == OrderStatus.readyForPickup)
-                          isCourierHandoverLoading
-                              ? Center(
-                                  child: SizedBox(
-                                    width: 24,
-                                    height: 24,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2.5,
-                                      color: Color(0xFF24B364),
-                                    ),
-                                  ),
-                                )
-                              : SizedBox(
-                                  width: context.width,
-                                  child: AppButton(
-                                    color: const Color(0xFF24B364),
-                                    title: "تسليم للمندوب",
-                                    onTap: onCourierHandoverTap,
-                                  ),
-                                ),
-                      ],
-                    ),
-            ),
-          ],
-        ),
+            );
+          }),
+          if (hasUnavailableItems)
+            AppText.labelSmall('Some items are not available in stock', color: const Color(0xFFFF4C51), fontWeight: FontWeight.w700),
+          const SizedBox(height: 12),
+          _actions(),
+        ],
       ),
     );
   }
+
+  Widget _actions() {
+    if (canAccept || canReject) {
+      return Row(
+        children: [
+          Expanded(child: AppButton(title: 'Accept', onTap: onAcceptTap)),
+          const SizedBox(width: 12),
+          AppOutlinedButton(color: const Color(0xFFFF4C51), title: 'Reject', onTap: onRejectTap),
+        ],
+      );
+    }
+    if (canCourierHandover) {
+      if (isCourierHandoverLoading) {
+        return const Center(child: SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2.5)));
+      }
+      return AppButton(color: const Color(0xFF24B364), title: 'Courier handover', onTap: onCourierHandoverTap);
+    }
+    return AppButton(icon: Icons.arrow_forward_rounded, title: 'Details', onTap: onViewDetailsTap);
+  }
 }
 
-enum OrderStatus { pending, preparing, readyForPickup, completed, rejected }
+enum OrderStatus { pending, accepted, preparing, readyForPickup, pickedUp, completed, cancelled, rejected, unknown }
 
 enum PaymentWay { cash }
-
-class _RequirementRow extends StatelessWidget {
-  final String label;
-  final bool isAvailable;
-
-  const _RequirementRow({required this.label, required this.isAvailable});
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: AppText(
-            label,
-            textAlign: TextAlign.start,
-            style: TextStyle(
-              color: Color(0xE52F2B3D),
-              fontSize: 12,
-              height: 1.333,
-            ),
-          ),
-        ),
-        Icon(
-          isAvailable
-              ? FontAwesomeIcons.circleCheck
-              : FontAwesomeIcons.circleXmark,
-          color: isAvailable ? Colors.green : Colors.red,
-          size: 18,
-        ),
-      ],
-    );
-  }
-}
