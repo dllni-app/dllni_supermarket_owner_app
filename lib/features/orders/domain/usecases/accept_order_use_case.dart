@@ -19,6 +19,21 @@ class AcceptOrderUseCase
 
 class AcceptOrderParams with Params {
   final int orderId;
+  final int? preparationTimeMinutes;
+  final String? note;
 
-  AcceptOrderParams({required this.orderId});
+  AcceptOrderParams({
+    required this.orderId,
+    this.preparationTimeMinutes,
+    this.note,
+  });
+
+  @override
+  BodyMap getBody() {
+    return {
+      if (preparationTimeMinutes != null)
+        'preparationTimeMinutes': preparationTimeMinutes,
+      if (note != null && note!.trim().isNotEmpty) 'note': note,
+    };
+  }
 }
