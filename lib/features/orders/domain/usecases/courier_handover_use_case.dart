@@ -19,6 +19,14 @@ class CourierHandoverUseCase
 
 class CourierHandoverParams with Params {
   final int orderId;
+  final String? note;
 
-  CourierHandoverParams({required this.orderId});
+  CourierHandoverParams({required this.orderId, this.note});
+
+  @override
+  BodyMap getBody() {
+    return {
+      if (note != null && note!.trim().isNotEmpty) 'note': note,
+    };
+  }
 }
