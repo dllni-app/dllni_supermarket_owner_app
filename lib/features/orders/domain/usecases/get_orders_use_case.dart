@@ -19,11 +19,16 @@ class GetOrdersUseCase implements UseCase<GetOrdersModel, GetOrdersParams> {
 class GetOrdersParams with Params {
   final String? status;
   final int page;
+  final int perPage;
 
-  GetOrdersParams({this.status, this.page = 1});
+  GetOrdersParams({this.status, this.page = 1, this.perPage = 20});
 
   @override
-  getParams() {
-    return {"page": page, if (status != null) "filter[status]": status};
+  QueryParams getParams() {
+    return {
+      'page': page,
+      'perPage': perPage,
+      if (status != null) 'filter[status]': status,
+    };
   }
 }
