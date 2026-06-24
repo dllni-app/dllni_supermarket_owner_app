@@ -1,6 +1,9 @@
 part of 'orders_bloc.dart';
 
 class OrdersState {
+  BlocStatus? orderCountsStatus;
+  GetOrderCountsModel? orderCounts;
+
   /// 0 when idle; otherwise the [order] id for the in-flight courier handover.
   int courierHandoverLoadingOrderId;
   BlocStatus? courierHandoverStatus;
@@ -26,6 +29,8 @@ class OrdersState {
     this.rejectOrderStatus,
     this.orderDetails,
     this.orderDetailsStatus,
+    this.orderCounts,
+    this.orderCountsStatus,
   });
 
   OrdersState copyWith({
@@ -40,12 +45,13 @@ class OrdersState {
     BlocStatus? rejectOrderStatus,
     GetOrderDetailsModel? orderDetails,
     BlocStatus? orderDetailsStatus,
+    GetOrderCountsModel? orderCounts,
+    BlocStatus? orderCountsStatus,
   }) => OrdersState(
     courierHandoverLoadingOrderId:
         courierHandoverLoadingOrderId ?? this.courierHandoverLoadingOrderId,
     courierHandover: courierHandover ?? this.courierHandover,
-    courierHandoverStatus:
-        courierHandoverStatus ?? this.courierHandoverStatus,
+    courierHandoverStatus: courierHandoverStatus ?? this.courierHandoverStatus,
     errorMessage: errorMessage ?? this.errorMessage,
     orders: orders ?? this.orders,
     acceptOrder: acceptOrder ?? this.acceptOrder,
@@ -54,5 +60,7 @@ class OrdersState {
     rejectOrderStatus: rejectOrderStatus ?? this.rejectOrderStatus,
     orderDetails: orderDetails ?? this.orderDetails,
     orderDetailsStatus: orderDetailsStatus ?? this.orderDetailsStatus,
+    orderCounts: orderCounts ?? this.orderCounts,
+    orderCountsStatus: orderCountsStatus ?? this.orderCountsStatus,
   );
 }

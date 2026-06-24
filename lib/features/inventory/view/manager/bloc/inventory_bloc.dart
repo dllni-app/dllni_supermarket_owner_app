@@ -13,12 +13,16 @@ import '../../../domain/usecases/get_hourly_count_use_case.dart';
 import '../../../data/models/get_hourly_count_model.dart';
 import '../../../domain/usecases/get_inventory_summary_use_case.dart';
 import '../../../data/models/get_inventory_summary_model.dart';
+import 'package:common_package/helpers/pagination_helper.dart';
+import '../../../domain/usecases/get_invetory_counts_use_case.dart';
+import '../../../data/models/get_invetory_counts_model.dart';
 
 part 'inventory_event.dart';
 part 'inventory_state.dart';
 
 @injectable
 class InventoryBloc extends Bloc<InventoryEvent, InventoryState> {
+  final GetInvetoryCountsUseCase getInvetoryCountsUseCase;
   final GetHourlyCountUseCase getHourlyCountUseCase;
   final UpdateProductAmountUseCase updateProductAmountUseCase;
   final GetProductsUseCase getProductsUseCase;
@@ -31,13 +35,14 @@ class InventoryBloc extends Bloc<InventoryEvent, InventoryState> {
     this.getHourlyCountUseCase,
     this.getInventorySummaryUseCase,
     this.getLowStockUseCase,
-  ) : super(InventoryState()) {
+    this.getInvetoryCountsUseCase,) : super(InventoryState()) {
     on<GetProductsEvent>(_getProducts, transformer: droppableProMax());
     on<UpdateProductAmountEvent>(_updateProductAmount);
     on<GetHourlyCountEvent>(_getHourlyCount);
     on<GetInventorySummaryEvent>(_getInventorySummary);
     on<GetLowStockEvent>(_getLowStock);
-  }
+  
+    on<GetInvetoryCountsEvent>(_getInvetoryCounts);}
 
   EventTransformer<T> droppableProMax<T extends EventWithReload>() {
     return (events, mapper) {
@@ -203,4 +208,20 @@ class InventoryBloc extends Bloc<InventoryEvent, InventoryState> {
       },
     );
   }
-}
+
+
+  FutureOr<void> _getInvetoryCounts(GetInvetoryCountsEvent event, Emitter<InventoryState> emit) async {
+    emit(state.copyWith(invetoryCountsStatus: BlocStatus.loading));
+    final res = await getInvetoryCountsUseCase(event.params);
+    res.fold((l) {
+      emit(state.copyWith(
+        invetoryCountsStatus: BlocStatus.failed,
+        errorMessage: l.message,
+      ));
+    }, (r) {
+      emit(state.copyWith(
+        invetoryCountsStatus: BlocStatus.success,
+        invetoryCounts: r,
+      ));
+    });
+  }}

@@ -20,6 +20,36 @@ import '../widgets/product_image_field.dart';
 import '../widgets/product_text_field.dart';
 import 'add_product_details_screen.dart';
 
+void showImageDialog(BuildContext context, Uint8List imageBytes) {
+
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Image Preview'),
+        content:  ClipRRect(
+          borderRadius: BorderRadius.circular(8.0),
+          child: InteractiveViewer(
+            child: Image.memory(
+              imageBytes,
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) {
+                return const Text('Failed to load image');
+              },
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
+          ),
+        ],
+      );
+    },
+  );
+}
+
 @AutoRoutePage(path: "/products/new_product/ai")
 class AddProductAIScreen extends StatefulWidget {
   const AddProductAIScreen({super.key});
@@ -38,20 +68,6 @@ class _AddProductAIScreenState extends State<AddProductAIScreen> {
   String? imagePath;
   late TextEditingController generatedProductNameController;
   late TextEditingController generatedProductDescriptionController;
-
-  @override
-  void initState() {
-    super.initState();
-    generatedProductNameController = TextEditingController();
-    generatedProductDescriptionController = TextEditingController();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    generatedProductNameController.dispose();
-    generatedProductDescriptionController.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -217,6 +233,10 @@ class _AddProductAIScreenState extends State<AddProductAIScreen> {
                                                       title: "عرض الصورة",
                                                       onTap: () {
                                                         print("show image");
+                                                        showImageDialog(
+                                                          context,
+                                                          generatedImage64Based!,
+                                                        );
                                                       },
                                                     ),
                                                   ),
@@ -386,5 +406,19 @@ class _AddProductAIScreenState extends State<AddProductAIScreen> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    generatedProductNameController.dispose();
+    generatedProductDescriptionController.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    generatedProductNameController = TextEditingController();
+    generatedProductDescriptionController = TextEditingController();
   }
 }

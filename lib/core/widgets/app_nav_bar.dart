@@ -3,15 +3,15 @@ import 'package:flutter/material.dart';
 import '../themes/app_colors.dart';
 
 class AppNavBar extends StatelessWidget {
+  final List<AppNavBarItem> items;
+  final void Function(int index) onChanged;
+  final int selectedIndex;
   const AppNavBar({
     super.key,
     required this.items,
     required this.onChanged,
     required this.selectedIndex,
   });
-  final List<AppNavBarItem> items;
-  final void Function(int index) onChanged;
-  final int selectedIndex;
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.sizeOf(context).width;
@@ -46,21 +46,21 @@ class AppNavBar extends StatelessWidget {
                   height: isSelected ? 48 : 40,
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? AppColors.accent.withValues(alpha: .16)
+                        ? AppColors.primary.withValues(alpha: .16)
                         : Colors.transparent,
                     borderRadius: BorderRadius.all(Radius.circular(24)),
                   ),
                   child: Icon(
                     items[index].icon,
                     size: 20,
-                    color: isSelected ? AppColors.accent : Color(0xFFA5AAC9),
+                    color: isSelected ? AppColors.primary : Color(0xFFA5AAC9),
                   ),
                 ),
               ),
               Text(
                 items[index].title,
                 style: TextStyle(
-                  color: isSelected ? AppColors.accent : Color(0xFFA5AAC9),
+                  color: isSelected ? AppColors.primary : Color(0xFFA5AAC9),
                   fontSize: 10,
                   fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
                 ),

@@ -34,3 +34,9 @@ class GetLowStockEvent extends InventoryEvent {
 
   GetLowStockEvent({required this.params});
 }
+
+class GetInvetoryCountsEvent extends InventoryEvent {
+  final GetInvetoryCountsParams params;
+
+  GetInvetoryCountsEvent({required this.params});
+}

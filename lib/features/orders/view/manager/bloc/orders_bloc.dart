@@ -13,12 +13,15 @@ import '../../../domain/usecases/get_order_details_use_case.dart';
 import '../../../data/models/get_order_details_model.dart';
 import '../../../domain/usecases/courier_handover_use_case.dart';
 import '../../../data/models/courier_handover_model.dart';
+import '../../../domain/usecases/get_order_counts_use_case.dart';
+import '../../../data/models/get_order_counts_model.dart';
 
 part 'orders_event.dart';
 part 'orders_state.dart';
 
 @injectable
 class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
+  final GetOrderCountsUseCase getOrderCountsUseCase;
   final GetOrderDetailsUseCase getOrderDetailsUseCase;
   final RejectOrderUseCase rejectOrderUseCase;
   final AcceptOrderUseCase acceptOrderUseCase;
@@ -31,7 +34,7 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
     this.rejectOrderUseCase,
     this.getOrderDetailsUseCase,
     this.courierHandoverUseCase,
-  ) : super(OrdersState()) {
+    this.getOrderCountsUseCase,) : super(OrdersState()) {
     
   
     on<GetOrdersEvent>(_getOrders, transformer: droppableProMax());
@@ -39,7 +42,8 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
     on<RejectOrderEvent>(_rejectOrder);
     on<GetOrderDetailsEvent>(_getOrderDetails);
     on<CourierHandoverEvent>(_courierHandover);
-  }
+  
+    on<GetOrderCountsEvent>(_getOrderCounts);}
 
   EventTransformer<T> droppableProMax<T extends EventWithReload>() {
     return (events, mapper) {
@@ -148,5 +152,21 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
       );
     });
   }
-}
+
+
+  FutureOr<void> _getOrderCounts(GetOrderCountsEvent event, Emitter<OrdersState> emit) async {
+    emit(state.copyWith(orderCountsStatus: BlocStatus.loading));
+    final res = await getOrderCountsUseCase(event.params);
+    res.fold((l) {
+      emit(state.copyWith(
+        orderCountsStatus: BlocStatus.failed,
+        errorMessage: l.message,
+      ));
+    }, (r) {
+      emit(state.copyWith(
+        orderCountsStatus: BlocStatus.success,
+        orderCounts: r,
+      ));
+    });
+  }}
 

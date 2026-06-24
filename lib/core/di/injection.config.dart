@@ -51,6 +51,7 @@ import '../../features/inventory/domain/usecases/get_hourly_count_use_case.dart'
     as _i767;
 import '../../features/inventory/domain/usecases/get_inventory_summary_use_case.dart'
     as _i495;
+import '../../features/inventory/domain/usecases/get_invetory_counts_use_case.dart';
 import '../../features/inventory/domain/usecases/get_products_use_case.dart'
     as _i132;
 import '../../features/inventory/domain/usecases/update_product_amount_use_case.dart'
@@ -65,6 +66,8 @@ import '../../features/orders/domain/usecases/accept_order_use_case.dart'
     as _i420;
 import '../../features/orders/domain/usecases/courier_handover_use_case.dart'
     as _i623;
+import '../../features/orders/domain/usecases/get_order_counts_use_case.dart' as _i132;
+import '../../features/orders/domain/usecases/get_order_counts_use_case.dart';
 import '../../features/orders/domain/usecases/get_order_details_use_case.dart'
     as _i384;
 import '../../features/orders/domain/usecases/get_orders_use_case.dart'
@@ -293,6 +296,7 @@ _i174.GetIt $initGetIt(
       gh<_i767.GetHourlyCountUseCase>(),
       gh<_i495.GetInventorySummaryUseCase>(),
       gh<_i348.GetLowStockUseCase>(),
+      GetInvetoryCountsUseCase(inventory: gh<_i1071.InventoryRepo>()),
     ),
   );
   gh.factory<_i958.AuthBloc>(() => _i958.AuthBloc(gh<_i37.LoginUseCase>()));
@@ -303,6 +307,7 @@ _i174.GetIt $initGetIt(
       gh<_i194.RejectOrderUseCase>(),
       gh<_i384.GetOrderDetailsUseCase>(),
       gh<_i623.CourierHandoverUseCase>(),
+      GetOrderCountsUseCase(orders: gh<_i132.OrdersRepo>()),
     ),
   );
   gh.lazySingleton<_i40.AddCouponCodeUseCase>(

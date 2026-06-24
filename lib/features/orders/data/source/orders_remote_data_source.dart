@@ -10,6 +10,8 @@ import '../models/get_order_details_model.dart';
 import '../../domain/usecases/get_order_details_use_case.dart';
 import '../models/courier_handover_model.dart';
 import '../../domain/usecases/courier_handover_use_case.dart';
+import '../models/get_order_counts_model.dart';
+import '../../domain/usecases/get_order_counts_use_case.dart';
 
 @lazySingleton
 class OrdersRemoteDataSource with HandlingApiManager {
@@ -72,4 +74,11 @@ class OrdersRemoteDataSource with HandlingApiManager {
       jsonConvert: courierHandoverModelFromJson,
     );
   }
-}
+
+
+  Future<GetOrderCountsModel> getOrderCounts(GetOrderCountsParams params) {
+    return wrapHandlingApi(
+      tryCall: () => dioNetwork.getData(endPoint: '/api/v1/store-owner/orders/counts', params: params.getParams(), data: params.getBody().isEmpty ? null : params.getBody()),
+      jsonConvert: getOrderCountsModelFromJson,
+    );
+  }}

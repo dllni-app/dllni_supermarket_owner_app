@@ -12,6 +12,8 @@ import '../../domain/usecases/get_hourly_count_use_case.dart';
 import '../models/get_hourly_count_model.dart';
 import '../../domain/usecases/get_inventory_summary_use_case.dart';
 import '../models/get_inventory_summary_model.dart';
+import '../../domain/usecases/get_invetory_counts_use_case.dart';
+import '../models/get_invetory_counts_model.dart';
 
 @LazySingleton(as: InventoryRepo)
 class InventoryRepoImpl with HandlingException implements InventoryRepo {
@@ -52,4 +54,11 @@ class InventoryRepoImpl with HandlingException implements InventoryRepo {
       tryCall: () => inventoryRemoteDataSource.getInventorySummary(params),
     );
   }
-}
+
+
+  @override
+  DataResponse<GetInvetoryCountsModel> getInvetoryCounts(GetInvetoryCountsParams params) {
+    return wrapHandlingException(
+      tryCall: () => inventoryRemoteDataSource.getInvetoryCounts(params),
+    );
+  }}

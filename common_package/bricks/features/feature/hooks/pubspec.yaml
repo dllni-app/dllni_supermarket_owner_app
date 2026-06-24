@@ -7,5 +7,6 @@ environment:
 
 dependencies:
   mason: any
+  logger: ^2.7.0
 
 

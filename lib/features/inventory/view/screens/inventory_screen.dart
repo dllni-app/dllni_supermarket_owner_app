@@ -13,33 +13,31 @@ import '../../../../core/utils/app_images.dart';
 import '../../../../core/widgets/app_app_bars.dart';
 import '../../../../core/widgets/failure_widget.dart';
 import '../../../products/domain/usecases/get_low_stock_use_case.dart';
+import '../../../products/view/widgets/loadings/products_tab_bar_loading.dart';
 import '../../../products/view/widgets/product_text_field.dart';
 import '../../data/models/get_products_model.dart';
 import '../../domain/editing_type.dart';
+import '../../domain/usecases/get_invetory_counts_use_case.dart';
 import '../../domain/usecases/update_product_amount_use_case.dart';
 import '../manager/bloc/inventory_bloc.dart';
 import '../widgets/inventory_tab_bar.dart';
 import '../widgets/low_stock_alerts_section.dart';
 
-List<GetProductsModelDataItem> _filterInventoryByTab(List<GetProductsModelDataItem> list, int tab) {
+List<GetProductsModelDataItem> _filterInventoryByTab(
+  List<GetProductsModelDataItem> list,
+  int tab,
+) {
   switch (tab) {
     case 1:
-      return list.where((e) => (e.stockQuantity ?? 0) >= (e.lowStockThreshold ?? 0)).toList();
+      return list
+          .where((e) => (e.stockQuantity ?? 0) >= (e.lowStockThreshold ?? 0))
+          .toList();
     case 2:
-      return list.where((e) => (e.stockQuantity ?? 0) < (e.lowStockThreshold ?? 0)).toList();
+      return list
+          .where((e) => (e.stockQuantity ?? 0) < (e.lowStockThreshold ?? 0))
+          .toList();
     default:
       return list;
-  }
-}
-
-int _inventoryTabCount(List<GetProductsModelDataItem> list, int tab) {
-  switch (tab) {
-    case 1:
-      return list.where((e) => (e.stockQuantity ?? 0) > (e.lowStockThreshold ?? 0)).length;
-    case 2:
-      return list.where((e) => (e.stockQuantity ?? 0) <= (e.lowStockThreshold ?? 0)).length;
-    default:
-      return list.length;
   }
 }
 
@@ -47,7 +45,11 @@ class EditProductAmount extends StatefulWidget {
   final EditingType type;
   final int productId;
 
-  const EditProductAmount({super.key, required this.type, required this.productId});
+  const EditProductAmount({
+    super.key,
+    required this.type,
+    required this.productId,
+  });
 
   @override
   State<EditProductAmount> createState() => _EditProductAmountState();
@@ -62,7 +64,16 @@ class InventoryCard extends StatelessWidget {
   final void Function()? onIncreaseTap;
   final void Function()? onDecreaseTap;
 
-  const InventoryCard({super.key, required this.name, required this.companyName, required this.amount, required this.lowStock, required this.unit, this.onIncreaseTap, this.onDecreaseTap});
+  const InventoryCard({
+    super.key,
+    required this.name,
+    required this.companyName,
+    required this.amount,
+    required this.lowStock,
+    required this.unit,
+    this.onIncreaseTap,
+    this.onDecreaseTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -83,7 +94,13 @@ class InventoryCard extends StatelessWidget {
             children: [
               Padding(
                 padding: const EdgeInsets.only(top: 8.0),
-                child: AppImage.asset(AppImages.burgerImage, width: 70, height: 87, fit: BoxFit.cover, borderRadius: BorderRadius.all(Radius.circular(12))),
+                child: AppImage.asset(
+                  AppImages.burgerImage,
+                  width: 70,
+                  height: 87,
+                  fit: BoxFit.cover,
+                  borderRadius: BorderRadius.all(Radius.circular(12)),
+                ),
               ),
               SizedBox(width: 8),
               Expanded(
@@ -94,12 +111,22 @@ class InventoryCard extends StatelessWidget {
                     SizedBox(height: 14),
                     AppText(
                       name,
-                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Color(0xFF111827), height: 1.42),
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF111827),
+                        height: 1.42,
+                      ),
                     ),
                     SizedBox(height: 10),
                     AppText(
                       companyName,
-                      style: TextStyle(fontSize: 10, color: Color(0xFF111827), height: 2, fontWeight: FontWeight.w300),
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Color(0xFF111827),
+                        height: 2,
+                        fontWeight: FontWeight.w300,
+                      ),
                     ),
                     SizedBox(height: 11),
                     Text.rich(
@@ -107,13 +134,26 @@ class InventoryCard extends StatelessWidget {
                         children: [
                           TextSpan(
                             text: "$amount $unit",
-                            style: TextStyle(fontWeight: FontWeight.w700, color: color),
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              color: color,
+                            ),
                           ),
-                          WidgetSpan(child: CircleAvatar(radius: 2, backgroundColor: Color(0xFFD1D5DB))),
+                          WidgetSpan(
+                            child: CircleAvatar(
+                              radius: 2,
+                              backgroundColor: Color(0xFFD1D5DB),
+                            ),
+                          ),
                           TextSpan(text: "الحد الأدنى: $lowStock $unit"),
                         ],
                       ),
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, height: 1.333, color: Color(0xFF6B7280)),
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        height: 1.333,
+                        color: Color(0xFF6B7280),
+                      ),
                     ),
                   ],
                 ),
@@ -126,7 +166,9 @@ class InventoryCard extends StatelessWidget {
                     bottom: BorderSide(color: color.withValues(alpha: .16)),
                     right: BorderSide(color: color.withValues(alpha: .16)),
                   ),
-                  borderRadius: BorderRadius.only(bottomRight: Radius.circular(8)),
+                  borderRadius: BorderRadius.only(
+                    bottomRight: Radius.circular(8),
+                  ),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -135,7 +177,12 @@ class InventoryCard extends StatelessWidget {
                     SizedBox(width: 4),
                     AppText.labelSmall(
                       lowStock >= amount ? "منخفض" : "طبيعي",
-                      style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.w700, height: 1.5),
+                      style: TextStyle(
+                        color: color,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        height: 1.5,
+                      ),
                     ),
                   ],
                 ),
@@ -146,11 +193,21 @@ class InventoryCard extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: InventoryCardButton(color: AppColors.accent, label: "إضافة الكمية", icon: FontAwesomeIcons.plus, onTap: onIncreaseTap),
+                child: InventoryCardButton(
+                  color: AppColors.accent,
+                  label: "إضافة الكمية",
+                  icon: FontAwesomeIcons.plus,
+                  onTap: onIncreaseTap,
+                ),
               ),
               SizedBox(width: 18),
               Expanded(
-                child: InventoryCardButton(color: Color(0xFF9CA3AF), label: "تقليل الكمية", icon: FontAwesomeIcons.minus, onTap: onDecreaseTap),
+                child: InventoryCardButton(
+                  color: Color(0xFF9CA3AF),
+                  label: "تقليل الكمية",
+                  icon: FontAwesomeIcons.minus,
+                  onTap: onDecreaseTap,
+                ),
               ),
               SizedBox(width: 8),
             ],
@@ -168,7 +225,13 @@ class InventoryCardButton extends StatelessWidget {
   final IconData icon;
   final void Function()? onTap;
 
-  const InventoryCardButton({super.key, required this.color, required this.label, required this.icon, this.onTap});
+  const InventoryCardButton({
+    super.key,
+    required this.color,
+    required this.label,
+    required this.icon,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -177,7 +240,10 @@ class InventoryCardButton extends StatelessWidget {
       child: Container(
         alignment: Alignment.center,
         padding: EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(color: color, borderRadius: BorderRadius.all(Radius.circular(8))),
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.all(Radius.circular(8)),
+        ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -185,7 +251,12 @@ class InventoryCardButton extends StatelessWidget {
             SizedBox(width: 15),
             AppText(
               label,
-              style: TextStyle(color: AppColors.white, fontSize: 12, fontWeight: FontWeight.w700, height: 1.333),
+              style: TextStyle(
+                color: AppColors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                height: 1.333,
+              ),
             ),
           ],
         ),
@@ -211,16 +282,25 @@ class ProductsLoading extends StatelessWidget {
       highlightColor: Colors.grey.shade100,
       child: Column(
         children: [
-          InventoryTabBar(
-            items: [
-              InventoryTabBarItem(title: "الكل", count: 158),
-              InventoryTabBarItem(title: "طبيعي", count: 34),
-              InventoryTabBarItem(title: "منخفض", count: 12),
-            ],
-            onChanged: (index) {},
-          ),
+          // InventoryTabBar(
+          //   items: [
+          //     InventoryTabBarItem(title: "الكل", count: 158),
+          //     InventoryTabBarItem(title: "طبيعي", count: 34),
+          //     InventoryTabBarItem(title: "منخفض", count: 12),
+          //   ],
+          //   onChanged: (index) {},
+          // ),
           // products
-          ...List.generate(2, (index) => InventoryCard(amount: 4.5, lowStock: 5, companyName: "شركة كرزة", name: "زيت مازولا", unit: "لتر")),
+          ...List.generate(
+            2,
+            (index) => InventoryCard(
+              amount: 4.5,
+              lowStock: 5,
+              companyName: "شركة كرزة",
+              name: "زيت مازولا",
+              unit: "لتر",
+            ),
+          ),
         ],
       ),
     );
@@ -238,9 +318,14 @@ class _EditProductAmountState extends State<EditProductAmount> {
         height: 200,
         child: AlertDialog(
           backgroundColor: AppColors.white,
-          title: Text(widget.type == EditingType.increment ? "زيادة كمية المنتج" : "نقص كمية المنتج"),
+          title: Text(
+            widget.type == EditingType.increment
+                ? "زيادة كمية المنتج"
+                : "نقص كمية المنتج",
+          ),
           content: AppTextField(
-            title: "مقدار ${widget.type == EditingType.increment ? "الزيادة" : "النقصان"}",
+            title:
+                "مقدار ${widget.type == EditingType.increment ? "الزيادة" : "النقصان"}",
             hintText: "0",
             keyboardType: TextInputType.number,
             onChanged: (value) {
@@ -251,7 +336,8 @@ class _EditProductAmountState extends State<EditProductAmount> {
           ),
           actions: [
             BlocConsumer<InventoryBloc, InventoryState>(
-              buildWhen: (previous, current) => previous.productAmountStatus != current.productAmountStatus,
+              buildWhen: (previous, current) =>
+                  previous.productAmountStatus != current.productAmountStatus,
               listener: (context, state) {
                 if (state.productAmountStatus == BlocStatus.success) {
                   if (context.canPop()) Navigator.of(context).pop(quantity);
@@ -267,7 +353,11 @@ class _EditProductAmountState extends State<EditProductAmount> {
                       onPressed: () {
                         context.read<InventoryBloc>().add(
                           UpdateProductAmountEvent(
-                            params: UpdateProductAmountParams(operation: widget.type, productId: widget.productId, quantity: quantity),
+                            params: UpdateProductAmountParams(
+                              operation: widget.type,
+                              productId: widget.productId,
+                              quantity: quantity,
+                            ),
                           ),
                         );
                       },
@@ -299,9 +389,16 @@ class _InventoryScreenState extends State<InventoryScreen> {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => getIt<InventoryBloc>()
-        ..add(GetProductsEvent(isReload: true, params: GetProductsParams(page: 1)))
-        ..add(GetInventorySummaryEvent(params: GetInventorySummaryParams(storeId: 1)))
-        ..add(GetLowStockEvent(params: GetLowStockParams())),
+        ..add(
+          GetProductsEvent(isReload: true, params: GetProductsParams(page: 1)),
+        )
+        ..add(
+          GetInventorySummaryEvent(
+            params: GetInventorySummaryParams(storeId: 1),
+          ),
+        )
+        ..add(GetLowStockEvent(params: GetLowStockParams()))
+        ..add(GetInvetoryCountsEvent(params: GetInvetoryCountsParams())),
       child: Scaffold(
         body: Column(
           children: [
@@ -311,7 +408,12 @@ class _InventoryScreenState extends State<InventoryScreen> {
                   title: "المخزون",
                   onSearchChanged: (value) {
                     search = value.trim().isEmpty ? null : value.trim();
-                    context.read<InventoryBloc>().add(GetProductsEvent(isReload: true, params: GetProductsParams(page: 1, search: search)));
+                    context.read<InventoryBloc>().add(
+                      GetProductsEvent(
+                        isReload: true,
+                        params: GetProductsParams(page: 1, search: search),
+                      ),
+                    );
                   },
                 );
               },
@@ -329,43 +431,89 @@ class _InventoryScreenState extends State<InventoryScreen> {
                     decoration: BoxDecoration(
                       color: AppColors.white,
                       borderRadius: BorderRadius.circular(8),
-                      boxShadow: [BoxShadow(offset: Offset(0, 4), blurRadius: 4, color: Color(0x1F5E6695))],
+                      boxShadow: [
+                        BoxShadow(
+                          offset: Offset(0, 4),
+                          blurRadius: 4,
+                          color: Color(0x1F5E6695),
+                        ),
+                      ],
                     ),
                     child: BlocBuilder<InventoryBloc, InventoryState>(
-                      buildWhen: (previous, current) => previous.inventorySummaryStatus != current.inventorySummaryStatus || previous.inventorySummary != current.inventorySummary,
+                      buildWhen: (previous, current) =>
+                          previous.inventorySummaryStatus !=
+                              current.inventorySummaryStatus ||
+                          previous.inventorySummary != current.inventorySummary,
                       builder: (context, state) {
                         final status = state.inventorySummaryStatus;
-                        final value = state.inventorySummary?.data?.inventoryValue;
-                        final displayValue = value != null ? value.formatWithComma() : '--';
+                        final value =
+                            state.inventorySummary?.data?.inventoryValue;
+                        final displayValue = value != null
+                            ? value.formatWithComma()
+                            : '--';
                         return Container(
                           padding: EdgeInsets.fromLTRB(12, 22, 16, 21),
-                          decoration: BoxDecoration(color: Color(0x1F8591E0), borderRadius: BorderRadius.all(Radius.circular(16))),
+                          decoration: BoxDecoration(
+                            color: Color(0x1F8591E0),
+                            borderRadius: BorderRadius.all(Radius.circular(16)),
+                          ),
                           child: Row(
                             children: [
                               AppText(
                                 "قيمة المخزون",
-                                style: TextStyle(color: Color(0xB22F2B3D), fontSize: 14, fontWeight: FontWeight.w500),
+                                style: TextStyle(
+                                  color: Color(0xB22F2B3D),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
                               Spacer(),
                               if (status == BlocStatus.loading)
-                                SizedBox(width: 28, height: 28, child: CircularProgressIndicator.adaptive(strokeWidth: 2.5))
+                                SizedBox(
+                                  width: 28,
+                                  height: 28,
+                                  child: CircularProgressIndicator.adaptive(
+                                    strokeWidth: 2.5,
+                                  ),
+                                )
                               else if (status == BlocStatus.failed)
                                 InkWell(
                                   onTap: () {
-                                    context.read<InventoryBloc>().add(GetInventorySummaryEvent(params: GetInventorySummaryParams(storeId: 1)));
+                                    context.read<InventoryBloc>().add(
+                                      GetInventorySummaryEvent(
+                                        params: GetInventorySummaryParams(
+                                          storeId: 1,
+                                        ),
+                                      ),
+                                    );
                                   },
                                   child: AppText(
                                     "إعادة المحاولة",
-                                    style: TextStyle(color: context.primary, fontSize: 14, fontWeight: FontWeight.w600),
+                                    style: TextStyle(
+                                      color: context.primary,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                 )
                               else
                                 AppText(
                                   displayValue,
-                                  style: TextStyle(color: context.primary, fontSize: 24, fontWeight: FontWeight.w700, height: 1.333),
+                                  style: TextStyle(
+                                    color: context.primary,
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.w700,
+                                    height: 1.333,
+                                  ),
                                 ),
                               SizedBox(width: 22),
-                              AppText("ل.س", style: TextStyle(color: context.primary, fontSize: 14)),
+                              AppText(
+                                "ل.س",
+                                style: TextStyle(
+                                  color: context.primary,
+                                  fontSize: 14,
+                                ),
+                              ),
                             ],
                           ),
                         );
@@ -373,62 +521,115 @@ class _InventoryScreenState extends State<InventoryScreen> {
                     ),
                   ),
                   SizedBox(height: 10),
+                  BlocBuilder<InventoryBloc, InventoryState>(
+                    buildWhen: (previous, current) =>
+                        previous.invetoryCountsStatus !=
+                        current.invetoryCountsStatus,
+                    builder: (context, state) {
+                      if (state.invetoryCountsStatus == BlocStatus.loading) {
+                        return ProductsTabBarLoading();
+                      } else if (state.invetoryCountsStatus ==
+                          BlocStatus.failed) {
+                        return FailureWidget(
+                          message: state.errorMessage.toString(),
+                          onRetry: () => _reloadProducts(context),
+                        );
+                      } else if (state.invetoryCountsStatus ==
+                          BlocStatus.success) {
+                        return InventoryTabBar(
+                          items: [
+                            InventoryTabBarItem(
+                              title: "الكل",
+                              count: state.invetoryCounts?.data?.total ?? 0,
+                            ),
+                            InventoryTabBarItem(
+                              title: "طبيعي",
+                              count: state.invetoryCounts?.data?.normal ?? 0,
+                            ),
+                            InventoryTabBarItem(
+                              title: "منخفض",
+                              count: state.invetoryCounts?.data?.lowStock ?? 0,
+                            ),
+                          ],
+                          onChanged: (index) {
+                            if (index == selectedTab) return;
+                            selectedTab = index;
+                            setState(() {});
+                          },
+                        );
+                      }
+                      return SizedBox();
+                    },
+                  ),
                   Expanded(
                     child: BlocBuilder<InventoryBloc, InventoryState>(
-                      buildWhen: (previous, current) => previous.products != current.products,
+                      buildWhen: (previous, current) =>
+                          previous.products != current.products,
                       builder: (context, state) {
                         return state.products!.builder(
                           loadingWidget: ProductsLoading(),
-                          emptyWidget: AppText.labelMedium('لا يوجد منتجات', fontWeight: FontWeight.w400),
+                          emptyWidget: AppText.labelMedium(
+                            'لا يوجد منتجات',
+                            fontWeight: FontWeight.w400,
+                          ),
                           successWidget: () {
                             final list = state.products!.list;
-                            final visible = _filterInventoryByTab(list, selectedTab);
-                            final loadingMore = state.products!.status == BlocStatus.loading && state.products!.list.isNotEmpty;
+                            final visible = _filterInventoryByTab(
+                              list,
+                              selectedTab,
+                            );
+                            final loadingMore =
+                                state.products!.status == BlocStatus.loading &&
+                                state.products!.list.isNotEmpty;
 
                             void requestNext() {
                               context.read<InventoryBloc>().add(
                                 GetProductsEvent(
                                   isReload: false,
-                                  params: GetProductsParams(page: state.products!.pageNumber, search: search),
+                                  params: GetProductsParams(
+                                    page: state.products!.pageNumber,
+                                    search: search,
+                                  ),
                                 ),
                               );
                             }
-
-                            final tabBar = InventoryTabBar(
-                              items: [
-                                InventoryTabBarItem(title: "الكل", count: _inventoryTabCount(list, 0)),
-                                InventoryTabBarItem(title: "طبيعي", count: _inventoryTabCount(list, 1)),
-                                InventoryTabBarItem(title: "منخفض", count: _inventoryTabCount(list, 2)),
-                              ],
-                              onChanged: (index) {
-                                if (index == selectedTab) return;
-                                selectedTab = index;
-                                setState(() {});
-                              },
-                            );
 
                             if (visible.isEmpty) {
                               if (state.products!.isEndPage) {
                                 return Column(
                                   children: [
-                                    tabBar,
                                     Expanded(
-                                      child: Center(child: AppText.labelMedium('لا يوجد منتجات', fontWeight: FontWeight.w400)),
+                                      child: Center(
+                                        child: AppText.labelMedium(
+                                          'لا يوجد منتجات',
+                                          fontWeight: FontWeight.w400,
+                                        ),
+                                      ),
                                     ),
                                   ],
                                 );
                               }
                               if (!loadingMore) {
-                                WidgetsBinding.instance.addPostFrameCallback((_) {
+                                WidgetsBinding.instance.addPostFrameCallback((
+                                  _,
+                                ) {
                                   if (!context.mounted) return;
                                   requestNext();
                                 });
                               }
                               return Column(
                                 children: [
-                                  tabBar,
                                   Expanded(
-                                    child: Center(child: SizedBox(width: 30, height: 30, child: CircularProgressIndicator.adaptive(strokeWidth: 3))),
+                                    child: Center(
+                                      child: SizedBox(
+                                        width: 30,
+                                        height: 30,
+                                        child:
+                                            CircularProgressIndicator.adaptive(
+                                              strokeWidth: 3,
+                                            ),
+                                      ),
+                                    ),
                                   ),
                                 ],
                               );
@@ -436,18 +637,30 @@ class _InventoryScreenState extends State<InventoryScreen> {
 
                             return Column(
                               children: [
-                                tabBar,
                                 Expanded(
                                   child: ListView.separated(
-                                    padding: EdgeInsetsDirectional.symmetric(horizontal: 0),
+                                    padding: EdgeInsetsDirectional.symmetric(
+                                      horizontal: 0,
+                                    ),
                                     itemBuilder: (context, index) {
                                       if (visible.length <= index) {
-                                        if (visible.length == index && !state.products!.isEndPage) {
-                                          if (state.products!.status != BlocStatus.loading) {
+                                        if (visible.length == index &&
+                                            !state.products!.isEndPage) {
+                                          if (state.products!.status !=
+                                              BlocStatus.loading) {
                                             requestNext();
                                           }
                                         }
-                                        return SizedBox(width: 30, height: 30, child: FittedBox(child: CircularProgressIndicator.adaptive(strokeWidth: 3)));
+                                        return SizedBox(
+                                          width: 30,
+                                          height: 30,
+                                          child: FittedBox(
+                                            child:
+                                                CircularProgressIndicator.adaptive(
+                                                  strokeWidth: 3,
+                                                ),
+                                          ),
+                                        );
                                       }
                                       final item = visible[index];
                                       return InventoryCard(
@@ -457,40 +670,64 @@ class _InventoryScreenState extends State<InventoryScreen> {
                                         name: item.name ?? '',
                                         unit: "كغ",
                                         onIncreaseTap: () async {
-                                          final incrementQuantity = await showDialog<int>(
-                                            context: context,
-                                            builder: (_) => BlocProvider.value(
-                                              value: context.read<InventoryBloc>(),
-                                              child: EditProductAmount(type: EditingType.increment, productId: item.id!),
-                                            ),
-                                          );
+                                          final incrementQuantity =
+                                              await showDialog<int>(
+                                                context: context,
+                                                builder: (_) =>
+                                                    BlocProvider.value(
+                                                      value: context
+                                                          .read<
+                                                            InventoryBloc
+                                                          >(),
+                                                      child: EditProductAmount(
+                                                        type: EditingType
+                                                            .increment,
+                                                        productId: item.id!,
+                                                      ),
+                                                    ),
+                                              );
                                           if (incrementQuantity == null) {
                                             return;
                                           }
                                         },
                                         onDecreaseTap: () async {
-                                          final decrementQuantity = await showDialog<int>(
-                                            context: context,
-                                            builder: (_) => BlocProvider.value(
-                                              value: context.read<InventoryBloc>(),
-                                              child: EditProductAmount(type: EditingType.decrement, productId: item.id!),
-                                            ),
-                                          );
+                                          final decrementQuantity =
+                                              await showDialog<int>(
+                                                context: context,
+                                                builder: (_) =>
+                                                    BlocProvider.value(
+                                                      value: context
+                                                          .read<
+                                                            InventoryBloc
+                                                          >(),
+                                                      child: EditProductAmount(
+                                                        type: EditingType
+                                                            .decrement,
+                                                        productId: item.id!,
+                                                      ),
+                                                    ),
+                                              );
                                           if (decrementQuantity == null) {
                                             return;
                                           }
                                         },
                                       );
                                     },
-                                    separatorBuilder: (context, index) => SizedBox(height: 8),
-                                    itemCount: visible.length + (state.products!.isEndPage ? 0 : 1),
+                                    separatorBuilder: (context, index) =>
+                                        SizedBox(height: 8),
+                                    itemCount:
+                                        visible.length +
+                                        (state.products!.isEndPage ? 0 : 1),
                                   ),
                                 ),
                               ],
                             );
                           },
                           failedWidget: Center(
-                            child: FailureWidget(message: state.errorMessage.toString(), onRetry: () => _reloadProducts(context)),
+                            child: FailureWidget(
+                              message: state.errorMessage.toString(),
+                              onRetry: () => _reloadProducts(context),
+                            ),
                           ),
                           onTapRetry: () => _reloadProducts(context),
                         );
@@ -507,6 +744,11 @@ class _InventoryScreenState extends State<InventoryScreen> {
   }
 
   void _reloadProducts(BuildContext context) {
-    context.read<InventoryBloc>().add(GetProductsEvent(isReload: true, params: GetProductsParams(page: 1, search: search)));
+    context.read<InventoryBloc>().add(
+      GetProductsEvent(
+        isReload: true,
+        params: GetProductsParams(page: 1, search: search),
+      ),
+    );
   }
 }

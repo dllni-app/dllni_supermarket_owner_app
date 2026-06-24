@@ -7,6 +7,8 @@ import '../usecases/get_hourly_count_use_case.dart';
 import '../../data/models/get_hourly_count_model.dart';
 import '../usecases/get_inventory_summary_use_case.dart';
 import '../../data/models/get_inventory_summary_model.dart';
+import '../usecases/get_invetory_counts_use_case.dart';
+import '../../data/models/get_invetory_counts_model.dart';
 
 abstract class InventoryRepo {
   DataResponse<GetProductsModel> getProducts(GetProductsParams params);
@@ -20,4 +22,6 @@ abstract class InventoryRepo {
   DataResponse<GetInventorySummaryModel> getInventorySummary(
     GetInventorySummaryParams params,
   );
+
+  DataResponse<GetInvetoryCountsModel> getInvetoryCounts(GetInvetoryCountsParams params);
 }

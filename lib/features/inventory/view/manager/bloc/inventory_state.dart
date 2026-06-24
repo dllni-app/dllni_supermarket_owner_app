@@ -1,6 +1,8 @@
 part of 'inventory_bloc.dart';
 
 class InventoryState {
+  BlocStatus? invetoryCountsStatus;
+  GetInvetoryCountsModel? invetoryCounts;
   BlocStatus? hourlyCountStatus;
   GetHourlyCountModel? hourlyCount;
   BlocStatus? productAmountStatus;
@@ -23,6 +25,8 @@ class InventoryState {
     this.inventorySummaryStatus,
     this.lowStock,
     this.lowStockStatus,
+    this.invetoryCounts,
+    this.invetoryCountsStatus,
   });
 
   InventoryState copyWith({
@@ -36,6 +40,8 @@ class InventoryState {
     BlocStatus? inventorySummaryStatus,
     GetLowStockModel? lowStock,
     BlocStatus? lowStockStatus,
+    GetInvetoryCountsModel? invetoryCounts,
+    BlocStatus? invetoryCountsStatus,
   }) => InventoryState(
     errorMessage: errorMessage ?? this.errorMessage,
     products: products ?? this.products,
@@ -48,5 +54,6 @@ class InventoryState {
         inventorySummaryStatus ?? this.inventorySummaryStatus,
     lowStock: lowStock ?? this.lowStock,
     lowStockStatus: lowStockStatus ?? this.lowStockStatus,
-  );
+        invetoryCounts: invetoryCounts ?? this.invetoryCounts,
+        invetoryCountsStatus: invetoryCountsStatus ?? this.invetoryCountsStatus,);
 }

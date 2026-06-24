@@ -282,6 +282,7 @@ class OrderCard extends StatelessWidget {
                               order.items!.length,
                               (index) => _RequirementRow(
                                 label: "${index + 1}- ${order.items![index]}",
+                                isAvailable: order.availableItems![index],
                               ),
                             ),
                           ),
@@ -359,30 +360,30 @@ enum PaymentWay { cash }
 
 class _RequirementRow extends StatelessWidget {
   final String label;
+  final bool isAvailable;
 
-  const _RequirementRow({required this.label});
+  const _RequirementRow({required this.label, required this.isAvailable});
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        AppText(
-          label,
-          style: TextStyle(
-            color: Color(0xE52F2B3D),
-            fontSize: 12,
-            height: 1.333,
+        Expanded(
+          child: AppText(
+            label,
+            textAlign: TextAlign.start,
+            style: TextStyle(
+              color: Color(0xE52F2B3D),
+              fontSize: 12,
+              height: 1.333,
+            ),
           ),
         ),
-        Spacer(),
-        CircleAvatar(radius: 9.5, backgroundColor: Color(0xFFD9D9D9)),
-        SizedBox(width: 12),
-        GestureDetector(
-          onTap: () {},
-          child: Icon(
-            FontAwesomeIcons.circleQuestion,
-            color: Color(0xFFFFAF66),
-            size: 18,
-          ),
+        Icon(
+          isAvailable
+              ? FontAwesomeIcons.circleCheck
+              : FontAwesomeIcons.circleXmark,
+          color: isAvailable ? Colors.green : Colors.red,
+          size: 18,
         ),
       ],
     );

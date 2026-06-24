@@ -273,6 +273,7 @@ class GetNewOrdersModelDataItem {
   String? createdAt;
   String? updatedAt;
   List<String>? items;
+  List<bool>? availableItems;
 
   GetNewOrdersModelDataItem({
     this.id,
@@ -299,6 +300,7 @@ class GetNewOrdersModelDataItem {
     this.createdAt,
     this.updatedAt,
     this.items,
+    this.availableItems,
   });
 
   factory GetNewOrdersModelDataItem.fromJson(Map<String, dynamic> json) {
@@ -332,6 +334,11 @@ class GetNewOrdersModelDataItem {
           ? []
           : (json["items"] as List)
                 .map<String>((element) => element["productName"])
+                .toList(),
+      availableItems: json["items"] is! List
+          ? []
+          : (json["items"] as List)
+                .map<bool>((element) => element["isAvailableInStock"])
                 .toList(),
     );
   }

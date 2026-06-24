@@ -15,139 +15,9 @@ import 'loadings/new_orders_loading.dart';
 import 'sheets/accept_order_bottom_sheet.dart';
 import 'sheets/reject_order_bottom_sheet.dart';
 
-class NewOrdersSection extends StatelessWidget {
-  const NewOrdersSection({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      spacing: 12,
-      children: [
-        Row(
-          children: [
-            AppText(
-              "طلبات جديدة",
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFF111827),
-                height: 1.5,
-              ),
-            ),
-            SizedBox(width: 8),
-            BlocBuilder<HomeBloc, HomeState>(
-              buildWhen: (previous, current) =>
-                  previous.newOrders != current.newOrders,
-              builder: (context, state) {
-                return state.newOrders!.builder(
-                  loadingWidget: SizedBox(),
-                  emptyWidget: SizedBox(),
-                  successWidget: () => state.newOrders!.isEmpty
-                      ? SizedBox()
-                      : Expanded(
-                          child: Row(
-                            children: [
-                              Container(
-                                padding: EdgeInsets.symmetric(
-                                  vertical: 2,
-                                  horizontal: 6,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFEF4444),
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(20),
-                                  ),
-                                ),
-                                child: AppText(
-                                  state.newOrders!.length.toString(),
-                                  style: TextStyle(
-                                    color: AppColors.white,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w700,
-                                    height: 1.5,
-                                  ),
-                                ),
-                              ),
-                              Spacer(),
-                              if (state.newOrders!.length > 2)
-                                InkWell(
-                                  onTap: () {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (_) => BlocProvider.value(
-                                          value: context.read<HomeBloc>(),
-                                          child: const AllNewOrdersScreen(),
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                  child: AppText(
-                                    "عرض الكل",
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Color(0xB22F2B3D),
-                                      fontWeight: FontWeight.w700,
-                                      height: 1.333,
-                                    ),
-                                  ),
-                                ),
-                              SizedBox(width: 26),
-                            ],
-                          ),
-                        ),
-                  failedWidget: SizedBox(),
-                );
-              },
-            ),
-          ],
-        ),
-        BlocBuilder<HomeBloc, HomeState>(
-          buildWhen: (previous, current) =>
-              previous.newOrders != current.newOrders,
-          builder: (context, state) {
-            return state.newOrders!.builder(
-              loadingWidget: NewOrdersLoading(),
-              emptyWidget: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: Center(
-                  child: AppText.labelMedium('لا يوجد طلبات للعرض'),
-                ),
-              ),
-              successWidget: () => ListView.separated(
-                physics: const NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                padding: EdgeInsets.zero,
-                itemBuilder: (context, index) =>
-                    NewOrderCard(order: state.newOrders![index]),
-                separatorBuilder: (_, _) => SizedBox(height: 12),
-                itemCount: state.newOrders!.length > 2
-                    ? 2
-                    : state.newOrders!.length,
-              ),
-              onTapRetry: () {
-                context.read<HomeBloc>().add(
-                  GetNewOrdersEvent(params: GetNewOrdersParams()),
-                );
-              },
-              failedWidget: FailureWidget(
-                message: state.errorMessage ?? "Error an occurred",
-                onRetry: () {
-                  context.read<HomeBloc>().add(
-                    GetNewOrdersEvent(params: GetNewOrdersParams()),
-                  );
-                },
-              ),
-            );
-          },
-        ),
-      ],
-    );
-  }
-}
-
 class NewOrderCard extends StatelessWidget {
-  const NewOrderCard({super.key, required this.order});
   final GetNewOrdersModelDataItem order;
+  const NewOrderCard({super.key, required this.order});
 
   String get delay {
     final Duration diffDate = DateTime.now().difference(
@@ -267,16 +137,9 @@ class NewOrderCard extends StatelessWidget {
                   order.items!.length,
                   (index) => _RequirementRow(
                     label: "${index + 1}- ${order.items![index]}",
+                    isAvailable: order.availableItems![index],
                   ),
                 ),
-
-                // [
-                //   _RequirementRow(label: "1- سيتي كورن ( نكهة الحار و الحلو )"),
-                //   _RequirementRow(label: "2- سطل لبن بقر"),
-                //   _RequirementRow(label: "4- علبة كاتشب العجمي (حار) * 2"),
-                //   _RequirementRow(label: "3- كيس كريم توم العجمي * 2"),
-                //   _RequirementRow(label: "5- كيس مخلل الأزرق * 2"),
-                // ],
               ),
             ),
             Row(
@@ -328,41 +191,9 @@ class NewOrderCard extends StatelessWidget {
   }
 }
 
-class _RequirementRow extends StatelessWidget {
-  const _RequirementRow({required this.label});
-
-  final String label;
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        AppText(
-          label,
-          style: TextStyle(
-            color: Color(0xE52F2B3D),
-            fontSize: 12,
-            height: 1.333,
-          ),
-        ),
-        Spacer(),
-        CircleAvatar(radius: 9.5, backgroundColor: Color(0xFFD9D9D9)),
-        SizedBox(width: 12),
-        GestureDetector(
-          onTap: () {},
-          child: Icon(
-            FontAwesomeIcons.circleQuestion,
-            color: Color(0xFFFFAF66),
-            size: 18,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 class NewOrderCardOld extends StatelessWidget {
-  const NewOrderCardOld({super.key, required this.order});
   final GetNewOrdersModelDataItem order;
+  const NewOrderCardOld({super.key, required this.order});
 
   String get delay {
     final Duration diffDate = DateTime.now().difference(
@@ -536,6 +367,177 @@ class NewOrderCardOld extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class NewOrdersSection extends StatelessWidget {
+  const NewOrdersSection({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      spacing: 12,
+      children: [
+        Row(
+          children: [
+            AppText(
+              "طلبات جديدة",
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF111827),
+                height: 1.5,
+              ),
+            ),
+            SizedBox(width: 8),
+            BlocBuilder<HomeBloc, HomeState>(
+              buildWhen: (previous, current) =>
+                  previous.newOrders != current.newOrders,
+              builder: (context, state) {
+                return state.newOrders!.builder(
+                  loadingWidget: SizedBox(),
+                  emptyWidget: SizedBox(),
+                  successWidget: () => state.newOrders!.isEmpty
+                      ? SizedBox()
+                      : Expanded(
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                  vertical: 2,
+                                  horizontal: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFEF4444),
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(20),
+                                  ),
+                                ),
+                                child: AppText(
+                                  state.newOrders!.length.toString(),
+                                  style: TextStyle(
+                                    color: AppColors.white,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w700,
+                                    height: 1.5,
+                                  ),
+                                ),
+                              ),
+                              Spacer(),
+                              if (state.newOrders!.length > 2)
+                                InkWell(
+                                  onTap: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (_) => BlocProvider.value(
+                                          value: context.read<HomeBloc>(),
+                                          child: const AllNewOrdersScreen(),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: AppText(
+                                    "عرض الكل",
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Color(0xB22F2B3D),
+                                      fontWeight: FontWeight.w700,
+                                      height: 1.333,
+                                    ),
+                                  ),
+                                ),
+                              SizedBox(width: 26),
+                            ],
+                          ),
+                        ),
+                  failedWidget: SizedBox(),
+                );
+              },
+            ),
+          ],
+        ),
+        BlocBuilder<HomeBloc, HomeState>(
+          buildWhen: (previous, current) =>
+              previous.newOrders != current.newOrders,
+          builder: (context, state) {
+            return state.newOrders!.builder(
+              loadingWidget: NewOrdersLoading(),
+              emptyWidget: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Center(
+                  child: AppText.labelMedium('لا يوجد طلبات للعرض'),
+                ),
+              ),
+              successWidget: () => ListView.separated(
+                physics: const NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                padding: EdgeInsets.zero,
+                itemBuilder: (context, index) =>
+                    NewOrderCard(order: state.newOrders![index]),
+                separatorBuilder: (_, _) => SizedBox(height: 12),
+                itemCount: state.newOrders!.length > 2
+                    ? 2
+                    : state.newOrders!.length,
+              ),
+              onTapRetry: () {
+                context.read<HomeBloc>().add(
+                  GetNewOrdersEvent(params: GetNewOrdersParams()),
+                );
+              },
+              failedWidget: FailureWidget(
+                message: state.errorMessage ?? "Error an occurred",
+                onRetry: () {
+                  context.read<HomeBloc>().add(
+                    GetNewOrdersEvent(params: GetNewOrdersParams()),
+                  );
+                },
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class _RequirementRow extends StatelessWidget {
+  final String label;
+  final bool isAvailable;
+
+  const _RequirementRow({required this.label, required this.isAvailable});
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: AppText(
+            label,
+            textAlign: TextAlign.start,
+            style: TextStyle(
+              color: Color(0xE52F2B3D),
+              fontSize: 12,
+              height: 1.333,
+            ),
+          ),
+        ),
+        Icon(
+          isAvailable
+              ? FontAwesomeIcons.circleCheck
+              : FontAwesomeIcons.circleXmark,
+          color: isAvailable ? Colors.green : Colors.red,
+          size: 18,
+        ),
+        // SizedBox(width: 12),
+        // GestureDetector(
+        //   onTap: () {},
+        //   child: Icon(
+        //     FontAwesomeIcons.circleQuestion,
+        //     color: Color(0xFFFFAF66),
+        //     size: 18,
+        //   ),
+        // ),
+      ],
     );
   }
 }

@@ -41,6 +41,7 @@ dependencies:
   flutter_map: ^8.2.2
   latlong2: ^0.9.1
   intl_phone_number_input: ^0.7.5
+  logger: ^2.7.0
   
 
 dev_dependencies:

@@ -38,3 +38,9 @@ class CourierHandoverEvent extends OrdersEvent {
     this.ordersListStatus,
   });
 }
+
+class GetOrderCountsEvent extends OrdersEvent {
+  final GetOrderCountsParams params;
+
+  GetOrderCountsEvent({required this.params});
+}

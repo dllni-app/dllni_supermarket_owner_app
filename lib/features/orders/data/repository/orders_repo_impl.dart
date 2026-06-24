@@ -14,6 +14,8 @@ import '../../domain/usecases/get_order_details_use_case.dart';
 import '../models/get_order_details_model.dart';
 import '../../domain/usecases/courier_handover_use_case.dart';
 import '../models/courier_handover_model.dart';
+import '../../domain/usecases/get_order_counts_use_case.dart';
+import '../models/get_order_counts_model.dart';
 
 @LazySingleton(as: OrdersRepo)
 class OrdersRepoImpl with HandlingException implements OrdersRepo {
@@ -58,5 +60,12 @@ class OrdersRepoImpl with HandlingException implements OrdersRepo {
       tryCall: () => ordersRemoteDataSource.courierHandover(params),
     );
   }
-}
+
+
+  @override
+  DataResponse<GetOrderCountsModel> getOrderCounts(GetOrderCountsParams params) {
+    return wrapHandlingException(
+      tryCall: () => ordersRemoteDataSource.getOrderCounts(params),
+    );
+  }}
 
