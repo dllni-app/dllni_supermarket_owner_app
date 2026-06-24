@@ -27,11 +27,11 @@ class SearchMasterProductsParams with Params {
 
   @override
   QueryParams getParams() {
-    final trimmed = index?.trim();
     return {
       'page': page,
       'perPage': 10,
-      'index': trimmed ?? '',
+      if(index != null && index != "")
+      'index': index,
     };
   }
 }
