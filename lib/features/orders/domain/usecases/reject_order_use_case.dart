@@ -21,17 +21,19 @@ class RejectOrderParams with Params {
   final int orderId;
   final String reason;
   final String message;
+  final String? rejectType;
 
   RejectOrderParams({
     required this.reason,
-    required this.message,
+    String? message,
+    this.rejectType,
     required this.orderId,
-  });
+  }) : message = message ?? reason;
 
   @override
   BodyMap getBody() {
     return <String, dynamic>{
-      'reason': reason,
+      'reason': rejectType ?? reason,
       'message': message,
     };
   }
