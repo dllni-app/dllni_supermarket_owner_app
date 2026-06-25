@@ -1,7 +1,6 @@
 import 'package:common_package/common_package.dart';
 import 'package:flutter/material.dart';
-
-import '../../../../../core/utils/app_svgs.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class SellingIndicator extends StatelessWidget {
   final num percent;
@@ -19,12 +18,18 @@ class SellingIndicator extends StatelessWidget {
       child: Row(
         spacing: 4,
         children: [
-          AppImage.asset(AppSvgs.up, size: 13),
+          FaIcon(
+            percent > 0
+                ? FontAwesomeIcons.arrowUpShortWide
+                : FontAwesomeIcons.arrowDownShortWide,
+            size: 13,
+            color: percent > 0 ? Color(0xFF4ADE80) : Color(0xFFEF4444),
+          ),
           AppText(
             "${percent > 0 ? "+$percent" : percent}%",
             textDirection: TextDirection.ltr,
             style: TextStyle(
-              color: Color(0xFF4ADE80),
+              color: percent > 0 ? Color(0xFF4ADE80) : Color(0xFFEF4444),
               fontSize: 12,
               height: 1.333,
             ),

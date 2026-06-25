@@ -75,10 +75,14 @@ class OrdersRemoteDataSource with HandlingApiManager {
     );
   }
 
-
   Future<GetOrderCountsModel> getOrderCounts(GetOrderCountsParams params) {
     return wrapHandlingApi(
-      tryCall: () => dioNetwork.getData(endPoint: '/api/v1/store-owner/orders/counts', params: params.getParams(), data: params.getBody().isEmpty ? null : params.getBody()),
+      tryCall: () => dioNetwork.getData(
+        endPoint: '/api/v1/store-owner/orders/counts',
+        params: params.getParams(),
+        data: params.getBody().isEmpty ? null : params.getBody(),
+      ),
       jsonConvert: getOrderCountsModelFromJson,
     );
-  }}
+  }
+}

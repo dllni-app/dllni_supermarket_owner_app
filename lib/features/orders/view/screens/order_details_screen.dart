@@ -65,13 +65,12 @@ class OrderDetailsScreen extends StatelessWidget {
                       return Column(
                         children: [
                           _OrderStatusCard(
-                            time: "12 دقيقة",
+                            time: state.orderDetails!.data!.orderDetails?.statusElapsedText ?? '',
                             createdAt: formattedTime,
                             expectedTime: state
                                 .orderDetails!
-                                .data!
-                                .pickupScheduledFor
-                                .toString(),
+                                  .data!
+                                  .orderDetails?.expectedDeliveryTime ?? '',
                           ),
                           SizedBox(height: 13),
                           _CustomerCard(
