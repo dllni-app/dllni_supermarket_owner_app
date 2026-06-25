@@ -153,26 +153,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       padding: EdgeInsetsDirectional.all(25),
                       child: Column(
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              AppText.bodyMedium(
-                                'رقم الجوال',
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xff111827),
-                                textAlign: TextAlign.start,
-                              ),
-                              SizedBox(height: 8),
-                              AppPhoneNumberField(
+                        children: [ AppPhoneNumberField(
                                 key: _phoneFieldKey,
                                 label: 'رقم الجوال',
                                 isRequired: true,
                                 variant: AppPhoneFieldVariant.ownerLogin,
                                 onChanged: (number) => _phone = number,
                               ),
-                            ],
-                          ),
+                         
                           SizedBox(height: 20),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
