@@ -1,36 +1,47 @@
 import 'dart:convert';
 
-String? _asString(dynamic value) {
-  if (value == null) return null;
-  if (value is String) return value;
-  if (value is num || value is bool) return value.toString();
-  return null;
-}
+GetOrderDetailsModelDataCustomer getOrderDetailsModelDataCustomerFromJson(
+  str,
+) => GetOrderDetailsModelDataCustomer.fromJson(str);
 
-int? _asInt(dynamic value) {
-  if (value == null) return null;
-  if (value is int) return value;
-  if (value is num) return value.toInt();
-  if (value is String) {
-    return int.tryParse(value) ?? double.tryParse(value)?.toInt();
-  }
-  return null;
-}
+String getOrderDetailsModelDataCustomerToJson(
+  GetOrderDetailsModelDataCustomer data,
+) => json.encode(data.toJson());
 
-double? _asDouble(dynamic value) {
-  if (value == null) return null;
-  if (value is double) return value;
-  if (value is num) return value.toDouble();
-  if (value is String) return double.tryParse(value);
-  return null;
-}
+GetOrderDetailsModelData getOrderDetailsModelDataFromJson(str) =>
+    GetOrderDetailsModelData.fromJson(str);
 
-num? _asNum(dynamic value) {
-  if (value == null) return null;
-  if (value is num) return value;
-  if (value is String) return num.tryParse(value);
-  return null;
-}
+GetOrderDetailsModelDataItemsItem getOrderDetailsModelDataItemsItemFromJson(
+  str,
+) => GetOrderDetailsModelDataItemsItem.fromJson(str);
+
+GetOrderDetailsModelDataItemsItemProduct
+getOrderDetailsModelDataItemsItemProductFromJson(str) =>
+    GetOrderDetailsModelDataItemsItemProduct.fromJson(str);
+
+String getOrderDetailsModelDataItemsItemProductToJson(
+  GetOrderDetailsModelDataItemsItemProduct data,
+) => json.encode(data.toJson());
+
+String getOrderDetailsModelDataItemsItemToJson(
+  GetOrderDetailsModelDataItemsItem data,
+) => json.encode(data.toJson());
+
+GetOrderDetailsModelDataStore getOrderDetailsModelDataStoreFromJson(str) =>
+    GetOrderDetailsModelDataStore.fromJson(str);
+
+String getOrderDetailsModelDataStoreToJson(
+  GetOrderDetailsModelDataStore data,
+) => json.encode(data.toJson());
+
+String getOrderDetailsModelDataToJson(GetOrderDetailsModelData data) =>
+    json.encode(data.toJson());
+
+GetOrderDetailsModel getOrderDetailsModelFromJson(str) =>
+    GetOrderDetailsModel.fromJson(str);
+
+String getOrderDetailsModelToJson(GetOrderDetailsModel data) =>
+    json.encode(data.toJson());
 
 bool? _asBool(dynamic value) {
   if (value == null) return null;
@@ -47,9 +58,12 @@ bool? _asBool(dynamic value) {
   return null;
 }
 
-List<dynamic>? _asDynamicList(dynamic value) {
-  if (value is! List) return null;
-  return value.map(_asDynamic).toList();
+double? _asDouble(dynamic value) {
+  if (value == null) return null;
+  if (value is double) return value;
+  if (value is num) return value.toDouble();
+  if (value is String) return double.tryParse(value);
+  return null;
 }
 
 dynamic _asDynamic(dynamic value) {
@@ -70,48 +84,34 @@ dynamic _asDynamic(dynamic value) {
   return value.toString();
 }
 
-GetOrderDetailsModel getOrderDetailsModelFromJson(str) =>
-    GetOrderDetailsModel.fromJson(str);
+List<dynamic>? _asDynamicList(dynamic value) {
+  if (value is! List) return null;
+  return value.map(_asDynamic).toList();
+}
 
-String getOrderDetailsModelToJson(GetOrderDetailsModel data) =>
-    json.encode(data.toJson());
+int? _asInt(dynamic value) {
+  if (value == null) return null;
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  if (value is String) {
+    return int.tryParse(value) ?? double.tryParse(value)?.toInt();
+  }
+  return null;
+}
 
-GetOrderDetailsModelData getOrderDetailsModelDataFromJson(str) =>
-    GetOrderDetailsModelData.fromJson(str);
+num? _asNum(dynamic value) {
+  if (value == null) return null;
+  if (value is num) return value;
+  if (value is String) return num.tryParse(value);
+  return null;
+}
 
-String getOrderDetailsModelDataToJson(GetOrderDetailsModelData data) =>
-    json.encode(data.toJson());
-
-GetOrderDetailsModelDataItemsItem getOrderDetailsModelDataItemsItemFromJson(
-  str,
-) => GetOrderDetailsModelDataItemsItem.fromJson(str);
-
-String getOrderDetailsModelDataItemsItemToJson(
-  GetOrderDetailsModelDataItemsItem data,
-) => json.encode(data.toJson());
-
-GetOrderDetailsModelDataItemsItemProduct
-getOrderDetailsModelDataItemsItemProductFromJson(str) =>
-    GetOrderDetailsModelDataItemsItemProduct.fromJson(str);
-
-String getOrderDetailsModelDataItemsItemProductToJson(
-  GetOrderDetailsModelDataItemsItemProduct data,
-) => json.encode(data.toJson());
-
-GetOrderDetailsModelDataStore getOrderDetailsModelDataStoreFromJson(str) =>
-    GetOrderDetailsModelDataStore.fromJson(str);
-
-String getOrderDetailsModelDataStoreToJson(
-  GetOrderDetailsModelDataStore data,
-) => json.encode(data.toJson());
-
-GetOrderDetailsModelDataCustomer getOrderDetailsModelDataCustomerFromJson(
-  str,
-) => GetOrderDetailsModelDataCustomer.fromJson(str);
-
-String getOrderDetailsModelDataCustomerToJson(
-  GetOrderDetailsModelDataCustomer data,
-) => json.encode(data.toJson());
+String? _asString(dynamic value) {
+  if (value == null) return null;
+  if (value is String) return value;
+  if (value is num || value is bool) return value.toString();
+  return null;
+}
 
 class GetOrderDetailsModel {
   GetOrderDetailsModelData? data;
@@ -200,7 +200,7 @@ class GetOrderDetailsModelData {
 
   factory GetOrderDetailsModelData.fromJson(Map<String, dynamic> json) {
     return GetOrderDetailsModelData(
-      id: _asInt(json['id']),  
+      id: _asInt(json['id']),
       customerId: _asInt(json['customerId']),
       customer: json['customer'] is Map
           ? GetOrderDetailsModelDataCustomer.fromJson(
@@ -291,54 +291,50 @@ class GetOrderDetailsModelData {
   }
 }
 
-class OrderDetails {
-  String? currentStatus;
-  String? currentStatusLabel;
-  String? statusStartedAt;
-  int? statusElapsedMinutes;
-  String? statusElapsedText;
-  String? expectedDeliveryAt;
-  String? expectedDeliveryTime;
-  String? deliveredAt;
-  String? deliveredTime;
-  int? deliveryDurationMinutes;
-  String? deliveryDurationText;
+class GetOrderDetailsModelDataCustomer {
+  int? id;
+  String? name;
+  String? email;
+  dynamic phone;
+  dynamic moduleType;
+  String? emailVerifiedAt;
+  String? createdAt;
+  String? updatedAt;
 
-  OrderDetails({
-    this.currentStatus,
-    this.currentStatusLabel,
-    this.statusStartedAt,
-    this.statusElapsedMinutes,
-    this.statusElapsedText,
-    this.expectedDeliveryAt,
-    this.expectedDeliveryTime,
-    this.deliveredAt,
-    this.deliveredTime,
-    this.deliveryDurationMinutes,
-    this.deliveryDurationText,
+  GetOrderDetailsModelDataCustomer({
+    this.id,
+    this.name,
+    this.email,
+    this.phone,
+    this.moduleType,
+    this.emailVerifiedAt,
+    this.createdAt,
+    this.updatedAt,
   });
 
-  factory OrderDetails.fromJson(Map<String, dynamic> json) {
-    return OrderDetails(
-      currentStatus: _asString(json['currentStatus']),
-      currentStatusLabel: _asString(json['currentStatusLabel']),
-      statusStartedAt: _asString(json['statusStartedAt']),
-      statusElapsedMinutes: _asInt(json['statusElapsedMinutes']),
-      statusElapsedText: _asString(json['statusElapsedText']),
-      expectedDeliveryAt: _asString(json['expectedDeliveryAt']),
-      expectedDeliveryTime: _asString(json['expectedDeliveryTime']),
-      deliveredAt: _asString(json['deliveredAt']),
-      deliveredTime: _asString(json['deliveredTime']),
-      deliveryDurationMinutes: _asInt(json['deliveryDurationMinutes']),
-      deliveryDurationText: _asString(json['deliveryDurationText']),
+  factory GetOrderDetailsModelDataCustomer.fromJson(Map<String, dynamic> json) {
+    return GetOrderDetailsModelDataCustomer(
+      id: _asInt(json['id']),
+      name: _asString(json['name']),
+      email: _asString(json['email']),
+      phone: _asDynamic(json['phone']),
+      moduleType: _asDynamic(json['moduleType']),
+      emailVerifiedAt: _asString(json['emailVerifiedAt']),
+      createdAt: _asString(json['createdAt']),
+      updatedAt: _asString(json['updatedAt']),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'currentStatus': currentStatus,
-      'currentStatusLabel': currentStatusLabel,
-      'statusStartedAt': statusStartedAt,
+      'id': id,
+      'name': name,
+      'email': email,
+      'phone': phone,
+      'moduleType': moduleType,
+      'emailVerifiedAt': emailVerifiedAt,
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
     };
   }
 }
@@ -595,50 +591,54 @@ class GetOrderDetailsModelDataStore {
   }
 }
 
-class GetOrderDetailsModelDataCustomer {
-  int? id;
-  String? name;
-  String? email;
-  dynamic phone;
-  dynamic moduleType;
-  String? emailVerifiedAt;
-  String? createdAt;
-  String? updatedAt;
+class OrderDetails {
+  String? currentStatus;
+  String? currentStatusLabel;
+  String? statusStartedAt;
+  int? statusElapsedMinutes;
+  String? statusElapsedText;
+  String? expectedDeliveryAt;
+  String? expectedDeliveryTime;
+  String? deliveredAt;
+  String? deliveredTime;
+  int? deliveryDurationMinutes;
+  String? deliveryDurationText;
 
-  GetOrderDetailsModelDataCustomer({
-    this.id,
-    this.name,
-    this.email,
-    this.phone,
-    this.moduleType,
-    this.emailVerifiedAt,
-    this.createdAt,
-    this.updatedAt,
+  OrderDetails({
+    this.currentStatus,
+    this.currentStatusLabel,
+    this.statusStartedAt,
+    this.statusElapsedMinutes,
+    this.statusElapsedText,
+    this.expectedDeliveryAt,
+    this.expectedDeliveryTime,
+    this.deliveredAt,
+    this.deliveredTime,
+    this.deliveryDurationMinutes,
+    this.deliveryDurationText,
   });
 
-  factory GetOrderDetailsModelDataCustomer.fromJson(Map<String, dynamic> json) {
-    return GetOrderDetailsModelDataCustomer(
-      id: _asInt(json['id']),
-      name: _asString(json['name']),
-      email: _asString(json['email']),
-      phone: _asDynamic(json['phone']),
-      moduleType: _asDynamic(json['moduleType']),
-      emailVerifiedAt: _asString(json['emailVerifiedAt']),
-      createdAt: _asString(json['createdAt']),
-      updatedAt: _asString(json['updatedAt']),
+  factory OrderDetails.fromJson(Map<String, dynamic> json) {
+    return OrderDetails(
+      currentStatus: _asString(json['current_status']),
+      currentStatusLabel: _asString(json['current_status_label']),
+      statusStartedAt: _asString(json['status_started_at']),
+      statusElapsedMinutes: _asInt(json['status_elapsed_minutes']),
+      statusElapsedText: _asString(json['status_elapsed_text']),
+      expectedDeliveryAt: _asString(json['expected_delivery_at']),
+      expectedDeliveryTime: _asString(json['expected_delivery_time']),
+      deliveredAt: _asString(json['delivered_at']),
+      deliveredTime: _asString(json['delivery_duration_minutes']),
+      deliveryDurationMinutes: _asInt(json['delivery_duration_minutes']),
+      deliveryDurationText: _asString(json['delivery_duration_text']),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
-      'name': name,
-      'email': email,
-      'phone': phone,
-      'moduleType': moduleType,
-      'emailVerifiedAt': emailVerifiedAt,
-      'createdAt': createdAt,
-      'updatedAt': updatedAt,
+      'currentStatus': currentStatus,
+      'currentStatusLabel': currentStatusLabel,
+      'statusStartedAt': statusStartedAt,
     };
   }
 }
