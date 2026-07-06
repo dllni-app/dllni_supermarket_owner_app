@@ -27,6 +27,21 @@ class OrdersScreen extends StatefulWidget {
 
 class _OrdersScreenState extends State<OrdersScreen> {
   String? selectedStatus;
+
+  OrderStatus _mapOrderStatus(String? status) {
+    return switch (status) {
+      'pending' => OrderStatus.pending,
+      'accepted' => OrderStatus.accepted,
+      'preparing' => OrderStatus.preparing,
+      'ready_for_pickup' => OrderStatus.readyForPickup,
+      'picked_up' || 'out_for_delivery' => OrderStatus.pickedUp,
+      'completed' || 'delivered' => OrderStatus.completed,
+      'rejected' => OrderStatus.rejected,
+      'cancelled' || 'canceled' => OrderStatus.cancelled,
+      _ => OrderStatus.pending,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider<OrdersBloc>(
@@ -40,13 +55,13 @@ class _OrdersScreenState extends State<OrdersScreen> {
           if (state.courierHandoverStatus == BlocStatus.failed) {
             AppToast.showToast(
               context: context,
-              message: state.errorMessage ?? "Unknown Error",
+              message: state.errorMessage ?? 'Unknown Error',
               type: ToastificationType.error,
             );
           } else if (state.courierHandoverStatus == BlocStatus.success) {
             AppToast.showToast(
               context: context,
-              message: "تم تسليم الطلب للمندوب",
+              message: 'تم تسليم الطلب للمندوب',
               type: ToastificationType.success,
             );
           }
@@ -59,29 +74,16 @@ class _OrdersScreenState extends State<OrdersScreen> {
               Expanded(
                 child: Column(
                   children: [
-                    SizedBox(height: 8),
-
-                    // Padding(
-                    //   padding: const EdgeInsets.symmetric(horizontal: 20),
-                    //   child: WarningAlert(
-                    //     icon: FontAwesomeIcons.clock,
-                    //     title: "طلب متأخر #2475",
-                    //     description: "تجاوز الوقت المحدد بـ 5 دقائق.",
-                    //     labelButton: "عرض",
-                    //   ),
-                    // ),
-                    //* this just for get number of orders for each status
+                    const SizedBox(height: 8),
                     BlocBuilder<OrdersBloc, OrdersState>(
                       buildWhen: (previous, current) =>
-                          previous.orderCountsStatus !=
-                          current.orderCountsStatus,
+                          previous.orderCountsStatus != current.orderCountsStatus,
                       builder: (context, state) {
                         if (state.orderCountsStatus == BlocStatus.loading) {
                           return ProductsTabBarLoading();
-                        } else if (state.orderCountsStatus ==
-                            BlocStatus.failed) {
+                        } else if (state.orderCountsStatus == BlocStatus.failed) {
                           return FailureWidget(
-                            message: state.errorMessage ?? "Unknown Error",
+                            message: state.errorMessage ?? 'Unknown Error',
                             onRetry: () {
                               context.read<OrdersBloc>().add(
                                 GetOrderCountsEvent(
@@ -90,39 +92,35 @@ class _OrdersScreenState extends State<OrdersScreen> {
                               );
                             },
                           );
-                        } else if (state.orderCountsStatus ==
-                            BlocStatus.success) {
+                        } else if (state.orderCountsStatus == BlocStatus.success) {
                           return OrdersTabBar(
                             items: [
                               OrdersTabBarItem(
-                                title: "الكل",
+                                title: 'الكل',
                                 count: state.orderCounts?.data?.total ?? 0,
                               ),
                               OrdersTabBarItem(
-                                title: "طلب جديد",
+                                title: 'طلب جديد',
                                 count: state.orderCounts?.data?.pending ?? 0,
                                 leadingColor: context.primary,
                               ),
                               OrdersTabBarItem(
-                                title: "قيد التحضير",
+                                title: 'قيد التحضير',
                                 count: state.orderCounts?.data?.preparing ?? 0,
                                 leadingColor: AppColors.accent,
                               ),
                               OrdersTabBarItem(
-                                title: "جاهز للتسليم",
-                                count:
-                                    state.orderCounts?.data?.readyForDelivery ??
-                                    0,
-                                leadingColor: Color(0xFF24B364),
+                                title: 'جاهز للتسليم',
+                                count: state.orderCounts?.data?.readyForDelivery ?? 0,
+                                leadingColor: const Color(0xFF24B364),
                               ),
                               OrdersTabBarItem(
-                                title: "مكتمل",
+                                title: 'مكتمل',
                                 count: state.orderCounts?.data?.completed ?? 0,
-                                leadingColor: Color(0xFF24B364),
+                                leadingColor: const Color(0xFF24B364),
                               ),
                             ],
                             onChanged: (index) {
-                              print(index);
                               if (index == 0) {
                                 selectedStatus = null;
                               } else if (index == 1) {
@@ -146,51 +144,49 @@ class _OrdersScreenState extends State<OrdersScreen> {
                             },
                           );
                         }
-                        return SizedBox();
+                        return const SizedBox();
                       },
                     ),
                     Expanded(
                       child: BlocBuilder<OrdersBloc, OrdersState>(
                         buildWhen: (previous, current) =>
                             previous.orders != current.orders ||
-                            previous.courierHandoverStatus !=
-                                current.courierHandoverStatus ||
-                            previous.courierHandoverLoadingOrderId !=
-                                current.courierHandoverLoadingOrderId,
+                            previous.courierHandoverStatus != current.courierHandoverStatus ||
+                            previous.courierHandoverLoadingOrderId != current.courierHandoverLoadingOrderId,
                         builder: (context, state) {
                           return state.orders!.builder(
                             loadingWidget: Shimmer.fromColors(
-                              baseColor: Color(0xFFE0E0E0),
-                              highlightColor: Color(0xFFCCCCCC),
+                              baseColor: const Color(0xFFE0E0E0),
+                              highlightColor: const Color(0xFFCCCCCC),
                               child: ListView.separated(
                                 shrinkWrap: true,
-                                padding: EdgeInsets.symmetric(
+                                padding: const EdgeInsets.symmetric(
                                   horizontal: 20,
                                   vertical: 16,
                                 ),
                                 itemBuilder: (_, index) => [
                                   Container(
                                     width: double.infinity,
-                                    height: 300,
+                                    height: 220,
                                     decoration: BoxDecoration(
                                       color: Colors.white,
-                                      borderRadius: BorderRadius.circular(8),
+                                      borderRadius: BorderRadius.circular(18),
                                     ),
                                   ),
                                   Container(
                                     width: double.infinity,
-                                    height: 300,
+                                    height: 220,
                                     decoration: BoxDecoration(
                                       color: Colors.white,
-                                      borderRadius: BorderRadius.circular(8),
+                                      borderRadius: BorderRadius.circular(18),
                                     ),
                                   ),
                                   Container(
                                     width: double.infinity,
-                                    height: 300,
+                                    height: 220,
                                     decoration: BoxDecoration(
                                       color: Colors.white,
-                                      borderRadius: BorderRadius.circular(8),
+                                      borderRadius: BorderRadius.circular(18),
                                     ),
                                   ),
                                   Container(
@@ -198,12 +194,11 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                     height: 80,
                                     decoration: BoxDecoration(
                                       color: Colors.white,
-                                      borderRadius: BorderRadius.circular(8),
+                                      borderRadius: BorderRadius.circular(18),
                                     ),
                                   ),
                                 ][index],
-                                separatorBuilder: (_, _) =>
-                                    SizedBox(height: 12),
+                                separatorBuilder: (_, _) => const SizedBox(height: 12),
                                 itemCount: 4,
                               ),
                             ),
@@ -213,9 +208,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
                             ),
                             successWidget: () {
                               return ListView.separated(
-                                padding: EdgeInsetsDirectional.symmetric(
-                                  horizontal: 24,
-                                  vertical: 8,
+                                padding: const EdgeInsetsDirectional.symmetric(
+                                  horizontal: 20,
+                                  vertical: 10,
                                 ),
                                 itemBuilder: (context, index) {
                                   if (state.orders!.length <= index) {
@@ -231,33 +226,24 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                       );
                                     }
                                     return Shimmer.fromColors(
-                                      baseColor: Color(0xFFE0E0E0),
-                                      highlightColor: Color(0xFFCCCCCC),
+                                      baseColor: const Color(0xFFE0E0E0),
+                                      highlightColor: const Color(0xFFCCCCCC),
                                       child: Container(
                                         width: double.infinity,
                                         height: 80,
                                         decoration: BoxDecoration(
                                           color: Colors.white,
-                                          borderRadius: BorderRadius.circular(
-                                            8,
-                                          ),
+                                          borderRadius: BorderRadius.circular(18),
                                         ),
                                       ),
                                     );
                                   }
+
+                                  final order = state.orders!.list[index];
+
                                   return OrderCard(
-                                    order: state.orders!.list[index],
-                                    status:
-                                        state.orders!.list[index].status ==
-                                            "pending"
-                                        ? OrderStatus.pending
-                                        : state.orders!.list[index].status ==
-                                              "preparing"
-                                        ? OrderStatus.preparing
-                                        : state.orders!.list[index].status ==
-                                              "ready_for_pickup"
-                                        ? OrderStatus.readyForPickup
-                                        : OrderStatus.completed,
+                                    order: order,
+                                    status: _mapOrderStatus(order.status),
                                     onAcceptTap: () {
                                       showModalBottomSheet(
                                         context: context,
@@ -267,12 +253,8 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                           value: context.read<OrdersBloc>(),
                                           child: AcceptOrderBottomSheet(
                                             status: selectedStatus,
-                                            orderId:
-                                                state.orders!.list[index].id!,
-                                            orderNumber: state
-                                                .orders!
-                                                .list[index]
-                                                .orderNumber!,
+                                            orderId: order.id!,
+                                            orderNumber: order.orderNumber!,
                                           ),
                                         ),
                                       );
@@ -286,12 +268,8 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                           value: context.read<OrdersBloc>(),
                                           child: RejectOrderBottomSheet(
                                             status: selectedStatus,
-                                            orderId:
-                                                state.orders!.list[index].id!,
-                                            orderNumber: state
-                                                .orders!
-                                                .list[index]
-                                                .orderNumber!,
+                                            orderId: order.id!,
+                                            orderNumber: order.orderNumber!,
                                           ),
                                         ),
                                       );
@@ -300,28 +278,22 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                     onCourierHandoverTap: () {
                                       context.read<OrdersBloc>().add(
                                         CourierHandoverEvent(
-                                          params: CourierHandoverParams(
-                                            orderId:
-                                                state.orders!.list[index].id!,
-                                          ),
+                                          params: CourierHandoverParams(orderId: order.id!),
                                           ordersListStatus: selectedStatus,
                                         ),
                                       );
                                     },
                                     isCourierHandoverLoading:
-                                        state.courierHandoverStatus ==
-                                            BlocStatus.loading &&
-                                        state.courierHandoverLoadingOrderId ==
-                                            state.orders!.list[index].id,
+                                        state.courierHandoverStatus == BlocStatus.loading &&
+                                        state.courierHandoverLoadingOrderId == order.id,
                                   );
                                 },
-                                separatorBuilder: (context, index) =>
-                                    SizedBox(height: 16),
+                                separatorBuilder: (context, index) => const SizedBox(height: 14),
                                 itemCount: state.orders!.listLength(1),
                               );
                             },
                             failedWidget: FailureWidget(
-                              message: state.errorMessage ?? "Unknown Error",
+                              message: state.errorMessage ?? 'Unknown Error',
                               onRetry: () {
                                 context.read<OrdersBloc>().add(
                                   GetOrdersEvent(
@@ -359,5 +331,3 @@ class _OrdersScreenState extends State<OrdersScreen> {
     );
   }
 }
-
-// ,
