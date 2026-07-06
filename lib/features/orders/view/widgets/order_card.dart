@@ -25,6 +25,11 @@ class OrderCard extends StatelessWidget {
     this.isCourierHandoverLoading = false,
   });
 
+  bool get hasPrimaryAction =>
+      status == OrderStatus.pending ||
+      status == OrderStatus.preparing ||
+      status == OrderStatus.readyForPickup;
+
   String get orderDelay {
     final parsedDate = _tryParseDate(order.updatedAt ?? order.createdAt);
     if (parsedDate == null) return 'غير محدد';
@@ -36,8 +41,20 @@ class OrderCard extends StatelessWidget {
     return 'الآن';
   }
 
+  String get stageLabel => switch (status) {
+    OrderStatus.pending => 'بانتظار قبول الطلب من المتجر',
+    OrderStatus.accepted => 'المندوب في الطريق',
+    OrderStatus.preparing => 'يتم تجهيز المنتجات',
+    OrderStatus.readyForPickup => 'بانتظار تسليم الطلب للمندوب',
+    OrderStatus.pickedUp => 'تم تسليم الطلب للمندوب',
+    OrderStatus.completed => 'تم تسليم الطلب',
+    OrderStatus.rejected => 'تم رفض الطلب',
+    OrderStatus.cancelled => 'تم إلغاء الطلب',
+  };
+
   Color get statusColor => switch (status) {
-    OrderStatus.completed || OrderStatus.readyForPickup => const Color(0xFF24B364),
+    OrderStatus.completed ||
+    OrderStatus.readyForPickup => const Color(0xFF24B364),
     OrderStatus.accepted || OrderStatus.pickedUp => const Color(0xFF2563EB),
     OrderStatus.preparing => AppColors.accent,
     OrderStatus.rejected || OrderStatus.cancelled => const Color(0xFFEF4444),
@@ -65,39 +82,7 @@ class OrderCard extends StatelessWidget {
     OrderStatus.cancelled => 'ملغي',
   };
 
-  String get stageLabel => switch (status) {
-    OrderStatus.pending => 'بانتظار قبول الطلب من المتجر',
-    OrderStatus.accepted => 'المندوب في الطريق',
-    OrderStatus.preparing => 'يتم تجهيز المنتجات',
-    OrderStatus.readyForPickup => 'بانتظار تسليم الطلب للمندوب',
-    OrderStatus.pickedUp => 'تم تسليم الطلب للمندوب',
-    OrderStatus.completed => 'تم تسليم الطلب',
-    OrderStatus.rejected => 'تم رفض الطلب',
-    OrderStatus.cancelled => 'تم إلغاء الطلب',
-  };
-
-  bool get hasPrimaryAction => status == OrderStatus.pending || status == OrderStatus.preparing || status == OrderStatus.readyForPickup;
-
   String get totalAmountText => '${_formatMoney(order.totalAmount)} ل.س';
-
-  DateTime? _tryParseDate(String? value) {
-    if (value == null || value.trim().isEmpty) return null;
-    return DateTime.tryParse(value) ?? DateTime.tryParse(value.replaceFirst(' ', 'T'));
-  }
-
-  String _formatMoney(String? value) {
-    final amount = double.tryParse(value ?? '');
-    if (amount == null) return value ?? '0';
-    if (amount == amount.roundToDouble()) return amount.toStringAsFixed(0);
-    return amount.toStringAsFixed(2);
-  }
-
-  void _openDetails(BuildContext context) {
-    onViewDetailsTap();
-    final id = order.id;
-    if (id == null) return;
-    context.pushRoute('/orders/order_details', arguments: id);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -172,6 +157,7 @@ class OrderCard extends StatelessWidget {
                 Expanded(
                   child: AppText(
                     totalAmountText,
+                    textAlign: TextAlign.start,
                     style: TextStyle(
                       color: context.primary,
                       fontSize: 22,
@@ -253,40 +239,157 @@ class OrderCard extends StatelessWidget {
       ),
     );
   }
+
+  String _formatMoney(String? value) {
+    final amount = double.tryParse(value ?? '');
+    if (amount == null) return value ?? '0';
+    if (amount == amount.roundToDouble()) return amount.toStringAsFixed(0);
+    return amount.toStringAsFixed(2);
+  }
+
+  void _openDetails(BuildContext context) {
+    onViewDetailsTap();
+    final id = order.id;
+    if (id == null) return;
+    context.pushRoute('/orders/order_details', arguments: id);
+  }
+
+  DateTime? _tryParseDate(String? value) {
+    if (value == null || value.trim().isEmpty) return null;
+    return DateTime.tryParse(value) ??
+        DateTime.tryParse(value.replaceFirst(' ', 'T'));
+  }
 }
 
-class _StatusBadge extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final Color color;
+enum OrderStatus {
+  pending,
+  accepted,
+  preparing,
+  readyForPickup,
+  pickedUp,
+  completed,
+  rejected,
+  cancelled,
+}
 
-  const _StatusBadge({
-    required this.label,
-    required this.icon,
-    required this.color,
+enum PaymentWay { cash }
+
+class _ActionSection extends StatelessWidget {
+  final OrderStatus status;
+  final VoidCallback onAcceptTap;
+  final VoidCallback onRejectTap;
+  final VoidCallback onOpenDetailsTap;
+  final VoidCallback onCourierHandoverTap;
+  final bool isCourierHandoverLoading;
+
+  const _ActionSection({
+    required this.status,
+    required this.onAcceptTap,
+    required this.onRejectTap,
+    required this.onOpenDetailsTap,
+    required this.onCourierHandoverTap,
+    required this.isCourierHandoverLoading,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: .10),
-        borderRadius: BorderRadius.circular(100),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
+    if (status == OrderStatus.pending) {
+      return Row(
         children: [
-          Icon(icon, size: 14, color: color),
-          const SizedBox(width: 5),
-          AppText(
-            label,
-            style: TextStyle(
-              color: color,
-              fontSize: 12,
-              fontWeight: FontWeight.w800,
+          Expanded(
+            child: AppButton(title: 'قبول الطلب', onTap: onAcceptTap),
+          ),
+          const SizedBox(width: 12),
+          AppOutlinedButton(
+            color: const Color(0xFFFF4C51),
+            title: 'رفض',
+            onTap: onRejectTap,
+          ),
+        ],
+      );
+    }
+
+    if (status == OrderStatus.readyForPickup) {
+      if (isCourierHandoverLoading) {
+        return const Center(
+          child: SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(strokeWidth: 2.5),
+          ),
+        );
+      }
+
+      return SizedBox(
+        width: context.width,
+        child: AppButton(
+          color: const Color(0xFF24B364),
+          title: 'تسليم للمندوب',
+          onTap: onCourierHandoverTap,
+        ),
+      );
+    }
+
+    return SizedBox(
+      width: context.width,
+      child: AppButton(
+        icon: Icons.arrow_forward_rounded,
+        title: 'عرض التفاصيل',
+        onTap: onOpenDetailsTap,
+      ),
+    );
+  }
+}
+
+class _ItemsPreview extends StatelessWidget {
+  final List<String> items;
+  final List<bool> availableItems;
+
+  const _ItemsPreview({required this.items, required this.availableItems});
+
+  @override
+  Widget build(BuildContext context) {
+    final visibleItems = items.take(3).toList();
+    final hiddenCount = items.length - visibleItems.length;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF9FAFB),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFE5E7EB)),
+      ),
+      child: Column(
+        children: [
+          ...List.generate(
+            visibleItems.length,
+            (index) => Padding(
+              padding: EdgeInsets.only(
+                bottom: index == visibleItems.length - 1 && hiddenCount == 0
+                    ? 0
+                    : 8,
+              ),
+              child: _RequirementRow(
+                label: '${index + 1}- ${visibleItems[index]}',
+                isAvailable: index < availableItems.length
+                    ? availableItems[index]
+                    : true,
+              ),
             ),
           ),
+          if (hiddenCount > 0)
+            Align(
+              alignment: Alignment.centerRight,
+              child: AppText(
+                '+ $hiddenCount منتجات أخرى',
+                style: const TextStyle(
+                  color: Color(0xFF6B7280),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -331,138 +434,6 @@ class _MetaChip extends StatelessWidget {
   }
 }
 
-class _ItemsPreview extends StatelessWidget {
-  final List<String> items;
-  final List<bool> availableItems;
-
-  const _ItemsPreview({required this.items, required this.availableItems});
-
-  @override
-  Widget build(BuildContext context) {
-    final visibleItems = items.take(3).toList();
-    final hiddenCount = items.length - visibleItems.length;
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF9FAFB),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
-      ),
-      child: Column(
-        children: [
-          ...List.generate(
-            visibleItems.length,
-            (index) => Padding(
-              padding: EdgeInsets.only(bottom: index == visibleItems.length - 1 && hiddenCount == 0 ? 0 : 8),
-              child: _RequirementRow(
-                label: '${index + 1}- ${visibleItems[index]}',
-                isAvailable: index < availableItems.length ? availableItems[index] : true,
-              ),
-            ),
-          ),
-          if (hiddenCount > 0)
-            Align(
-              alignment: Alignment.centerRight,
-              child: AppText(
-                '+ $hiddenCount منتجات أخرى',
-                style: const TextStyle(
-                  color: Color(0xFF6B7280),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ActionSection extends StatelessWidget {
-  final OrderStatus status;
-  final VoidCallback onAcceptTap;
-  final VoidCallback onRejectTap;
-  final VoidCallback onOpenDetailsTap;
-  final VoidCallback onCourierHandoverTap;
-  final bool isCourierHandoverLoading;
-
-  const _ActionSection({
-    required this.status,
-    required this.onAcceptTap,
-    required this.onRejectTap,
-    required this.onOpenDetailsTap,
-    required this.onCourierHandoverTap,
-    required this.isCourierHandoverLoading,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    if (status == OrderStatus.pending) {
-      return Row(
-        children: [
-          Expanded(
-            child: AppButton(
-              title: 'قبول الطلب',
-              onTap: onAcceptTap,
-            ),
-          ),
-          const SizedBox(width: 12),
-          AppOutlinedButton(
-            color: const Color(0xFFFF4C51),
-            title: 'رفض',
-            onTap: onRejectTap,
-          ),
-        ],
-      );
-    }
-
-    if (status == OrderStatus.readyForPickup) {
-      if (isCourierHandoverLoading) {
-        return const Center(
-          child: SizedBox(
-            width: 24,
-            height: 24,
-            child: CircularProgressIndicator(strokeWidth: 2.5),
-          ),
-        );
-      }
-
-      return SizedBox(
-        width: context.width,
-        child: AppButton(
-          color: const Color(0xFF24B364),
-          title: 'تسليم للمندوب',
-          onTap: onCourierHandoverTap,
-        ),
-      );
-    }
-
-    return SizedBox(
-      width: context.width,
-      child: AppButton(
-        icon: Icons.arrow_forward_rounded,
-        title: 'عرض التفاصيل',
-        onTap: onOpenDetailsTap,
-      ),
-    );
-  }
-}
-
-enum OrderStatus {
-  pending,
-  accepted,
-  preparing,
-  readyForPickup,
-  pickedUp,
-  completed,
-  rejected,
-  cancelled,
-}
-
-enum PaymentWay { cash }
-
 class _RequirementRow extends StatelessWidget {
   final String label;
   final bool isAvailable;
@@ -476,7 +447,9 @@ class _RequirementRow extends StatelessWidget {
       children: [
         Icon(
           isAvailable ? Icons.check_circle_rounded : Icons.cancel_rounded,
-          color: isAvailable ? const Color(0xFF24B364) : const Color(0xFFEF4444),
+          color: isAvailable
+              ? const Color(0xFF24B364)
+              : const Color(0xFFEF4444),
           size: 18,
         ),
         const SizedBox(width: 8),
@@ -494,6 +467,44 @@ class _RequirementRow extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _StatusBadge extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final Color color;
+
+  const _StatusBadge({
+    required this.label,
+    required this.icon,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: .10),
+        borderRadius: BorderRadius.circular(100),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: color),
+          const SizedBox(width: 5),
+          AppText(
+            label,
+            style: TextStyle(
+              color: color,
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

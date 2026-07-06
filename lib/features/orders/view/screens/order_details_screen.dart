@@ -16,10 +16,11 @@ import '../../domain/usecases/get_order_details_use_case.dart';
 import '../manager/bloc/orders_bloc.dart';
 import '../widgets/order_details_app_bar.dart';
 
-String _safeText(dynamic value, {String fallback = '-'}) {
-  if (value == null) return fallback;
-  final text = value.toString().trim();
-  return text.isEmpty || text == 'null' ? fallback : text;
+String _formatDurationArabic(int minutes) {
+  if (minutes < 0) return '';
+  if (minutes < 60) return '$minutes دقيقة';
+  if (minutes < 1440) return '${(minutes / 60).floor()} ساعة';
+  return '${(minutes / 1440).floor()} يوم';
 }
 
 String _formatMoney(String? value) {
@@ -29,26 +30,24 @@ String _formatMoney(String? value) {
   return amount.toStringAsFixed(2);
 }
 
+String _formatTime(String? value) {
+  final date = _parseDate(value);
+  if (date == null) return 'غير محدد';
+  return DateFormat.jm(
+    'ar_DZ',
+  ).format(date).replaceAll('مساءً', 'م').replaceAll('صباحاً', 'ص');
+}
+
 DateTime? _parseDate(String? value) {
   if (value == null || value.trim().isEmpty) return null;
   return DateTime.tryParse(value) ??
       DateTime.tryParse(value.replaceFirst(' ', 'T'));
 }
 
-String _formatTime(String? value) {
-  final date = _parseDate(value);
-  if (date == null) return 'غير محدد';
-  return DateFormat.jm('ar_DZ')
-      .format(date)
-      .replaceAll('مساءً', 'م')
-      .replaceAll('صباحاً', 'ص');
-}
-
-String _formatDurationArabic(int minutes) {
-  if (minutes < 0) return '';
-  if (minutes < 60) return '$minutes دقيقة';
-  if (minutes < 1440) return '${(minutes / 60).floor()} ساعة';
-  return '${(minutes / 1440).floor()} يوم';
+String _safeText(dynamic value, {String fallback = '-'}) {
+  if (value == null) return fallback;
+  final text = value.toString().trim();
+  return text.isEmpty || text == 'null' ? fallback : text;
 }
 
 Color _statusColor(String? status) {
@@ -97,24 +96,6 @@ class OrderDetailsLoading extends StatelessWidget {
   }
 }
 
-class _LoadingBlock extends StatelessWidget {
-  final double height;
-
-  const _LoadingBlock({required this.height});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      height: height,
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(18),
-      ),
-    );
-  }
-}
-
 @AutoRoutePage(path: '/orders/order_details')
 class OrderDetailsScreen extends StatelessWidget {
   final int orderId;
@@ -154,12 +135,12 @@ class OrderDetailsScreen extends StatelessWidget {
                             message: state.errorMessage.toString(),
                             onRetry: () {
                               context.read<OrdersBloc>().add(
-                                    GetOrderDetailsEvent(
-                                      params: GetOrderDetailsParams(
-                                        orderId: orderId,
-                                      ),
-                                    ),
-                                  );
+                                GetOrderDetailsEvent(
+                                  params: GetOrderDetailsParams(
+                                    orderId: orderId,
+                                  ),
+                                ),
+                              );
                             },
                           ),
                         ),
@@ -201,372 +182,6 @@ class OrderDetailsScreen extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _SectionCard extends StatelessWidget {
-  final Widget child;
-  final EdgeInsetsGeometry padding;
-
-  const _SectionCard({
-    required this.child,
-    this.padding = const EdgeInsets.all(16),
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: padding,
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFF3F4F6)),
-        boxShadow: [AppShadows.shadow],
-      ),
-      child: child,
-    );
-  }
-}
-
-class _SectionTitle extends StatelessWidget {
-  final String title;
-  final IconData icon;
-  final Color? color;
-  final String? trailing;
-
-  const _SectionTitle({
-    required this.title,
-    required this.icon,
-    this.color,
-    this.trailing,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final effectiveColor = color ?? context.primary;
-
-    return Row(
-      children: [
-        Container(
-          width: 34,
-          height: 34,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: effectiveColor.withValues(alpha: .10),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(icon, size: 18, color: effectiveColor),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: AppText(
-            title,
-            textAlign: TextAlign.start,
-            style: const TextStyle(
-              color: Color(0xFF111827),
-              fontSize: 15,
-              fontWeight: FontWeight.w800,
-              height: 1.4,
-            ),
-          ),
-        ),
-        if (trailing != null)
-          AppText(
-            trailing!,
-            style: const TextStyle(
-              color: Color(0xFF6B7280),
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-      ],
-    );
-  }
-}
-
-class _OrderStatusCard extends StatelessWidget {
-  final GetOrderDetailsModelData data;
-
-  const _OrderStatusCard({required this.data});
-
-  @override
-  Widget build(BuildContext context) {
-    final details = data.orderDetails;
-    final status = details?.currentStatus ?? data.status;
-    final color = _statusColor(status);
-    final minutes = details?.statusElapsedMinutes ?? 0;
-    final statusLabel =
-        details?.currentStatusLabel ?? _safeText(data.status, fallback: 'غير محدد');
-
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: const [
-          BoxShadow(
-            offset: Offset(0, 12),
-            blurRadius: 26,
-            spreadRadius: -16,
-            color: Color(0x66000000),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              CircleAvatar(
-                radius: 22,
-                backgroundColor: const Color(0x33FFFFFF),
-                child: Icon(
-                  _statusIcon(status),
-                  size: 22,
-                  color: AppColors.white,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    AppText(
-                      'الحالة الحالية',
-                      textAlign: TextAlign.start,
-                      style: const TextStyle(
-                        color: Color(0xE6FFFFFF),
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    AppText(
-                      statusLabel,
-                      textAlign: TextAlign.start,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: AppColors.white,
-                        fontSize: 19,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-                decoration: BoxDecoration(
-                  color: const Color(0x33FFFFFF),
-                  borderRadius: BorderRadius.circular(100),
-                ),
-                child: AppText(
-                  details?.statusElapsedText ?? _formatDurationArabic(minutes),
-                  style: const TextStyle(
-                    color: AppColors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: _TimeOrderOverlay(
-                  title: 'وقت الاستلام',
-                  subtitle: _formatTime(data.createdAt),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _TimeOrderOverlay(
-                  title: 'الوقت المتوقع',
-                  subtitle: details?.expectedDeliveryTime ?? 'غير محدد',
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _TimeOrderOverlay(
-                  title: 'منذ',
-                  subtitle: _formatDurationArabic(minutes),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _OrderInfoCard extends StatelessWidget {
-  final GetOrderDetailsModelData data;
-
-  const _OrderInfoCard({required this.data});
-
-  @override
-  Widget build(BuildContext context) {
-    final notes = _safeText(
-      data.specialInstructions,
-      fallback: 'لا توجد ملاحظات خاصة',
-    );
-
-    return _SectionCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const _SectionTitle(
-            title: 'معلومات الطلب',
-            icon: Icons.receipt_long_rounded,
-          ),
-          const SizedBox(height: 14),
-          Row(
-            children: [
-              Expanded(
-                child: _InfoTile(
-                  title: 'رقم الطلب',
-                  value: '#${data.orderNumber ?? data.id ?? '-'}',
-                  icon: Icons.tag_rounded,
-                ),
-              ),
-              const SizedBox(width: 10),
-              const Expanded(
-                child: _InfoTile(
-                  title: 'طريقة الدفع',
-                  value: 'نقدي',
-                  icon: Icons.payments_outlined,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(
-                child: _InfoTile(
-                  title: 'نوع الاستلام',
-                  value: _pickupModeLabel(data.pickupMode),
-                  icon: Icons.delivery_dining_rounded,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _InfoTile(
-                  title: 'تاريخ الإنشاء',
-                  value: _formatTime(data.createdAt),
-                  icon: Icons.schedule_rounded,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF9FAFB),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Icon(
-                  Icons.notes_rounded,
-                  size: 18,
-                  color: Color(0xFF6B7280),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: AppText(
-                    notes,
-                    textAlign: TextAlign.start,
-                    style: const TextStyle(
-                      color: Color(0xFF4B5563),
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      height: 1.5,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _pickupModeLabel(String? value) {
-    return switch (value) {
-      'delivery' => 'توصيل',
-      'pickup' => 'استلام من المتجر',
-      _ => _safeText(value, fallback: 'توصيل'),
-    };
-  }
-}
-
-class _InfoTile extends StatelessWidget {
-  final String title;
-  final String value;
-  final IconData icon;
-
-  const _InfoTile({
-    required this.title,
-    required this.value,
-    required this.icon,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF9FAFB),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, size: 15, color: const Color(0xFF6B7280)),
-              const SizedBox(width: 6),
-              Expanded(
-                child: AppText(
-                  title,
-                  textAlign: TextAlign.start,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: Color(0xFF6B7280),
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          AppText(
-            value,
-            textAlign: TextAlign.start,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              color: Color(0xFF111827),
-              fontSize: 13,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -666,53 +281,6 @@ class _BillCard extends StatelessWidget {
   }
 }
 
-class _PaymentRow extends StatelessWidget {
-  final String label;
-  final String value;
-  final Color? valueColor;
-  final bool isTotal;
-
-  const _PaymentRow({
-    required this.label,
-    required this.value,
-    this.valueColor,
-    this.isTotal = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Expanded(
-          child: AppText(
-            label,
-            textAlign: TextAlign.start,
-            style: TextStyle(
-              color: isTotal
-                  ? const Color(0xFF111827)
-                  : const Color(0xFF4B5563),
-              fontSize: isTotal ? 16 : 14,
-              fontWeight: isTotal ? FontWeight.w800 : FontWeight.w600,
-              height: 1.42,
-            ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        AppText(
-          value,
-          style: TextStyle(
-            color: valueColor ?? const Color(0xFF111827),
-            fontSize: isTotal ? 16 : 14,
-            fontWeight: FontWeight.w800,
-            height: 1.42,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 class _CustomerCard extends StatelessWidget {
   final GetOrderDetailsModelDataCustomer? customer;
 
@@ -748,10 +316,7 @@ class _CustomerCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     AppText(
-                      _safeText(
-                        customer?.name,
-                        fallback: 'زبون السوبرماركت',
-                      ),
+                      _safeText(customer?.name, fallback: 'زبون السوبرماركت'),
                       textAlign: TextAlign.start,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -844,42 +409,59 @@ class _CustomerCard extends StatelessWidget {
   }
 }
 
-class _StoreCard extends StatelessWidget {
-  final GetOrderDetailsModelDataStore store;
+class _InfoTile extends StatelessWidget {
+  final String title;
+  final String value;
+  final IconData icon;
 
-  const _StoreCard({required this.store});
+  const _InfoTile({
+    required this.title,
+    required this.value,
+    required this.icon,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return _SectionCard(
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF9FAFB),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFE5E7EB)),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const _SectionTitle(
-            title: 'معلومات المتجر',
-            icon: Icons.storefront_rounded,
+          Row(
+            children: [
+              Icon(icon, size: 15, color: const Color(0xFF6B7280)),
+              const SizedBox(width: 6),
+              Expanded(
+                child: AppText(
+                  title,
+                  textAlign: TextAlign.start,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Color(0xFF6B7280),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 6),
           AppText(
-            _safeText(store.name, fallback: 'اسم المتجر غير متوفر'),
+            value,
             textAlign: TextAlign.start,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
               color: Color(0xFF111827),
-              fontSize: 15,
+              fontSize: 13,
               fontWeight: FontWeight.w800,
             ),
-          ),
-          const SizedBox(height: 8),
-          _InlineInfo(
-            icon: Icons.location_on_outlined,
-            value: _safeText(store.address, fallback: 'عنوان المتجر غير متوفر'),
-          ),
-          const SizedBox(height: 5),
-          _InlineInfo(
-            icon: Icons.phone_rounded,
-            value: _safeText(store.phone, fallback: 'رقم المتجر غير متوفر'),
           ),
         ],
       ),
@@ -915,6 +497,49 @@ class _InlineInfo extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _LoadingBlock extends StatelessWidget {
+  final double height;
+
+  const _LoadingBlock({required this.height});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      height: height,
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(18),
+      ),
+    );
+  }
+}
+
+class _MiniBadge extends StatelessWidget {
+  final String label;
+
+  const _MiniBadge({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF3F4F6),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: AppText(
+        label,
+        style: const TextStyle(
+          color: Color(0xFF4B5563),
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
     );
   }
 }
@@ -971,21 +596,301 @@ class _OrderDetailsCard extends StatelessWidget {
   }
 }
 
+class _OrderInfoCard extends StatelessWidget {
+  final GetOrderDetailsModelData data;
+
+  const _OrderInfoCard({required this.data});
+
+  @override
+  Widget build(BuildContext context) {
+    final notes = _safeText(
+      data.specialInstructions,
+      fallback: 'لا توجد ملاحظات خاصة',
+    );
+
+    return _SectionCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const _SectionTitle(
+            title: 'معلومات الطلب',
+            icon: Icons.receipt_long_rounded,
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
+                flex: 3,
+                child: _InfoTile(
+                  title: 'رقم الطلب',
+                  value: '#${data.orderNumber ?? data.id ?? '-'}',
+                  icon: Icons.tag_rounded,
+                ),
+              ),
+              const SizedBox(width: 10),
+              const Expanded(
+                flex: 2,
+                child: _InfoTile(
+                  title: 'طريقة الدفع',
+                  value: 'نقدي',
+                  icon: Icons.payments_outlined,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                flex: 3,
+                child: _InfoTile(
+                  title: 'نوع الاستلام',
+                  value: _pickupModeLabel(data.pickupMode),
+                  icon: Icons.delivery_dining_rounded,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                flex: 2,
+                child: _InfoTile(
+                  title: 'تاريخ الإنشاء',
+                  value: _formatTime(data.createdAt),
+                  icon: Icons.schedule_rounded,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF9FAFB),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(
+                  Icons.notes_rounded,
+                  size: 18,
+                  color: Color(0xFF6B7280),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: AppText(
+                    notes,
+                    textAlign: TextAlign.start,
+                    style: const TextStyle(
+                      color: Color(0xFF4B5563),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      height: 1.5,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _pickupModeLabel(String? value) {
+    return switch (value) {
+      'delivery' => 'توصيل',
+      'pickup' => 'استلام من المتجر',
+      "immediate_pickup" => 'استلام فوري من المتجر',
+      _ => _safeText(value, fallback: 'توصيل'),
+    };
+  }
+}
+
+class _OrderStatusCard extends StatelessWidget {
+  final GetOrderDetailsModelData data;
+
+  const _OrderStatusCard({required this.data});
+
+  @override
+  Widget build(BuildContext context) {
+    final details = data.orderDetails;
+    final status = details?.currentStatus ?? data.status;
+    final color = _statusColor(status);
+    final minutes = details?.statusElapsedMinutes ?? 0;
+    final statusLabel =
+        details?.currentStatusLabel ??
+        _safeText(data.status, fallback: 'غير محدد');
+
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: const [
+          BoxShadow(
+            offset: Offset(0, 12),
+            blurRadius: 26,
+            spreadRadius: -16,
+            color: Color(0x66000000),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 22,
+                backgroundColor: const Color(0x33FFFFFF),
+                child: Icon(
+                  _statusIcon(status),
+                  size: 22,
+                  color: AppColors.white,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    AppText(
+                      'الحالة الحالية',
+                      textAlign: TextAlign.start,
+                      style: const TextStyle(
+                        color: Color(0xE6FFFFFF),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    AppText(
+                      statusLabel,
+                      textAlign: TextAlign.start,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: AppColors.white,
+                        fontSize: 19,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 7,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0x33FFFFFF),
+                  borderRadius: BorderRadius.circular(100),
+                ),
+                child: AppText(
+                  details?.statusElapsedText ?? _formatDurationArabic(minutes),
+                  style: const TextStyle(
+                    color: AppColors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _TimeOrderOverlay(
+                  title: 'وقت الاستلام',
+                  subtitle: _formatTime(data.createdAt),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _TimeOrderOverlay(
+                  title: 'الوقت المتوقع',
+                  subtitle: details?.expectedDeliveryTime ?? 'غير محدد',
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _TimeOrderOverlay(
+                  title: 'منذ',
+                  subtitle: _formatDurationArabic(minutes),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PaymentRow extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color? valueColor;
+  final bool isTotal;
+
+  const _PaymentRow({
+    required this.label,
+    required this.value,
+    this.valueColor,
+    this.isTotal = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: AppText(
+            label,
+            textAlign: TextAlign.start,
+            style: TextStyle(
+              color: isTotal
+                  ? const Color(0xFF111827)
+                  : const Color(0xFF4B5563),
+              fontSize: isTotal ? 16 : 14,
+              fontWeight: isTotal ? FontWeight.w800 : FontWeight.w600,
+              height: 1.42,
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        AppText(
+          value,
+          style: TextStyle(
+            color: valueColor ?? const Color(0xFF111827),
+            fontSize: isTotal ? 16 : 14,
+            fontWeight: FontWeight.w800,
+            height: 1.42,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _ProductDetails extends StatelessWidget {
   final bool isLast;
   final GetOrderDetailsModelDataItemsItem orderItem;
 
-  const _ProductDetails({
-    this.isLast = false,
-    required this.orderItem,
-  });
+  const _ProductDetails({this.isLast = false, required this.orderItem});
 
   @override
   Widget build(BuildContext context) {
     final productName =
         orderItem.productName ?? orderItem.product?.name ?? 'منتج غير معروف';
     final imageUrl = _safeText(orderItem.product?.imageUrl, fallback: '');
-    final unitPrice = _formatMoney(orderItem.unitPrice ?? orderItem.product?.price);
+    final unitPrice = _formatMoney(
+      orderItem.unitPrice ?? orderItem.product?.price,
+    );
     final totalPrice = _formatMoney(orderItem.totalPrice);
 
     return Container(
@@ -1066,26 +971,125 @@ class _ProductDetails extends StatelessWidget {
   }
 }
 
-class _MiniBadge extends StatelessWidget {
-  final String label;
+class _SectionCard extends StatelessWidget {
+  final Widget child;
+  final EdgeInsetsGeometry padding;
 
-  const _MiniBadge({required this.label});
+  const _SectionCard({
+    required this.child,
+    this.padding = const EdgeInsets.all(16),
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      width: double.infinity,
+      padding: padding,
       decoration: BoxDecoration(
-        color: const Color(0xFFF3F4F6),
-        borderRadius: BorderRadius.circular(8),
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFFF3F4F6)),
+        boxShadow: [AppShadows.shadow],
       ),
-      child: AppText(
-        label,
-        style: const TextStyle(
-          color: Color(0xFF4B5563),
-          fontSize: 11,
-          fontWeight: FontWeight.w700,
+      child: child,
+    );
+  }
+}
+
+class _SectionTitle extends StatelessWidget {
+  final String title;
+  final IconData icon;
+  final Color? color;
+  final String? trailing;
+
+  const _SectionTitle({
+    required this.title,
+    required this.icon,
+    this.color,
+    this.trailing,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final effectiveColor = color ?? context.primary;
+
+    return Row(
+      children: [
+        Container(
+          width: 34,
+          height: 34,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: effectiveColor.withValues(alpha: .10),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(icon, size: 18, color: effectiveColor),
         ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: AppText(
+            title,
+            textAlign: TextAlign.start,
+            style: const TextStyle(
+              color: Color(0xFF111827),
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
+              height: 1.4,
+            ),
+          ),
+        ),
+        if (trailing != null)
+          AppText(
+            trailing!,
+            style: const TextStyle(
+              color: Color(0xFF6B7280),
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _StoreCard extends StatelessWidget {
+  final GetOrderDetailsModelDataStore store;
+
+  const _StoreCard({required this.store});
+
+  @override
+  Widget build(BuildContext context) {
+    return _SectionCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const _SectionTitle(
+            title: 'معلومات المتجر',
+            icon: Icons.storefront_rounded,
+          ),
+          const SizedBox(height: 14),
+          AppText(
+            _safeText(store.name, fallback: 'اسم المتجر غير متوفر'),
+            textAlign: TextAlign.start,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: Color(0xFF111827),
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 8),
+          _InlineInfo(
+            icon: Icons.location_on_outlined,
+            value: _safeText(store.address, fallback: 'عنوان المتجر غير متوفر'),
+          ),
+          const SizedBox(height: 5),
+          _InlineInfo(
+            icon: Icons.phone_rounded,
+            value: _safeText(store.phone, fallback: 'رقم المتجر غير متوفر'),
+          ),
+        ],
       ),
     );
   }
