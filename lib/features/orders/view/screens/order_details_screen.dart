@@ -16,7 +16,7 @@ import '../../domain/usecases/get_order_details_use_case.dart';
 import '../manager/bloc/orders_bloc.dart';
 import '../widgets/order_details_app_bar.dart';
 
-String _valueToString(dynamic value, {String fallback = '-'}) {
+String _safeText(dynamic value, {String fallback = '-'}) {
   if (value == null) return fallback;
   final text = value.toString().trim();
   return text.isEmpty || text == 'null' ? fallback : text;
@@ -24,7 +24,7 @@ String _valueToString(dynamic value, {String fallback = '-'}) {
 
 String _formatMoney(String? value) {
   final amount = double.tryParse(value ?? '');
-  if (amount == null) return _valueToString(value, fallback: '0');
+  if (amount == null) return _safeText(value, fallback: '0');
   if (amount == amount.roundToDouble()) return amount.toStringAsFixed(0);
   return amount.toStringAsFixed(2);
 }
@@ -124,9 +124,7 @@ class OrderDetailsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => getIt<OrdersBloc>()
-        ..add(
-          GetOrderDetailsEvent(params: GetOrderDetailsParams(orderId: orderId)),
-        ),
+        ..add(GetOrderDetailsEvent(params: GetOrderDetailsParams(orderId: orderId))),
       child: Scaffold(
         backgroundColor: const Color(0xFFF5F6FA),
         body: Column(
@@ -153,9 +151,7 @@ class OrderDetailsScreen extends StatelessWidget {
                             message: state.errorMessage.toString(),
                             onRetry: () {
                               context.read<OrdersBloc>().add(
-                                GetOrderDetailsEvent(
-                                  params: GetOrderDetailsParams(orderId: orderId),
-                                ),
+                                GetOrderDetailsEvent(params: GetOrderDetailsParams(orderId: orderId)),
                               );
                             },
                           ),
@@ -295,9 +291,7 @@ class _OrderStatusCard extends StatelessWidget {
     final status = details?.currentStatus ?? data.status;
     final color = _statusColor(status);
     final minutes = details?.statusElapsedMinutes ?? 0;
-    final createdAt = _formatTime(data.createdAt);
-    final expectedTime = details?.expectedDeliveryTime ?? 'غير محدد';
-    final statusLabel = details?.currentStatusLabel ?? _valueToString(data.status, fallback: 'غير محدد');
+    final statusLabel = details?.currentStatusLabel ?? _safeText(data.status, fallback: 'غير محدد');
 
     return Container(
       padding: const EdgeInsets.all(18),
@@ -373,24 +367,15 @@ class _OrderStatusCard extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: _TimeOrderOverlay(
-                  title: 'وقت الاستلام',
-                  subtitle: createdAt,
-                ),
+                child: _TimeOrderOverlay(title: 'وقت الاستلام', subtitle: _formatTime(data.createdAt)),
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: _TimeOrderOverlay(
-                  title: 'الوقت المتوقع',
-                  subtitle: expectedTime,
-                ),
+                child: _TimeOrderOverlay(title: 'الوقت المتوقع', subtitle: details?.expectedDeliveryTime ?? 'غير محدد'),
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: _TimeOrderOverlay(
-                  title: 'منذ',
-                  subtitle: _formatDurationArabic(minutes),
-                ),
+                child: _TimeOrderOverlay(title: 'منذ', subtitle: _formatDurationArabic(minutes)),
               ),
             ],
           ),
@@ -407,54 +392,27 @@ class _OrderInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final specialInstructions = _valueToString(data.specialInstructions, fallback: 'لا توجد ملاحظات خاصة');
+    final notes = _safeText(data.specialInstructions, fallback: 'لا توجد ملاحظات خاصة');
 
     return _SectionCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const _SectionTitle(
-            title: 'معلومات الطلب',
-            icon: Icons.receipt_long_rounded,
-          ),
+          const _SectionTitle(title: 'معلومات الطلب', icon: Icons.receipt_long_rounded),
           const SizedBox(height: 14),
           Row(
             children: [
-              Expanded(
-                child: _InfoTile(
-                  title: 'رقم الطلب',
-                  value: '#${data.orderNumber ?? data.id ?? '-'}',
-                  icon: Icons.tag_rounded,
-                ),
-              ),
+              Expanded(child: _InfoTile(title: 'رقم الطلب', value: '#${data.orderNumber ?? data.id ?? '-'}', icon: Icons.tag_rounded)),
               const SizedBox(width: 10),
-              Expanded(
-                child: _InfoTile(
-                  title: 'طريقة الدفع',
-                  value: 'نقدي',
-                  icon: Icons.payments_outlined,
-                ),
-              ),
+              const Expanded(child: _InfoTile(title: 'طريقة الدفع', value: 'نقدي', icon: Icons.payments_outlined)),
             ],
           ),
           const SizedBox(height: 10),
           Row(
             children: [
-              Expanded(
-                child: _InfoTile(
-                  title: 'نوع الاستلام',
-                  value: _pickupModeLabel(data.pickupMode),
-                  icon: Icons.delivery_dining_rounded,
-                ),
-              ),
+              Expanded(child: _InfoTile(title: 'نوع الاستلام', value: _pickupModeLabel(data.pickupMode), icon: Icons.delivery_dining_rounded)),
               const SizedBox(width: 10),
-              Expanded(
-                child: _InfoTile(
-                  title: 'تاريخ الإنشاء',
-                  value: _formatTime(data.createdAt),
-                  icon: Icons.schedule_rounded,
-                ),
-              ),
+              Expanded(child: _InfoTile(title: 'تاريخ الإنشاء', value: _formatTime(data.createdAt), icon: Icons.schedule_rounded)),
             ],
           ),
           const SizedBox(height: 12),
@@ -472,7 +430,7 @@ class _OrderInfoCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: AppText(
-                    specialInstructions,
+                    notes,
                     textAlign: TextAlign.start,
                     style: const TextStyle(
                       color: Color(0xFF4B5563),
@@ -494,7 +452,7 @@ class _OrderInfoCard extends StatelessWidget {
     return switch (value) {
       'delivery' => 'توصيل',
       'pickup' => 'استلام من المتجر',
-      _ => _valueToString(value, fallback: 'توصيل'),
+      _ => _safeText(value, fallback: 'توصيل'),
     };
   }
 }
@@ -587,28 +545,14 @@ class _BillCard extends StatelessWidget {
           const SizedBox(height: 16),
           _PaymentRow(label: 'تكلفة المنتجات', value: '${_formatMoney(price)} ل.س'),
           const SizedBox(height: 10),
-          _PaymentRow(
-            label: 'الخصم',
-            value: '- ${_formatMoney(discount)} ل.س',
-            valueColor: const Color(0xFF16A34A),
-          ),
+          _PaymentRow(label: 'الخصم', value: '- ${_formatMoney(discount)} ل.س', valueColor: const Color(0xFF16A34A)),
           const SizedBox(height: 10),
-          _PaymentRow(
-            label: 'تكلفة الخدمة',
-            value: '+ ${_formatMoney(fees)} ل.س',
-            valueColor: const Color(0xFFEF4444),
-          ),
+          _PaymentRow(label: 'تكلفة الخدمة', value: '+ ${_formatMoney(fees)} ل.س', valueColor: const Color(0xFFEF4444)),
           const SizedBox(height: 12),
           Container(
             padding: const EdgeInsets.only(top: 12),
-            decoration: const BoxDecoration(
-              border: Border(top: BorderSide(color: Color(0xFFE5E7EB))),
-            ),
-            child: _PaymentRow(
-              label: 'الإجمالي',
-              value: '${_formatMoney(totalPrice)} ل.س',
-              isTotal: true,
-            ),
+            decoration: const BoxDecoration(border: Border(top: BorderSide(color: Color(0xFFE5E7EB)))),
+            child: _PaymentRow(label: 'الإجمالي', value: '${_formatMoney(totalPrice)} ل.س', isTotal: true),
           ),
           const SizedBox(height: 16),
           Container(
@@ -619,18 +563,18 @@ class _BillCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(14),
             ),
             child: Row(
-              children: const [
-                CircleAvatar(
+              children: [
+                const CircleAvatar(
                   radius: 16,
                   backgroundColor: Color(0xFFDCFCE7),
                   child: Icon(Icons.payments_outlined, size: 16, color: Color(0xFF16A34A)),
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 Expanded(
                   child: AppText(
                     'نقداً عند الاستلام',
                     textAlign: TextAlign.start,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Color(0xFF111827),
                       fontSize: 14,
                       fontWeight: FontWeight.w800,
@@ -698,18 +642,14 @@ class _CustomerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final phone = _valueToString(customer?.phone, fallback: '');
+    final phone = _safeText(customer?.phone, fallback: '');
 
     return _SectionCard(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const _SectionTitle(
-            title: 'معلومات الزبون',
-            icon: Icons.person_rounded,
-            trailing: 'توصيل',
-          ),
+          const _SectionTitle(title: 'معلومات الزبون', icon: Icons.person_rounded, trailing: 'توصيل'),
           const SizedBox(height: 16),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -726,7 +666,7 @@ class _CustomerCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     AppText(
-                      _valueToString(customer?.name, fallback: 'زبون السوبرماركت'),
+                      _safeText(customer?.name, fallback: 'زبون السوبرماركت'),
                       textAlign: TextAlign.start,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -738,15 +678,9 @@ class _CustomerCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 6),
-                    _InlineInfo(
-                      icon: Icons.phone_rounded,
-                      value: phone.isEmpty ? 'رقم الهاتف غير متوفر' : phone,
-                    ),
+                    _InlineInfo(icon: Icons.phone_rounded, value: phone.isEmpty ? 'رقم الهاتف غير متوفر' : phone),
                     const SizedBox(height: 5),
-                    _InlineInfo(
-                      icon: Icons.email_outlined,
-                      value: _valueToString(customer?.email, fallback: 'البريد الإلكتروني غير متوفر'),
-                    ),
+                    _InlineInfo(icon: Icons.email_outlined, value: _safeText(customer?.email, fallback: 'البريد الإلكتروني غير متوفر')),
                   ],
                 ),
               ),
@@ -791,12 +725,12 @@ class _CustomerCard extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
-                  Icon(Icons.phone_rounded, size: 17, color: AppColors.white),
-                  SizedBox(width: 8),
+                children: [
+                  const Icon(Icons.phone_rounded, size: 17, color: AppColors.white),
+                  const SizedBox(width: 8),
                   AppText(
                     'اتصال بالزبون',
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: AppColors.white,
                       fontSize: 14,
                       fontWeight: FontWeight.w800,
@@ -823,13 +757,10 @@ class _StoreCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const _SectionTitle(
-            title: 'معلومات المتجر',
-            icon: Icons.storefront_rounded,
-          ),
+          const _SectionTitle(title: 'معلومات المتجر', icon: Icons.storefront_rounded),
           const SizedBox(height: 14),
           AppText(
-            _valueToString(store.name, fallback: 'اسم المتجر غير متوفر'),
+            _safeText(store.name, fallback: 'اسم المتجر غير متوفر'),
             textAlign: TextAlign.start,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -840,15 +771,9 @@ class _StoreCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          _InlineInfo(
-            icon: Icons.location_on_outlined,
-            value: _valueToString(store.address, fallback: 'عنوان المتجر غير متوفر'),
-          ),
+          _InlineInfo(icon: Icons.location_on_outlined, value: _safeText(store.address, fallback: 'عنوان المتجر غير متوفر')),
           const SizedBox(height: 5),
-          _InlineInfo(
-            icon: Icons.phone_rounded,
-            value: _valueToString(store.phone, fallback: 'رقم المتجر غير متوفر'),
-          ),
+          _InlineInfo(icon: Icons.phone_rounded, value: _safeText(store.phone, fallback: 'رقم المتجر غير متوفر')),
         ],
       ),
     );
@@ -913,9 +838,9 @@ class _OrderDetailsCard extends StatelessWidget {
                 color: const Color(0xFFF9FAFB),
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: const AppText(
+              child: AppText(
                 'لا توجد منتجات في هذا الطلب',
-                style: TextStyle(
+                style: const TextStyle(
                   color: Color(0xFF6B7280),
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
@@ -951,7 +876,7 @@ class _ProductDetails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final productName = orderItem.productName ?? orderItem.product?.name ?? 'منتج غير معروف';
-    final imageUrl = _valueToString(orderItem.product?.imageUrl, fallback: '');
+    final imageUrl = _safeText(orderItem.product?.imageUrl, fallback: '');
     final unitPrice = _formatMoney(orderItem.unitPrice ?? orderItem.product?.price);
     final totalPrice = _formatMoney(orderItem.totalPrice);
 
