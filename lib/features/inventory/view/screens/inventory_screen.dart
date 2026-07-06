@@ -561,6 +561,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                       return SizedBox();
                     },
                   ),
+
                   Expanded(
                     child: BlocBuilder<InventoryBloc, InventoryState>(
                       buildWhen: (previous, current) =>

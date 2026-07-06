@@ -100,7 +100,7 @@ class _MoreScreenState extends State<MoreScreen> {
         children: [
           MoreAppBar(
             title: storeProfile["user"]['name'],
-            storeId: storeProfile["user"]['id'].toString(),
+            // storeId: storeProfile["user"]['id'].toString(),
           ),
           Expanded(
             child: SingleChildScrollView(

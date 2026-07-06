@@ -430,7 +430,7 @@ class _CustomerCard extends StatelessWidget {
                         ),
                         SizedBox(width: 4),
                         AppText(
-                          customer.phone.toString(), //"09501234567",
+                          customer.phone.toString().formatAsPhoneNumber, //"09501234567",
                           style: TextStyle(
                             color: Color(0xFF6B7280),
                             fontSize: 12,
@@ -473,17 +473,19 @@ class _CustomerCard extends StatelessWidget {
           SizedBox(height: 16),
           InkWell(
             onTap: () async {
+              print(customer.phone);
               if (await canLaunchUrlString("tel:${customer.phone}") &&
                   context.mounted) {
-                AppToast.showToast(
-                  context: context,
-                  message: "رقم الهاتف غير صالح",
-                  type: ToastificationType.warning,
-                );
+
+                launchUrlString("tel:${customer.phone}");
+                Clipboard.setData(ClipboardData(text: customer.phone));
                 return;
               }
-              launchUrlString("tel:${customer.phone}");
-              Clipboard.setData(ClipboardData(text: customer.phone));
+              AppToast.showToast(
+                context: context,
+                message: "رقم الهاتف غير صالح",
+                type: ToastificationType.warning,
+              );
             },
             borderRadius: BorderRadius.all(Radius.circular(12)),
             child: Container(

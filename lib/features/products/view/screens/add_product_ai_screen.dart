@@ -147,6 +147,7 @@ class _AddProductAIScreenState extends State<AddProductAIScreen> {
                                           title: productName.trim(),
                                           description: productDescription
                                               .trim(),
+
                                         ),
                                       ),
                                     );
@@ -253,6 +254,8 @@ class _AddProductAIScreenState extends State<AddProductAIScreen> {
                                                               AddProductDetailsParams(
                                                                 mainImage64Based:
                                                                     generatedImage64Based,
+                                                                title: productName,
+                                                                description: productDescription
                                                               ),
                                                         );
                                                       },
@@ -383,6 +386,7 @@ class _AddProductAIScreenState extends State<AddProductAIScreen> {
                                                 description:
                                                     generatedProductDescriptionController
                                                         .text,
+                                                mainImagePath: imagePath
                                               ),
                                             );
                                           },
