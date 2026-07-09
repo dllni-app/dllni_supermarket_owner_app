@@ -34,16 +34,15 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
     this.rejectOrderUseCase,
     this.getOrderDetailsUseCase,
     this.courierHandoverUseCase,
-    this.getOrderCountsUseCase,) : super(OrdersState()) {
-    
-  
+    this.getOrderCountsUseCase,
+  ) : super(OrdersState()) {
     on<GetOrdersEvent>(_getOrders, transformer: droppableProMax());
     on<AcceptOrderEvent>(_acceptOrder);
     on<RejectOrderEvent>(_rejectOrder);
     on<GetOrderDetailsEvent>(_getOrderDetails);
     on<CourierHandoverEvent>(_courierHandover);
-  
-    on<GetOrderCountsEvent>(_getOrderCounts);}
+    on<GetOrderCountsEvent>(_getOrderCounts);
+  }
 
   EventTransformer<T> droppableProMax<T extends EventWithReload>() {
     return (events, mapper) {
@@ -51,7 +50,10 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
     };
   }
 
-  FutureOr<void> _getOrders(GetOrdersEvent event, Emitter<OrdersState> emit) async {
+  FutureOr<void> _getOrders(
+    GetOrdersEvent event,
+    Emitter<OrdersState> emit,
+  ) async {
     if (!state.orders!.isEndPage || event.isReload) {
       emit(state.copyWith(
         orders: state.orders!.setLoading(isReload: event.isReload),
@@ -70,7 +72,10 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
     }
   }
 
-  FutureOr<void> _acceptOrder(AcceptOrderEvent event, Emitter<OrdersState> emit) async {
+  FutureOr<void> _acceptOrder(
+    AcceptOrderEvent event,
+    Emitter<OrdersState> emit,
+  ) async {
     emit(state.copyWith(acceptOrderStatus: BlocStatus.loading));
     final res = await acceptOrderUseCase(event.params);
     res.fold((l) {
@@ -83,10 +88,14 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
         acceptOrderStatus: BlocStatus.success,
         acceptOrder: r,
       ));
+      add(GetOrderCountsEvent(params: GetOrderCountsParams()));
     });
   }
 
-  FutureOr<void> _rejectOrder(RejectOrderEvent event, Emitter<OrdersState> emit) async {
+  FutureOr<void> _rejectOrder(
+    RejectOrderEvent event,
+    Emitter<OrdersState> emit,
+  ) async {
     emit(state.copyWith(rejectOrderStatus: BlocStatus.loading));
     final res = await rejectOrderUseCase(event.params);
     res.fold((l) {
@@ -99,10 +108,14 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
         rejectOrderStatus: BlocStatus.success,
         rejectOrder: r,
       ));
+      add(GetOrderCountsEvent(params: GetOrderCountsParams()));
     });
   }
 
-  FutureOr<void> _getOrderDetails(GetOrderDetailsEvent event, Emitter<OrdersState> emit) async {
+  FutureOr<void> _getOrderDetails(
+    GetOrderDetailsEvent event,
+    Emitter<OrdersState> emit,
+  ) async {
     emit(state.copyWith(orderDetailsStatus: BlocStatus.loading));
     final res = await getOrderDetailsUseCase(event.params);
     res.fold((l) {
@@ -150,11 +163,14 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
           ),
         ),
       );
+      add(GetOrderCountsEvent(params: GetOrderCountsParams()));
     });
   }
 
-
-  FutureOr<void> _getOrderCounts(GetOrderCountsEvent event, Emitter<OrdersState> emit) async {
+  FutureOr<void> _getOrderCounts(
+    GetOrderCountsEvent event,
+    Emitter<OrdersState> emit,
+  ) async {
     emit(state.copyWith(orderCountsStatus: BlocStatus.loading));
     final res = await getOrderCountsUseCase(event.params);
     res.fold((l) {
@@ -168,5 +184,5 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
         orderCounts: r,
       ));
     });
-  }}
-
+  }
+}
