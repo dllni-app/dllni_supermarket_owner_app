@@ -64,21 +64,18 @@ class OrdersRemoteDataSource with HandlingApiManager {
   }
 
   Future<CourierHandoverModel> courierHandover(CourierHandoverParams params) {
-    if (params.stage == 1 || params.stage == 2) {
-      final status = params.stage == 1 ? 'preparing' : 'ready_for_pickup';
-      return wrapHandlingApi(
-        tryCall: () => dioNetwork.patchData(
-          endPoint: '/api/v1/sm-orders/${params.orderId}',
-          data: {'status': status},
-          params: params.getParams(),
-        ),
-        jsonConvert: courierHandoverModelFromJson,
-      );
-    }
+    final endPoint = switch (params.action) {
+      OrderLifecycleAction.markPreparing =>
+        '/api/v1/store-owner/orders/${params.orderId}/preparing',
+      OrderLifecycleAction.markReadyForPickup =>
+        '/api/v1/store-owner/orders/${params.orderId}/ready-for-pickup',
+      OrderLifecycleAction.courierHandover =>
+        '/api/v1/store-owner/orders/${params.orderId}/courier-handover',
+    };
 
     return wrapHandlingApi(
       tryCall: () => dioNetwork.postData(
-        endPoint: '/api/v1/store-owner/orders/${params.orderId}/courier-handover',
+        endPoint: endPoint,
         data: params.getBody(),
         params: params.getParams(),
       ),
