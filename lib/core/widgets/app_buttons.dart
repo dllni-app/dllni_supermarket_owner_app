@@ -9,17 +9,19 @@ class AppButton extends StatelessWidget {
     this.onTap,
     required this.title,
     this.withShadow = true,
-    this.color = AppColors.primary,
+    this.color,
     this.icon,
   });
   final void Function()? onTap;
   final String title;
   final bool withShadow;
-  final Color color;
+  final Color? color;
   final IconData? icon;
 
   @override
   Widget build(BuildContext context) {
+    final effectiveColor = color ?? AppColors.primary;
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.all(Radius.circular(8)),
@@ -27,7 +29,7 @@ class AppButton extends StatelessWidget {
         padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.all(Radius.circular(8)),
-          color: onTap != null ? color : const Color(0x662F2B3D),
+          color: onTap != null ? effectiveColor : const Color(0x662F2B3D),
           boxShadow: onTap == null || (onTap != null && !withShadow)
               ? null
               : [
