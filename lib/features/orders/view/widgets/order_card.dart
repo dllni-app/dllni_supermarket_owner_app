@@ -27,6 +27,7 @@ class OrderCard extends StatelessWidget {
 
   bool get hasPrimaryAction =>
       status == OrderStatus.pending ||
+      status == OrderStatus.accepted ||
       status == OrderStatus.preparing ||
       status == OrderStatus.readyForPickup;
 
@@ -45,9 +46,9 @@ class OrderCard extends StatelessWidget {
 
   String get stageLabel => switch (status) {
     OrderStatus.pending => 'بانتظار قبول الطلب من المتجر',
-    OrderStatus.accepted => 'جاري البحث عن مندوب',
+    OrderStatus.accepted => 'تم قبول الطلب - بانتظار بدء التحضير',
     OrderStatus.preparing => 'يتم تجهيز المنتجات',
-    OrderStatus.readyForPickup => 'بانتظار تسليم الطلب للمندوب',
+    OrderStatus.readyForPickup => 'الطلب جاهز وبانتظار المندوب',
     OrderStatus.pickedUp => 'تم تسليم الطلب للمندوب',
     OrderStatus.completed => 'تم تسليم الطلب',
     OrderStatus.rejected => 'تم رفض الطلب',
@@ -315,7 +316,9 @@ class _ActionSection extends StatelessWidget {
       );
     }
 
-    if (status == OrderStatus.readyForPickup) {
+    if (status == OrderStatus.accepted ||
+        status == OrderStatus.preparing ||
+        status == OrderStatus.readyForPickup) {
       if (isCourierHandoverLoading) {
         return const Center(
           child: SizedBox(
@@ -326,11 +329,22 @@ class _ActionSection extends StatelessWidget {
         );
       }
 
+      final buttonTitle = switch (status) {
+        OrderStatus.accepted => 'بدء التحضير',
+        OrderStatus.preparing => 'جاهز للاستلام',
+        OrderStatus.readyForPickup => 'تسليم للمندوب',
+        _ => 'تحديث الحالة',
+      };
+
+      final buttonColor = status == OrderStatus.readyForPickup
+          ? const Color(0xFF24B364)
+          : null;
+
       return SizedBox(
         width: context.width,
         child: AppButton(
-          color: const Color(0xFF24B364),
-          title: 'تسليم للمندوب',
+          color: buttonColor,
+          title: buttonTitle,
           onTap: onCourierHandoverTap,
         ),
       );
