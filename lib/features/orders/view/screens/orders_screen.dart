@@ -109,6 +109,11 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                 leadingColor: context.primary,
                               ),
                               OrdersTabBarItem(
+                                title: 'مقبول',
+                                count: state.orderCounts?.data?.accepted ?? 0,
+                                leadingColor: const Color(0xFF2563EB),
+                              ),
+                              OrdersTabBarItem(
                                 title: 'قيد التحضير',
                                 count: state.orderCounts?.data?.preparing ?? 0,
                                 leadingColor: AppColors.accent,
@@ -128,9 +133,10 @@ class _OrdersScreenState extends State<OrdersScreen> {
                             onChanged: (index) {
                               if (index == 0) selectedStatus = null;
                               if (index == 1) selectedStatus = 'pending';
-                              if (index == 2) selectedStatus = 'preparing';
-                              if (index == 3) selectedStatus = 'ready_for_pickup';
-                              if (index == 4) selectedStatus = 'completed';
+                              if (index == 2) selectedStatus = 'accepted';
+                              if (index == 3) selectedStatus = 'preparing';
+                              if (index == 4) selectedStatus = 'ready_for_pickup';
+                              if (index == 5) selectedStatus = 'completed';
                               context.read<OrdersBloc>().add(
                                 GetOrdersEvent(
                                   params: GetOrdersParams(
