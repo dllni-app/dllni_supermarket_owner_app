@@ -141,7 +141,7 @@ class LowStockAlertsSection extends StatelessWidget {
               ],
             ),
             WarningAlert(
-              icon: FontAwesomeIcons.triangleExclamation,
+              icon: FontAwesomeIcons.triangleExclamation.data,
               title: 'تنبيه مخزون منخفض',
               description:
                   'مادة "$name" قاربت على النفاد (الكمية الحالية: $current، الحد الأدنى: $threshold)',

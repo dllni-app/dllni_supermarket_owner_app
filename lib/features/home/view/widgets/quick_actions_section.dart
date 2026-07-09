@@ -143,7 +143,7 @@ class QuickActionsSection extends StatelessWidget {
                 QuickActionChipItem(
                   width: 133,
                   label: "إضافة يدوية",
-                  icon: FontAwesomeIcons.plus,
+                  icon: FontAwesomeIcons.plus.data,
                   onTap: () {
                     context.pushRoute("/products/new_product/details");
                   },
@@ -151,7 +151,7 @@ class QuickActionsSection extends StatelessWidget {
                 // QuickActionChipItem(
                 //   width: 152,
                 //   label: "المسح الضوئي للباركود",
-                //   icon: FontAwesomeIcons.expand,
+                //   icon: FontAwesomeIcons.expand.data,
                 //   onTap: () {
                 //     AppToast.showToast(
                 //       context: context,
@@ -163,7 +163,7 @@ class QuickActionsSection extends StatelessWidget {
                 QuickActionChipItem(
                   width: 137,
                   label: "رفع ملف إكسل",
-                  icon: FontAwesomeIcons.fileExcel,
+                  icon: FontAwesomeIcons.fileExcel.data,
                   onTap: () {
                     context.pushRoute(
                       "/products/new_product/menu",
@@ -174,7 +174,7 @@ class QuickActionsSection extends StatelessWidget {
                 QuickActionChipItem(
                   width: 148,
                   label: "البحث في الكتالوج المركزي",
-                  icon: FontAwesomeIcons.magnifyingGlass,
+                  icon: FontAwesomeIcons.magnifyingGlass.data,
                   onTap: () {
                     context.pushRoute("/products/new_product/catalog");
                   },
@@ -182,7 +182,7 @@ class QuickActionsSection extends StatelessWidget {
                 QuickActionChipItem(
                   width: 148,
                   label: "تقارير الأداء",
-                  icon: FontAwesomeIcons.newspaper,
+                  icon: FontAwesomeIcons.newspaper.data,
                   onTap: () {
                     context.pushRoute(
                       "/performance_report",
@@ -224,7 +224,7 @@ class QuickActionsSectionOld extends StatelessWidget {
           children: [
             Expanded(
               child: QuickActionChipOld(
-                icon: FontAwesomeIcons.plus,
+                icon: FontAwesomeIcons.plus.data,
                 isPrimary: true,
                 label: 'منتج جديد',
                 onTap: () {
@@ -234,7 +234,7 @@ class QuickActionsSectionOld extends StatelessWidget {
             ),
             Expanded(
               child: QuickActionChipOld(
-                icon: FontAwesomeIcons.percent,
+                icon: FontAwesomeIcons.percent.data,
                 label: 'إنشاء عرض',
                 onTap: () {
                   AppToast.showToast(
@@ -247,7 +247,7 @@ class QuickActionsSectionOld extends StatelessWidget {
             ),
             Expanded(
               child: QuickActionChipOld(
-                icon: FontAwesomeIcons.boxOpen,
+                icon: FontAwesomeIcons.boxOpen.data,
                 label: 'تعديل المخزون',
                 onTap: () {
                   AppToast.showToast(
@@ -260,7 +260,7 @@ class QuickActionsSectionOld extends StatelessWidget {
             ),
             Expanded(
               child: QuickActionChipOld(
-                icon: FontAwesomeIcons.paperPlane,
+                icon: FontAwesomeIcons.paperPlane.data,
                 label: 'التقارير',
                 onTap: () {
                   AppToast.showToast(

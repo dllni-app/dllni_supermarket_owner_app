@@ -196,7 +196,7 @@ class InventoryCard extends StatelessWidget {
                 child: InventoryCardButton(
                   color: AppColors.accent,
                   label: "إضافة الكمية",
-                  icon: FontAwesomeIcons.plus,
+                  icon: FontAwesomeIcons.plus.data,
                   onTap: onIncreaseTap,
                 ),
               ),
@@ -205,7 +205,7 @@ class InventoryCard extends StatelessWidget {
                 child: InventoryCardButton(
                   color: Color(0xFF9CA3AF),
                   label: "تقليل الكمية",
-                  icon: FontAwesomeIcons.minus,
+                  icon: FontAwesomeIcons.minus.data,
                   onTap: onDecreaseTap,
                 ),
               ),

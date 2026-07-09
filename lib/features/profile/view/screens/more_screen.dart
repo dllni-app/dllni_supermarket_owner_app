@@ -69,7 +69,7 @@ class _LogoutButton extends StatelessWidget {
                 borderRadius: BorderRadius.all(Radius.circular(16)),
               ),
               child: Icon(
-                FontAwesomeIcons.arrowRightFromBracket,
+                FontAwesomeIcons.arrowRightFromBracket.data,
                 size: 18,
                 color: Color(0xFFEF4444),
               ),
@@ -129,7 +129,7 @@ class _MoreScreenState extends State<MoreScreen> {
                         SectionCard(
                           containerColor: Color(0xffD1FAE5),
                           iconColor: Color(0xff059669),
-                          icon: FontAwesomeIcons.store,
+                          icon: FontAwesomeIcons.store.data,
                           title: "معلومات السوبر ماركت",
                           subtitle: 'الاسم والعنوان والتفاصيل',
                           onTap: () {
@@ -145,7 +145,7 @@ class _MoreScreenState extends State<MoreScreen> {
                         SectionCard(
                           containerColor: Color(0xffE0F2FE),
                           iconColor: Color(0xff0284C7),
-                          icon: FontAwesomeIcons.solidClock,
+                          icon: FontAwesomeIcons.solidClock.data,
                           title: 'ساعات العمل',
                           subtitle: 'تحديد اوقات الفتح والاغلاق',
                           onTap: () {
@@ -177,7 +177,7 @@ class _MoreScreenState extends State<MoreScreen> {
                         SectionCard(
                           containerColor: Color(0xffFEE2E2),
                           iconColor: Color(0xffDC2626),
-                          icon: FontAwesomeIcons.circleQuestion,
+                          icon: FontAwesomeIcons.circleQuestion.data,
                           title: 'ادارة العروض',
                           subtitle: 'انشاء وتعديل العروض الترويجية',
                           onTap: () {
@@ -193,7 +193,7 @@ class _MoreScreenState extends State<MoreScreen> {
                         SectionCard(
                           containerColor: Color(0xffFEF3C7),
                           iconColor: Color(0xffD97706),
-                          icon: FontAwesomeIcons.ticket,
+                          icon: FontAwesomeIcons.ticket.data,
                           title: 'الكوبونات',
                           subtitle: 'ادارة اكواد الخصم',
                           onTap: () {
@@ -225,7 +225,7 @@ class _MoreScreenState extends State<MoreScreen> {
                         SectionCard(
                           containerColor: Color(0xffCFFAFE),
                           iconColor: Color(0xff0891B2),
-                          icon: FontAwesomeIcons.users,
+                          icon: FontAwesomeIcons.users.data,
                           title: 'ادارة الموظفين',
                           subtitle: 'إضافة وتعديل بيانات الموظفين',
                           onTap: () {
@@ -241,7 +241,7 @@ class _MoreScreenState extends State<MoreScreen> {
                         SectionCard(
                           containerColor: Color(0xffF1F5F9),
                           iconColor: Color(0xff475569),
-                          icon: FontAwesomeIcons.circleXmark,                          title: 'سجل نشاط الموظفين',
+                          icon: FontAwesomeIcons.circleXmark.data,                          title: 'سجل نشاط الموظفين',
                           subtitle: 'متابعة نشاط الفريق',
                           onTap: () {
                             context.pushRoute('/profile/employees/activity_log');
@@ -271,7 +271,7 @@ class _MoreScreenState extends State<MoreScreen> {
                         SectionCard(
                           containerColor: Color(0xffDBEAFE),
                           iconColor: Color(0xff2563EB),
-                          icon: FontAwesomeIcons.headset,
+                          icon: FontAwesomeIcons.headset.data,
                           title: 'الدعم الفني',
                           subtitle: 'تواصل مع فريق الدعم',
                           onTap: () {

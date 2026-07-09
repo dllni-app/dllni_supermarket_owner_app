@@ -75,11 +75,11 @@ class AcceptOrderBottomSheet extends StatelessWidget {
                     InkWell(
                       onTap: () => context.pop(),
                       customBorder: CircleBorder(),
-                      child: const CircleAvatar(
+                      child: CircleAvatar(
                         backgroundColor: Color(0xFFF9FAFB),
                         radius: 16,
                         child: Icon(
-                          FontAwesomeIcons.x,
+                          FontAwesomeIcons.x.data,
                           size: 14,
                           color: Color(0xFF9CA3AF),
                         ),
@@ -98,7 +98,7 @@ class AcceptOrderBottomSheet extends StatelessWidget {
                       // Row(
                       //   children: [
                       //     const Icon(
-                      //       FontAwesomeIcons.clock,
+                      //       FontAwesomeIcons.clock.data,
                       //       size: 14,
                       //       color: Color(0xFF3B82F6),
                       //     ),
@@ -125,7 +125,7 @@ class AcceptOrderBottomSheet extends StatelessWidget {
                       // HomeTextField(
                       //   hintText: "أدخل وقت مخصص (دقيقة)",
                       //   prefix: Icon(
-                      //     FontAwesomeIcons.solidHourglassHalf,
+                      //     FontAwesomeIcons.solidHourglassHalf.data,
                       //     color: Color(0xFF9CA3AF),
                       //     size: 16,
                       //   ),
@@ -147,13 +147,13 @@ class AcceptOrderBottomSheet extends StatelessWidget {
                       //     print(value);
                       //   },
                       //   title: "تعيين موظف مسؤول",
-                      //   icon: FontAwesomeIcons.userGroup,
+                      //   icon: FontAwesomeIcons.userGroup.data,
                       // ),
                       SizedBox(height: 24),
                       // HomeTextFieldWithTitle(
                       //   title: "ملاحظات المطبخ",
                       //   hintText: "أضف ملاحظات خاصة للتجهيز...",
-                      //   icon: FontAwesomeIcons.noteSticky,
+                      //   icon: FontAwesomeIcons.noteSticky.data,
                       //   maxLines: 3,
                       // ),
                       // SizedBox(height: 24),
@@ -194,7 +194,7 @@ class AcceptOrderBottomSheet extends StatelessWidget {
                                     boxShadow: [AppShadows.shadow],
                                   ),
                                   child: Icon(
-                                    FontAwesomeIcons.boxesStacked,
+                                    FontAwesomeIcons.boxesStacked.data,
                                     size: 14,
                                     color: Color(0xFF2563EB),
                                   ),
@@ -242,7 +242,7 @@ class AcceptOrderBottomSheet extends StatelessWidget {
                                     boxShadow: [AppShadows.shadow],
                                   ),
                                   child: Icon(
-                                    FontAwesomeIcons.bell,
+                                    FontAwesomeIcons.bell.data,
                                     size: 14,
                                     color: Color(0xFF2563EB),
                                   ),

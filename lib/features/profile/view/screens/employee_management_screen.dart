@@ -299,7 +299,7 @@ class _EmployeeCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    FontAwesomeIcons.solidEye,
+                    FontAwesomeIcons.solidEye.data,
                     size: 14,
                     color: AppColors.white,
                   ),
@@ -521,7 +521,7 @@ class _FilterSection extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
-                            FontAwesomeIcons.filter,
+                            FontAwesomeIcons.filter.data,
                             color: AppColors.accent,
                             size: 14,
                           ),
@@ -554,7 +554,7 @@ class _FilterSection extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
-                            FontAwesomeIcons.sort,
+                            FontAwesomeIcons.sort.data,
                             color: AppColors.accent,
                             size: 14,
                           ),

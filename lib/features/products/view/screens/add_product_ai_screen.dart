@@ -90,7 +90,7 @@ class _AddProductAIScreenState extends State<AddProductAIScreen> {
                         title: "توليد الصورة من الاسم",
                         subtitle:
                             "اكتب اسم ووصف الوجبة وسيتم اقتراح الصورة والوصف تلقائياً",
-                        icon: FontAwesomeIcons.image,
+                        icon: FontAwesomeIcons.image.data,
                         expandedWidget: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -128,7 +128,7 @@ class _AddProductAIScreenState extends State<AddProductAIScreen> {
                                 return GradientButton(
                                   title: "توليد الصورة",
                                   icon: Icon(
-                                    FontAwesomeIcons.wandMagicSparkles,
+                                    FontAwesomeIcons.wandMagicSparkles.data,
                                     size: 17,
                                     color: AppColors.white,
                                   ),
@@ -280,7 +280,7 @@ class _AddProductAIScreenState extends State<AddProductAIScreen> {
                         title: "توليد الاسم من الصورة",
                         subtitle:
                             "قم برفع صورة لمنتجك وسيتم اقتراح اسم ووصف المنتج تلقائياً",
-                        icon: FontAwesomeIcons.envelopeOpenText,
+                        icon: FontAwesomeIcons.envelopeOpenText.data,
                         expandedWidget: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -321,7 +321,7 @@ class _AddProductAIScreenState extends State<AddProductAIScreen> {
                                 return GradientButton(
                                   title: "توليد الاقتراحات",
                                   icon: Icon(
-                                    FontAwesomeIcons.wandMagicSparkles,
+                                    FontAwesomeIcons.wandMagicSparkles.data,
                                     size: 17,
                                     color: AppColors.white,
                                   ),

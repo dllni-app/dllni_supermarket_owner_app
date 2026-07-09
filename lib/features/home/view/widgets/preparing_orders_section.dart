@@ -243,7 +243,7 @@ class PreparingOrderCard extends StatelessWidget {
             spacing: 4,
             children: [
               Icon(
-                FontAwesomeIcons.clock,
+                FontAwesomeIcons.clock.data,
                 size: 12,
                 color: const Color(0xFF2563EB),
               ),

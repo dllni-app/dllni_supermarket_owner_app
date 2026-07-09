@@ -94,11 +94,11 @@ class _RejectOrderBottomSheetState extends State<RejectOrderBottomSheet> {
                     InkWell(
                       onTap: () => context.pop(),
                       customBorder: CircleBorder(),
-                      child: const CircleAvatar(
+                      child: CircleAvatar(
                         backgroundColor: Color(0xFFF9FAFB),
                         radius: 16,
                         child: Icon(
-                          FontAwesomeIcons.x,
+                          FontAwesomeIcons.x.data,
                           size: 14,
                           color: Color(0xFF9CA3AF),
                         ),
@@ -116,8 +116,8 @@ class _RejectOrderBottomSheetState extends State<RejectOrderBottomSheet> {
                       SizedBox(height: 24),
                       Row(
                         children: [
-                          const Icon(
-                            FontAwesomeIcons.listCheck,
+                          Icon(
+                            FontAwesomeIcons.listCheck.data,
                             size: 14,
                             color: Color(0xFF3B82F6),
                           ),
@@ -160,7 +160,7 @@ class _RejectOrderBottomSheetState extends State<RejectOrderBottomSheet> {
                       HomeTextFieldWithTitle(
                         controller: moreInfoController,
                         title: "ملاحظات إضافية",
-                        icon: FontAwesomeIcons.message,
+                        icon: FontAwesomeIcons.message.data,
                         hintText: "اكتب رسالة توضيحية للعميل...",
                         maxLines: 3,
                       ),
@@ -316,7 +316,7 @@ class _WarningDialog extends StatelessWidget {
           Padding(
             padding: EdgeInsets.only(top: 4),
             child: Icon(
-              FontAwesomeIcons.circleInfo,
+              FontAwesomeIcons.circleInfo.data,
               size: 16,
               color: const Color(0xFFFF9F43),
             ),

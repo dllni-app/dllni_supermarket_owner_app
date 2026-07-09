@@ -324,7 +324,7 @@ class _BillCard extends StatelessWidget {
                   radius: 16,
                   backgroundColor: Color(0xFFDCFCE7),
                   child: Icon(
-                    FontAwesomeIcons.moneyBill,
+                    FontAwesomeIcons.moneyBill.data,
                     size: 14,
                     color: Color(0xFF16A34A),
                   ),
@@ -424,7 +424,7 @@ class _CustomerCard extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
-                          FontAwesomeIcons.phone,
+                          FontAwesomeIcons.phone.data,
                           size: 10,
                           color: Color(0XFF6B7280),
                         ),
@@ -446,7 +446,7 @@ class _CustomerCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Icon(
-                          FontAwesomeIcons.locationDot,
+                          FontAwesomeIcons.locationDot.data,
                           size: 10,
                           color: Color(0XFF6B7280),
                         ),
@@ -498,7 +498,7 @@ class _CustomerCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    FontAwesomeIcons.phone,
+                    FontAwesomeIcons.phone.data,
                     size: 14,
                     color: AppColors.white,
                   ),
@@ -654,7 +654,7 @@ class _OrderStatusCard extends StatelessWidget {
                 radius: 20,
                 backgroundColor: Color(0x33FFFFFF),
                 child: Icon(
-                  FontAwesomeIcons.solidClock,
+                  FontAwesomeIcons.solidClock.data,
                   size: 18,
                   color: AppColors.white,
                 ),

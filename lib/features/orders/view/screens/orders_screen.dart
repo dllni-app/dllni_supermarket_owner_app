@@ -64,7 +64,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                     // Padding(
                     //   padding: const EdgeInsets.symmetric(horizontal: 20),
                     //   child: WarningAlert(
-                    //     icon: FontAwesomeIcons.clock,
+                    //     icon: FontAwesomeIcons.clock.data,
                     //     title: "طلب متأخر #2475",
                     //     description: "تجاوز الوقت المحدد بـ 5 دقائق.",
                     //     labelButton: "عرض",

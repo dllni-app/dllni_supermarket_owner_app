@@ -50,7 +50,7 @@ class _HomeAppBarState extends State<HomeAppBar> {
       child: Row(
         spacing: 12,
         children: [
-          Icon(FontAwesomeIcons.store, color: context.primary, size: 29),
+          Icon(FontAwesomeIcons.store.data, color: context.primary, size: 29),
           AppText(
             storeProfile["user"]['name'],
             style: TextStyle(
@@ -66,7 +66,7 @@ class _HomeAppBarState extends State<HomeAppBar> {
               context.pushRoute("/notification_screen");
             },
             child: Icon(
-              FontAwesomeIcons.bell,
+              FontAwesomeIcons.bell.data,
               color: context.primary,
               size: 30,
             ),

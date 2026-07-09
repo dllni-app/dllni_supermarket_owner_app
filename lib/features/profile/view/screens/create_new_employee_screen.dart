@@ -1,4 +1,4 @@
-﻿import 'package:common_package/common_package.dart';
+import 'package:common_package/common_package.dart';
 import 'package:dllni_supermarket_owner_app/core/widgets/failure_widget.dart';
 import 'package:dllni_supermarket_owner_app/features/products/view/widgets/product_image_field.dart';
 import 'package:dllni_supermarket_owner_app/features/profile/domain/usecases/add_update_store_employee_use_case.dart';
@@ -108,17 +108,17 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
 
     if (newPassword.isEmpty || confirmation.isEmpty) {
       _passwordMismatch = false;
-      return "الرجاء إدخال كلمة المرور وتأكيدها";
+      return "?????? ????? ???? ?????? ????????";
     }
 
     if (newPassword.length < 8) {
       _passwordMismatch = false;
-      return "كلمة المرور يجب أن تكون 8 أحرف على الأقل";
+      return "???? ?????? ??? ?? ???? 8 ???? ??? ?????";
     }
 
     if (newPassword != confirmation) {
       _passwordMismatch = true;
-      return "كلمتا المرور غير متطابقتين";
+      return "????? ?????? ??? ?????????";
     }
 
     _passwordMismatch = false;
@@ -147,7 +147,7 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
       (l) async {
         AppToast.showToast(
           context: context,
-          message: "تم حفظ الموظف، لكن فشل تحديث كلمة المرور: ${l.message}",
+          message: "?? ??? ??????? ??? ??? ????? ???? ??????: ${l.message}",
           type: ToastificationType.warning,
         );
         context.pop(true);
@@ -155,7 +155,7 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
       (r) async {
         AppToast.showToast(
           context: context,
-          message: r.message ?? "تم الحفظ بنجاح",
+          message: r.message ?? "?? ????? ?????",
           type: ToastificationType.success,
         );
         context.pop(true);
@@ -267,7 +267,7 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
       if (!mounted) return;
       AppToast.showToast(
         context: context,
-        message: "الرجاء إدخال رقم الهاتف",
+        message: "?????? ????? ??? ??????",
         type: ToastificationType.error,
       );
       return;
@@ -312,8 +312,8 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
           children: [
             AppSimpleAppBar(
               title: widget.params != null
-                  ? "تفاصيل الموظف"
-                  : "إضافة موظف جديد",
+                  ? "?????? ??????"
+                  : "????? ???? ????",
             ),
             Expanded(
               child: SingleChildScrollView(
@@ -321,8 +321,8 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
                 child: Column(
                   children: [
                     _ProfileForm(
-                      title: "البيانات الأساسية",
-                      icon: FontAwesomeIcons.user,
+                      title: "???????? ????????",
+                      icon: FontAwesomeIcons.user.data,
                       iconColor: Color(0xFF064E3B),
                       child: Column(
                         children: [
@@ -331,12 +331,12 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
                             onPickImage: (imagePath) {
                               this.imagePath = imagePath;
                             },
-                            title: "صورة الموظف",
+                            title: "???? ??????",
                           ),
                           SizedBox(height: 16),
                           AppTextField(
-                            title: "الاسم الكامل",
-                            hintText: "أدخل الاسم الكامل للموظف",
+                            title: "????? ??????",
+                            hintText: "???? ????? ?????? ??????",
                             isRequired: true,
                             controller: TextEditingController(
                               text: params.user?.name,
@@ -347,8 +347,8 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
                           ),
                           SizedBox(height: 16),
                           AppTextField(
-                            title: "الايميل",
-                            hintText: "أدخل ايميل للموظف",
+                            title: "???????",
+                            hintText: "???? ????? ??????",
                             isRequired: true,
                             controller: TextEditingController(
                               text: params.user?.email,
@@ -360,7 +360,7 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
                           SizedBox(height: 16),
                           AppPhoneNumberField(
                             key: _phoneFieldKey,
-                            label: 'رقم الهاتف',
+                            label: '??? ??????',
                             hintText: "9xxxxxxxx",
                             isRequired: true,
                             initialValue: _initialPhone,
@@ -372,9 +372,9 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
                     ),
                     SizedBox(height: 16),
                     _ProfileForm(
-                      title: "تحديد صلاحيات الموظف",
-                      subtitle: "اختر الصلاحيات المناسبة لدور الموظف",
-                      icon: FontAwesomeIcons.shieldHalved,
+                      title: "????? ??????? ??????",
+                      subtitle: "???? ????????? ???????? ???? ??????",
+                      icon: FontAwesomeIcons.shieldHalved.data,
                       iconColor: Color(0xFFD97706),
                       child: BlocBuilder<ProfileBloc, ProfileState>(
                         buildWhen: (previous, current) =>
@@ -455,9 +455,9 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
                                 ),
                                 AlertMessage(
                                   message:
-                                      "يمكنك تعديل صلاحيات الموظف في أي وقت من صفحة إدارة الموظفين",
+                                      "????? ????? ??????? ?????? ?? ?? ??? ?? ???? ????? ????????",
                                   color: Color(0xFF064E3B),
-                                  icon: FontAwesomeIcons.solidLightbulb,
+                                  icon: FontAwesomeIcons.solidLightbulb.data,
                                 ),
                               ],
                             );
@@ -468,17 +468,17 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
                     ),
                     SizedBox(height: 16),
                     _ProfileForm(
-                      title: "بيانات كلمة المرور",
+                      title: "?????? ???? ??????",
                       subtitle: _isCreateMode
-                          ? "كلمة المرور مطلوبة عند إنشاء موظف جديد"
-                          : "اختياري في التعديل - اترك الحقول فارغة إذا لا تريد تغيير كلمة المرور",
-                      icon: FontAwesomeIcons.lock,
+                          ? "???? ?????? ?????? ??? ????? ???? ????"
+                          : "??????? ?? ??????? - ???? ?????? ????? ??? ?? ???? ????? ???? ??????",
+                      icon: FontAwesomeIcons.lock.data,
                       iconColor: Color(0xFF1E3A8A),
                       child: Column(
                         children: [
                           _buildPasswordField(
-                            title: "كلمة المرور الجديدة",
-                            hintText: "8 أحرف على الأقل",
+                            title: "???? ?????? ???????",
+                            hintText: "8 ???? ??? ?????",
                             controller: _newPasswordController,
                             obscureText: _obscureNewPassword,
                             hasError: _passwordMismatch,
@@ -490,8 +490,8 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
                           ),
                           SizedBox(height: 16),
                           _buildPasswordField(
-                            title: "تأكيد كلمة المرور",
-                            hintText: "أعد إدخال كلمة المرور",
+                            title: "????? ???? ??????",
+                            hintText: "??? ????? ???? ??????",
                             controller: _confirmPasswordController,
                             obscureText: _obscureConfirmPassword,
                             hasError: _passwordMismatch,
@@ -514,7 +514,7 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
                                 SizedBox(width: 6),
                                 Expanded(
                                   child: AppText(
-                                    "كلمتا المرور غير متطابقتين",
+                                    "????? ?????? ??? ?????????",
                                     style: TextStyle(
                                       color: Color(0xFFEF4444),
                                       fontSize: 12,
@@ -530,8 +530,8 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
                     ),
                     SizedBox(height: 16),
                     _ProfileForm(
-                      title: "حالة الحساب",
-                      icon: FontAwesomeIcons.toggleOn,
+                      title: "???? ??????",
+                      icon: FontAwesomeIcons.toggleOn.data,
                       iconColor: Color(0xFF10B981),
                       child: Column(
                         children: [
@@ -553,7 +553,7 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
                                     spacing: 4,
                                     children: [
                                       AppText(
-                                        "تفعيل الحساب",
+                                        "????? ??????",
                                         style: TextStyle(
                                           color: Color(0xFF111827),
                                           fontSize: 14,
@@ -562,7 +562,7 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
                                         ),
                                       ),
                                       AppText(
-                                        "السماح للموظف بالدخول للنظام",
+                                        "?????? ?????? ??????? ??????",
                                         style: TextStyle(
                                           color: Color(0xFF6B7280),
                                           fontSize: 12,
@@ -587,8 +587,8 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
                           SizedBox(height: 16),
                           AlertMessage(
                             message:
-                                "الحساب نشط - سيتمكن الموظف من تسجيل الدخول فور الحفظ",
-                            icon: FontAwesomeIcons.solidCircleCheck,
+                                "?????? ??? - ?????? ?????? ?? ????? ?????? ??? ?????",
+                            icon: FontAwesomeIcons.solidCircleCheck.data,
                             color: Color(0xFF10B981),
                           ),
                         ],
@@ -617,7 +617,7 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
                               AppToast.showToast(
                                 context: context,
                                 message:
-                                    "تم حفظ الموظف، لكن تعذر تحديث كلمة المرور لعدم توفر معرف الموظف",
+                                    "?? ??? ??????? ??? ???? ????? ???? ?????? ???? ???? ???? ??????",
                                 type: ToastificationType.warning,
                               );
                               context.pop(true);
@@ -630,7 +630,7 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
                           AppToast.showToast(
                             context: context,
                             message:
-                                "تم ${params.id != null ? "التعديل" : "الإضافة"} بنجاح",
+                                "?? ${params.id != null ? "???????" : "???????"} ?????",
                             type: ToastificationType.success,
                           );
                           context.pop(true);
@@ -649,7 +649,7 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
                           children: [
                             Expanded(
                               child: AppButton(
-                                title: "حفظ وتفعيل",
+                                title: "??? ??????",
                                 onTap: () async {
                                   await _onSavePressed(
                                     context.read<ProfileBloc>(),
@@ -659,7 +659,7 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
                             ),
                             SizedBox(width: 16),
                             AppOutlinedButton(
-                              title: "إلغاء",
+                              title: "?????",
                               color: const Color(0xFFFF4C51),
                             ),
                           ],
@@ -709,9 +709,9 @@ class PermissionLoading extends StatelessWidget {
           ),
           AlertMessage(
             message:
-                "يمكنك تعديل صلاحيات الموظف في أي وقت من صفحة إدارة الموظفين",
+                "????? ????? ??????? ?????? ?? ?? ??? ?? ???? ????? ????????",
             color: Color(0xFF064E3B),
-            icon: FontAwesomeIcons.solidLightbulb,
+            icon: FontAwesomeIcons.solidLightbulb.data,
           ),
         ],
       ),
@@ -971,219 +971,219 @@ PermissionDetails getPermissionDetails(String permission) {
     // --- STORES (Blue) ---
     case 'stores.view':
       return PermissionDetails(
-        "عرض المتاجر",
-        "صلاحية الوصول إلى قائمة الفروع واستعراض بيانات المواقع.",
-        FontAwesomeIcons.shop,
+        "??? ???????",
+        "?????? ?????? ??? ????? ?????? ???????? ?????? ???????.",
+        FontAwesomeIcons.shop.data,
         storeColor,
       );
     case 'stores.create':
       return PermissionDetails(
-        "إضافة متجر جديد",
-        "إدراج فروع أو مستودعات جديدة في النظام وتحديد إعداداتها.",
-        FontAwesomeIcons.circlePlus,
+        "????? ???? ????",
+        "????? ???? ?? ???????? ????? ?? ?????? ?????? ?????????.",
+        FontAwesomeIcons.circlePlus.data,
         storeColor,
       );
     case 'stores.update':
       return PermissionDetails(
-        "تحديث بيانات المتجر",
-        "تعديل معلومات الفروع القائمة مثل الموقع، وساعات العمل.",
-        FontAwesomeIcons.penToSquare,
+        "????? ?????? ??????",
+        "????? ??????? ?????? ??????? ??? ??????? ?????? ?????.",
+        FontAwesomeIcons.penToSquare.data,
         storeColor,
       );
     case 'stores.delete':
       return PermissionDetails(
-        "حذف المتجر",
-        "إزالة بيانات المتجر من النظام أو أرشفتها بشكل نهائي.",
-        FontAwesomeIcons.trashCan,
+        "??? ??????",
+        "????? ?????? ?????? ?? ?????? ?? ??????? ???? ?????.",
+        FontAwesomeIcons.trashCan.data,
         deleteColor,
       );
 
     // --- PRODUCTS (Green) ---
     case 'products.view':
       return PermissionDetails(
-        "استعراض المنتجات",
-        "الاطلاع على كتالوج المنتجات، الأسعار، والمواصفات المتوفرة.",
-        FontAwesomeIcons.boxesStacked,
+        "??????? ????????",
+        "??????? ??? ?????? ????????? ???????? ?????????? ????????.",
+        FontAwesomeIcons.boxesStacked.data,
         productColor,
       );
     case 'products.create':
       return PermissionDetails(
-        "إضافة منتج",
-        "تسجيل أصناف جديدة في النظام مع تحديد الأسعار والصور.",
-        FontAwesomeIcons.boxOpen,
+        "????? ????",
+        "????? ????? ????? ?? ?????? ?? ????? ??????? ??????.",
+        FontAwesomeIcons.boxOpen.data,
         productColor,
       );
     case 'products.update':
       return PermissionDetails(
-        "تعديل المنتجات",
-        "تغيير تفاصيل المنتج القائمة مثل تحديث الأسعار أو الوصف.",
-        FontAwesomeIcons.filePen,
+        "????? ????????",
+        "????? ?????? ?????? ??????? ??? ????? ??????? ?? ?????.",
+        FontAwesomeIcons.filePen.data,
         productColor,
       );
     case 'products.delete':
       return PermissionDetails(
-        "حذف المنتج",
-        "إلغاء توفر المنتج وإزالته من قوائم البيع والبحث.",
-        FontAwesomeIcons.eraser,
+        "??? ??????",
+        "????? ???? ?????? ??????? ?? ????? ????? ??????.",
+        FontAwesomeIcons.eraser.data,
         deleteColor,
       );
 
     // --- ORDERS (Orange) ---
     case 'orders.view':
       return PermissionDetails(
-        "متابعة الطلبات",
-        "عرض تفاصيل طلبات الشراء، سجل المبيعات، وحالة الفواتير.",
-        FontAwesomeIcons.receipt,
+        "?????? ???????",
+        "??? ?????? ????? ??????? ??? ????????? ????? ????????.",
+        FontAwesomeIcons.receipt.data,
         orderColor,
       );
     case 'orders.create':
       return PermissionDetails(
-        "إنشاء طلب",
-        "إدراج عمليات بيع جديدة يدويًا وتحديد بيانات العميل.",
-        FontAwesomeIcons.cartPlus,
+        "????? ???",
+        "????? ?????? ??? ????? ?????? ?????? ?????? ??????.",
+        FontAwesomeIcons.cartPlus.data,
         orderColor,
       );
     case 'orders.update':
       return PermissionDetails(
-        "تحديث الطلبات",
-        "تعديل حالة الطلب أو مراجعة الكميات.",
-        FontAwesomeIcons.truckRampBox,
+        "????? ???????",
+        "????? ???? ????? ?? ?????? ???????.",
+        FontAwesomeIcons.truckRampBox.data,
         orderColor,
       );
     case 'orders.delete':
       return PermissionDetails(
-        "إلغاء الطلب",
-        "حذف العمليات الشرائية الخاطئة أو معالجة المرتجعات.",
-        FontAwesomeIcons.rectangleXmark,
+        "????? ?????",
+        "??? ???????? ???????? ??????? ?? ?????? ?????????.",
+        FontAwesomeIcons.rectangleXmark.data,
         deleteColor,
       );
 
     // --- INVENTORY (Blue Grey) ---
     case 'inventory.view':
       return PermissionDetails(
-        "رقابة المخزون",
-        "الاطلاع على مستويات المخزون الحالية وتنبيهات النواقص.",
-        FontAwesomeIcons.warehouse,
+        "????? ???????",
+        "??????? ??? ??????? ??????? ??????? ???????? ???????.",
+        FontAwesomeIcons.warehouse.data,
         inventoryColor,
       );
     case 'inventory.create':
       return PermissionDetails(
-        "إدخال مخزني",
-        "إضافة كميات جديدة للمستودع وتوثيق حركات التوريد.",
-        FontAwesomeIcons.fileImport,
+        "????? ?????",
+        "????? ????? ????? ???????? ?????? ????? ???????.",
+        FontAwesomeIcons.fileImport.data,
         inventoryColor,
       );
     case 'inventory.update':
       return PermissionDetails(
-        "تسوية المخزون",
-        "تعديل كميات الأصناف لمطابقة الجرد الفعلي.",
-        FontAwesomeIcons.arrowRotateLeft,
+        "????? ???????",
+        "????? ????? ??????? ??????? ????? ??????.",
+        FontAwesomeIcons.arrowRotateLeft.data,
         inventoryColor,
       );
     case 'inventory.delete':
       return PermissionDetails(
-        "حذف سجلات المخزن",
-        "إزالة بيانات الجرد القديمة أو الحركات الخاطئة.",
-        FontAwesomeIcons.folderMinus,
+        "??? ????? ??????",
+        "????? ?????? ????? ??????? ?? ??????? ???????.",
+        FontAwesomeIcons.folderMinus.data,
         deleteColor,
       );
 
     // --- OFFERS (Pink) ---
     case 'offers.view':
       return PermissionDetails(
-        "عرض العروض",
-        "الاطلاع على قائمة الخصومات والحملات الترويجية النشطة.",
-        FontAwesomeIcons.tags,
+        "??? ??????",
+        "??????? ??? ????? ???????? ???????? ????????? ??????.",
+        FontAwesomeIcons.tags.data,
         offerColor,
       );
     case 'offers.create':
       return PermissionDetails(
-        "إضافة عرض",
-        "إطلاق حملات تخفيض جديدة وتحديد المنتجات المشمولة.",
-        FontAwesomeIcons.tag,
+        "????? ???",
+        "????? ????? ????? ????? ?????? ???????? ????????.",
+        FontAwesomeIcons.tag.data,
         offerColor,
       );
     case 'offers.update':
       return PermissionDetails(
-        "تحديث العروض",
-        "تعديل نسب الخصم أو تمديد فترات صلاحية الحملات.",
-        FontAwesomeIcons.clockRotateLeft,
+        "????? ??????",
+        "????? ??? ????? ?? ????? ????? ?????? ???????.",
+        FontAwesomeIcons.clockRotateLeft.data,
         offerColor,
       );
     case 'offers.delete':
       return PermissionDetails(
-        "إيقاف العرض",
-        "إلغاء العروض الترويجية وإعادة الأسعار لطبيعتها.",
-        FontAwesomeIcons.ban,
+        "????? ?????",
+        "????? ?????? ????????? ?????? ??????? ????????.",
+        FontAwesomeIcons.ban.data,
         deleteColor,
       );
 
     // --- STAFF (Purple) ---
     case 'staff.view':
       return PermissionDetails(
-        "عرض الموظفين",
-        "استعراض قائمة طاقم العمل، بيانات الاتصال، والأدوار.",
-        FontAwesomeIcons.usersGear,
+        "??? ????????",
+        "??????? ????? ???? ?????? ?????? ???????? ????????.",
+        FontAwesomeIcons.usersGear.data,
         staffColor,
       );
     case 'staff.create':
       return PermissionDetails(
-        "توظيف موظف",
-        "إنشاء حسابات جديدة للموظفين وتعيين الصلاحيات.",
-        FontAwesomeIcons.userPlus,
+        "????? ????",
+        "????? ?????? ????? ???????? ?????? ?????????.",
+        FontAwesomeIcons.userPlus.data,
         staffColor,
       );
     case 'staff.update':
       return PermissionDetails(
-        "تعديل بيانات الموظف",
-        "تحديث معلومات الموظفين وتعديل مسمياتهم الوظيفية.",
-        FontAwesomeIcons.userPen,
+        "????? ?????? ??????",
+        "????? ??????? ???????? ?????? ???????? ????????.",
+        FontAwesomeIcons.userPen.data,
         staffColor,
       );
     case 'staff.delete':
       return PermissionDetails(
-        "إنهاء الخدمة",
-        "تعطيل حساب الموظف ومنعه من الوصول للنظام.",
-        FontAwesomeIcons.userSlash,
+        "????? ??????",
+        "????? ???? ?????? ????? ?? ?????? ??????.",
+        FontAwesomeIcons.userSlash.data,
         deleteColor,
       );
 
     // --- COUPONS (Cyan) ---
     case 'coupons.view':
       return PermissionDetails(
-        "إدارة الكوبونات",
-        "الاطلاع على رموز الخصم، ونسب التوفير.",
-        FontAwesomeIcons.ticket,
+        "????? ?????????",
+        "??????? ??? ???? ?????? ???? ???????.",
+        FontAwesomeIcons.ticket.data,
         couponColor,
       );
     case 'coupons.create':
       return PermissionDetails(
-        "إنشاء كوبون",
-        "توليد أكواد خصم جديدة وتحديد شروط الاستخدام.",
-        FontAwesomeIcons.plus,
+        "????? ?????",
+        "????? ????? ??? ????? ?????? ???? ?????????.",
+        FontAwesomeIcons.plus.data,
         couponColor,
       );
     case 'coupons.update':
       return PermissionDetails(
-        "تحديث الكوبون",
-        "تعديل قيم الخصم أو تغيير حالة النشاط.",
-        FontAwesomeIcons.wrench,
+        "????? ???????",
+        "????? ??? ????? ?? ????? ???? ??????.",
+        FontAwesomeIcons.wrench.data,
         couponColor,
       );
     case 'coupons.delete':
       return PermissionDetails(
-        "حذف الكوبون",
-        "إلغاء كود الخصم نهائيًا ومنع استخدامه.",
-        FontAwesomeIcons.xmark,
+        "??? ???????",
+        "????? ??? ????? ??????? ???? ????????.",
+        FontAwesomeIcons.xmark.data,
         deleteColor,
       );
 
     // --- REPORTS (Indigo) ---
     case 'reports.view':
       return PermissionDetails(
-        "تحليل التقارير",
-        "استخراج الإحصائيات المالية والرسوم البيانية.",
-        FontAwesomeIcons.chartLine,
+        "????? ????????",
+        "??????? ?????????? ??????? ??????? ????????.",
+        FontAwesomeIcons.chartLine.data,
         reportColor,
       );
 
@@ -1191,7 +1191,7 @@ PermissionDetails getPermissionDetails(String permission) {
       return PermissionDetails(
         permission,
         permission,
-        FontAwesomeIcons.question,
+        FontAwesomeIcons.question.data,
         Colors.grey,
       );
   }

@@ -185,7 +185,7 @@ class _ActivityFilterDef {
 }
 
 class _EmployeeActivityLogScreenState extends State<EmployeeActivityLogScreen> {
-  static const List<_ActivityFilterDef> _filterDefs = [
+  static final List<_ActivityFilterDef> _filterDefs = [
     _ActivityFilterDef(
       category: EmployeeActivityCategory.all,
       label: 'الكل',
@@ -194,27 +194,27 @@ class _EmployeeActivityLogScreenState extends State<EmployeeActivityLogScreen> {
     _ActivityFilterDef(
       category: EmployeeActivityCategory.orders,
       label: 'طلبات',
-      icon: FontAwesomeIcons.receipt,
+      icon: FontAwesomeIcons.receipt.data,
     ),
     _ActivityFilterDef(
       category: EmployeeActivityCategory.products,
       label: 'منتجات',
-      icon: FontAwesomeIcons.cubes,
+      icon: FontAwesomeIcons.cubes.data,
     ),
     _ActivityFilterDef(
       category: EmployeeActivityCategory.inventory,
       label: 'مخزون',
-      icon: FontAwesomeIcons.boxesStacked,
+      icon: FontAwesomeIcons.boxesStacked.data,
     ),
     _ActivityFilterDef(
       category: EmployeeActivityCategory.offers,
       label: 'عروض',
-      icon: FontAwesomeIcons.tags,
+      icon: FontAwesomeIcons.tags.data,
     ),
     _ActivityFilterDef(
       category: EmployeeActivityCategory.system,
       label: 'نظام',
-      icon: FontAwesomeIcons.gear,
+      icon: FontAwesomeIcons.gear.data,
     ),
   ];
 

@@ -59,7 +59,7 @@ class NewOrderCard extends StatelessWidget {
                     color: const Color(0xFF1F2937),
                   ),
                   child: Icon(
-                    FontAwesomeIcons.solidUser,
+                    FontAwesomeIcons.solidUser.data,
                     size: 16,
                     color: const Color(0xFF9CA3AF),
                   ),
@@ -238,7 +238,7 @@ class NewOrderCardOld extends StatelessWidget {
                   color: const Color(0xFF1F2937),
                 ),
                 child: Icon(
-                  FontAwesomeIcons.solidUser,
+                  FontAwesomeIcons.solidUser.data,
                   size: 16,
                   color: const Color(0xFF9CA3AF),
                 ),
@@ -523,8 +523,8 @@ class _RequirementRow extends StatelessWidget {
         ),
         Icon(
           isAvailable
-              ? FontAwesomeIcons.circleCheck
-              : FontAwesomeIcons.circleXmark,
+              ? FontAwesomeIcons.circleCheck.data
+              : FontAwesomeIcons.circleXmark.data,
           color: isAvailable ? Colors.green : Colors.red,
           size: 18,
         ),
@@ -532,7 +532,7 @@ class _RequirementRow extends StatelessWidget {
         // GestureDetector(
         //   onTap: () {},
         //   child: Icon(
-        //     FontAwesomeIcons.circleQuestion,
+        //     FontAwesomeIcons.circleQuestion.data,
         //     color: Color(0xFFFFAF66),
         //     size: 18,
         //   ),

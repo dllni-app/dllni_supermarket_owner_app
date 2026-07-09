@@ -271,7 +271,7 @@ class _ProductPickAdditionalImagesState
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Icon(
-                      FontAwesomeIcons.plus,
+                      FontAwesomeIcons.plus.data,
                       size: 14,
                       color: Color(0xE52F2B3D),
                     ),

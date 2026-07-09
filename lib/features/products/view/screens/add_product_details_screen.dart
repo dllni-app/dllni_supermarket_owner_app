@@ -198,7 +198,7 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
                               isRequired: !isEdit,
                               initialImagePath: params.mainImagePath,
                               networkImageUrl: params.initialMainImageUrl,
-                              icon: FontAwesomeIcons.solidCamera,
+                              icon: FontAwesomeIcons.solidCamera.data,
                               onPickImage: (imagePath) {
                                 print(imagePath);
                                 params.mainImagePath = imagePath;

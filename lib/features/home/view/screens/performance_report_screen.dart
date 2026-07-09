@@ -122,7 +122,7 @@ class BestOfferCard extends StatelessWidget {
                   color: Color(0x33D97706),
                 ),
                 child: Icon(
-                  FontAwesomeIcons.trophy,
+                  FontAwesomeIcons.trophy.data,
                   size: 18,
                   color: Color(0xFFD97706),
                 ),
@@ -264,7 +264,7 @@ class PerformanceReportLoading extends StatelessWidget {
                 _ProductsProgressIndicator(
                   label: "طلبات استخدمت عروض",
                   value: "—",
-                  icon: FontAwesomeIcons.tags,
+                  icon: FontAwesomeIcons.tags.data,
                   color: Color(0xFF064E3B),
                   percent: 40,
                 ),
@@ -272,7 +272,7 @@ class PerformanceReportLoading extends StatelessWidget {
                 _ProductsProgressIndicator(
                   label: "إيرادات من العروض",
                   value: "—",
-                  icon: FontAwesomeIcons.moneyBillWave,
+                  icon: FontAwesomeIcons.moneyBillWave.data,
                   color: Color(0xFF10B981),
                 ),
                 SizedBox(height: 16),
@@ -529,7 +529,7 @@ class _PerformanceReportScreenState extends State<PerformanceReportScreen> {
                               Expanded(
                                 child: _StatisticCard(
                                   label: "طلبات استخدمت عروض",
-                                  icon: FontAwesomeIcons.tags,
+                                  icon: FontAwesomeIcons.tags.data,
                                   value: ordersWithOffers.formatWithComma(),
                                   color: Color(0xFF064E3B),
                                 ),
@@ -537,7 +537,7 @@ class _PerformanceReportScreenState extends State<PerformanceReportScreen> {
                               Expanded(
                                 child: _StatisticCard(
                                   label: "عدد الطلبات المخفضة",
-                                  icon: FontAwesomeIcons.receipt,
+                                  icon: FontAwesomeIcons.receipt.data,
                                   value:
                                       discountedOrdersCount.formatWithComma(),
                                   color: Color(0xFFD97706),
@@ -552,7 +552,7 @@ class _PerformanceReportScreenState extends State<PerformanceReportScreen> {
                               Expanded(
                                 child: _StatisticCard(
                                   label: "إيرادات من العروض",
-                                  icon: FontAwesomeIcons.moneyBillWave,
+                                  icon: FontAwesomeIcons.moneyBillWave.data,
                                   value: "${offersRevenue.formatWithComma()} ل.س",
                                   color: Color(0xFF10B981),
                                 ),
@@ -560,7 +560,7 @@ class _PerformanceReportScreenState extends State<PerformanceReportScreen> {
                               Expanded(
                                 child: _StatisticCard(
                                   label: "الإيرادات المخفضة",
-                                  icon: FontAwesomeIcons.wallet,
+                                  icon: FontAwesomeIcons.wallet.data,
                                   value:
                                       "${discountedRevenue.formatWithComma()} ل.س",
                                   color: Color(0xFFEF4444),
@@ -575,7 +575,7 @@ class _PerformanceReportScreenState extends State<PerformanceReportScreen> {
                               Expanded(
                                 child: _StatisticCard(
                                   label: "إجمالي التوفير",
-                                  icon: FontAwesomeIcons.percent,
+                                  icon: FontAwesomeIcons.percent.data,
                                   value: "${totalSavings.formatWithComma()} ل.س",
                                   color: Color(0xFF10B981),
                                 ),
@@ -583,7 +583,7 @@ class _PerformanceReportScreenState extends State<PerformanceReportScreen> {
                               Expanded(
                                 child: _StatisticCard(
                                   label: "معدل التحويل",
-                                  icon: FontAwesomeIcons.chartSimple,
+                                  icon: FontAwesomeIcons.chartSimple.data,
                                   value:
                                       "${conversionRatePercent.formatWithComma()}%",
                                   color: Color(0xFFEF4444),
@@ -618,7 +618,7 @@ class _PerformanceReportScreenState extends State<PerformanceReportScreen> {
                                 _ProductsProgressIndicator(
                                   label: "طلبات استخدمت عروض",
                                   value: "$ordersWithOffers طلب",
-                                  icon: FontAwesomeIcons.tags,
+                                  icon: FontAwesomeIcons.tags.data,
                                   color: Color(0xFF064E3B),
                                   percent: utilPercent,
                                 ),
@@ -627,7 +627,7 @@ class _PerformanceReportScreenState extends State<PerformanceReportScreen> {
                                   label: "إيرادات من العروض",
                                   value:
                                       "${offersRevenue.formatWithComma()} ل.س",
-                                  icon: FontAwesomeIcons.moneyBillWave,
+                                  icon: FontAwesomeIcons.moneyBillWave.data,
                                   color: Color(0xFF10B981),
                                 ),
                                 SizedBox(height: 16),

@@ -159,7 +159,7 @@ class OverviewSection extends StatelessWidget {
                         ),
                         AppImage.asset(AppImages.databases, size: 60),
                         // Icon(
-                        //   FontAwesomeIcons.database,
+                        //   FontAwesomeIcons.database.data,
                         //   color: Color(0xFFC2C8F0),
                         //   size: 60,
                         // ),
@@ -174,7 +174,7 @@ class OverviewSection extends StatelessWidget {
                           child: OverviewStatCard(
                             backgroundColor: const Color(0x333B82F6),
                             foregroundColor: const Color(0xFF60A5FA),
-                            icon: FontAwesomeIcons.receipt,
+                            icon: FontAwesomeIcons.receipt.data,
                             label: "طلبات جديدة",
                             value:
                                 state.dashboardOverview?.data?.newOrders ?? -1,
@@ -184,7 +184,7 @@ class OverviewSection extends StatelessWidget {
                           child: OverviewStatCard(
                             backgroundColor: const Color(0x33F97316),
                             foregroundColor: const Color(0xFFFB923C),
-                            icon: FontAwesomeIcons.bagShopping,
+                            icon: FontAwesomeIcons.bagShopping.data,
                             label: "قيد التحضير",
                             value:
                                 state.dashboardOverview?.data?.pendingOrders ??
@@ -195,7 +195,7 @@ class OverviewSection extends StatelessWidget {
                           child: OverviewStatCard(
                             backgroundColor: const Color(0x3322C55E),
                             foregroundColor: const Color(0xFF4ADE80),
-                            icon: FontAwesomeIcons.checkDouble,
+                            icon: FontAwesomeIcons.checkDouble.data,
                             label: "مكتمل",
                             value:
                                 state

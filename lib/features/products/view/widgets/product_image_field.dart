@@ -91,7 +91,7 @@ class _AppImageFieldState extends State<AppImageField> {
                       spacing: 8,
                       children: [
                         Icon(
-                          FontAwesomeIcons.cloudArrowUp,
+                          FontAwesomeIcons.cloudArrowUp.data,
                           size: 18,
                           color: const Color(0xFF064E3B),
                         ),

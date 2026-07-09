@@ -199,7 +199,7 @@ class OfferCard extends StatelessWidget {
               child: Row(
                 children: [
                   Icon(
-                    FontAwesomeIcons.receipt,
+                    FontAwesomeIcons.receipt.data,
                     size: 14,
                     color: Color(0xFF9CA3AF),
                   ),

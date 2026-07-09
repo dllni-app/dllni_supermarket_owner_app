@@ -211,7 +211,7 @@ class _CreateOfferScreenState extends State<CreateOfferScreen> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Icon(
-                                  FontAwesomeIcons.layerGroup,
+                                  FontAwesomeIcons.layerGroup.data,
                                   color: Color(0xFF374151),
                                   size: 14,
                                 ),
@@ -647,7 +647,7 @@ class NoProductSelected extends StatelessWidget {
                 boxShadow: [AppShadows.shadow],
               ),
               child: Icon(
-                FontAwesomeIcons.boxOpen,
+                FontAwesomeIcons.boxOpen.data,
                 size: 18,
                 color: const Color(0xFF9CA3AF),
               ),
@@ -787,7 +787,7 @@ class _OfferCheckboxState extends State<OfferCheckbox> {
               color: AppColors.white,
             ),
             child: Icon(
-              FontAwesomeIcons.pizzaSlice,
+              FontAwesomeIcons.pizzaSlice.data,
               size: 18,
               color: Color(0xFF064E3B),
             ),

@@ -138,9 +138,9 @@ class _WorkingTimeCardState extends State<WorkingTimeCard> {
                     child: Center(
                       child: Icon(
                         isEnabled && widget.isToday
-                            ? FontAwesomeIcons.solidCalendarCheck
+                            ? FontAwesomeIcons.solidCalendarCheck.data
                             : isEnabled
-                            ? FontAwesomeIcons.calendarDay
+                            ? FontAwesomeIcons.calendarDay.data
                             : Icons.door_front_door,
                         color: isEnabled && widget.isToday
                             ? AppColors.white

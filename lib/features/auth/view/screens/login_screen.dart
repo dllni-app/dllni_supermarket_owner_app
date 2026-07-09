@@ -113,7 +113,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: Icon(
-                        FontAwesomeIcons.cartArrowDown,
+                        FontAwesomeIcons.cartArrowDown.data,
                         color: context.onPrimary,
                         size: 40,
                       ),

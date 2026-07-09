@@ -32,12 +32,12 @@ class OrderCard extends StatelessWidget {
       backgroundColor: AppColors.primary,
     ),
     OrderStatus.preparing => Icon(
-      FontAwesomeIcons.fireBurner,
+      FontAwesomeIcons.fireBurner.data,
       size: 12,
       color: statusFontColor,
     ),
     OrderStatus.readyForPickup => Icon(
-      FontAwesomeIcons.solidCircleCheck,
+      FontAwesomeIcons.solidCircleCheck.data,
       size: 12,
       color: statusFontColor,
     ),
@@ -147,7 +147,7 @@ class OrderCard extends StatelessWidget {
                           radius: 20,
                           backgroundColor: statusColor.withValues(alpha: .16),
                           child: Icon(
-                            FontAwesomeIcons.check,
+                            FontAwesomeIcons.check.data,
                             size: 16,
                             color: statusFontColor,
                           ),
@@ -207,7 +207,7 @@ class OrderCard extends StatelessWidget {
                                 color: const Color(0xFF1F2937),
                               ),
                               child: Icon(
-                                FontAwesomeIcons.user,
+                                FontAwesomeIcons.user.data,
                                 size: 16,
                                 color: const Color(0xFF9CA3AF),
                               ),
@@ -380,8 +380,8 @@ class _RequirementRow extends StatelessWidget {
         ),
         Icon(
           isAvailable
-              ? FontAwesomeIcons.circleCheck
-              : FontAwesomeIcons.circleXmark,
+              ? FontAwesomeIcons.circleCheck.data
+              : FontAwesomeIcons.circleXmark.data,
           color: isAvailable ? Colors.green : Colors.red,
           size: 18,
         ),

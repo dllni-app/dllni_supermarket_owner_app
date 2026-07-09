@@ -164,7 +164,7 @@ class _CreateCouponScreenState extends State<CreateCouponScreen> {
                         AlertMessage(
                           message:
                               "تاريخ البداية والنهاية اختياريان، يمكنك تركهما فارغين",
-                          icon: FontAwesomeIcons.circleInfo,
+                          icon: FontAwesomeIcons.circleInfo.data,
                           color: const Color(0xFF92400E),
                         ),
                         AppDatePicker(

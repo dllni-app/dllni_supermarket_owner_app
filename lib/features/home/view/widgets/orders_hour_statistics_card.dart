@@ -40,7 +40,7 @@ class OrdersHourStatisticsCard extends StatelessWidget {
                 'نشاط الطلبات (ساعات)',
                 fontWeight: FontWeight.bold,
               ),
-              const Icon(
+              const FaIcon(
                 FontAwesomeIcons.chartPie,
                 size: 18,
                 color: Color(0xFF9CA3AF),

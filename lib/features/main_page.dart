@@ -37,11 +37,11 @@ class _MainPageState extends State<MainPage>
       ),
       bottomNavigationBar: AppNavBar(
         items: [
-          AppNavBarItem(title: "الرئيسية", icon: FontAwesomeIcons.solidHouse),
-          AppNavBarItem(title: "الطلبات", icon: FontAwesomeIcons.receipt),
-          AppNavBarItem(title: "المنتجات", icon: FontAwesomeIcons.cubes),
-          AppNavBarItem(title: "المخزون", icon: FontAwesomeIcons.boxesStacked),
-          AppNavBarItem(title: "المزيد", icon: FontAwesomeIcons.bars),
+          AppNavBarItem(title: "الرئيسية", icon: FontAwesomeIcons.solidHouse.data),
+          AppNavBarItem(title: "الطلبات", icon: FontAwesomeIcons.receipt.data),
+          AppNavBarItem(title: "المنتجات", icon: FontAwesomeIcons.cubes.data),
+          AppNavBarItem(title: "المخزون", icon: FontAwesomeIcons.boxesStacked.data),
+          AppNavBarItem(title: "المزيد", icon: FontAwesomeIcons.bars.data),
         ],
         selectedIndex: selectedTab,
         onChanged: (index) {

@@ -116,7 +116,7 @@ class _AddProductMenuScreenState extends State<AddProductMenuScreen> {
                                             boxShadow: [AppShadows.shadow],
                                           ),
                                           child: Icon(
-                                            FontAwesomeIcons.solidFileExcel,
+                                            FontAwesomeIcons.solidFileExcel.data,
                                             size: 18,
                                             color: Colors.green,
                                           ),
@@ -168,8 +168,10 @@ class _AddProductMenuScreenState extends State<AddProductMenuScreen> {
                                                         UploadFileType.image
                                                     ? FontAwesomeIcons
                                                           .solidCamera
+                                                          .data
                                                     : FontAwesomeIcons
-                                                          .solidFileExcel,
+                                                          .solidFileExcel
+                                                          .data,
                                                 size: 18,
                                                 color: const Color(0xFF9CA3AF),
                                               ),
@@ -277,7 +279,7 @@ class _AddProductMenuScreenState extends State<AddProductMenuScreen> {
                                   title:
                                       "تحليل ${widget.type == UploadFileType.image ? "الصورة" : "الملف"}",
                                   icon: Icon(
-                                    FontAwesomeIcons.wandMagicSparkles,
+                                    FontAwesomeIcons.wandMagicSparkles.data,
                                     size: 17,
                                     color: AppColors.white,
                                   ),
