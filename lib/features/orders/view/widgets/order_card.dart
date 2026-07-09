@@ -31,19 +31,21 @@ class OrderCard extends StatelessWidget {
       status == OrderStatus.readyForPickup;
 
   String get orderDelay {
-    final parsedDate = _tryParseDate(order.updatedAt ?? order.createdAt);
+    final parsedDate = _tryParseServerDate(order.createdAt);
     if (parsedDate == null) return 'غير محدد';
 
     final diffDate = DateTime.now().difference(parsedDate);
-    if (diffDate.inDays != 0) return '${diffDate.inDays} يوم';
-    if (diffDate.inHours != 0) return '${diffDate.inHours} ساعة';
-    if (diffDate.inMinutes != 0) return '${diffDate.inMinutes} دقيقة';
+    final safeDiff = diffDate.isNegative ? Duration.zero : diffDate;
+
+    if (safeDiff.inDays != 0) return '${safeDiff.inDays} يوم';
+    if (safeDiff.inHours != 0) return '${safeDiff.inHours} ساعة';
+    if (safeDiff.inMinutes != 0) return '${safeDiff.inMinutes} دقيقة';
     return 'الآن';
   }
 
   String get stageLabel => switch (status) {
     OrderStatus.pending => 'بانتظار قبول الطلب من المتجر',
-    OrderStatus.accepted => 'المندوب في الطريق',
+    OrderStatus.accepted => 'جاري البحث عن مندوب',
     OrderStatus.preparing => 'يتم تجهيز المنتجات',
     OrderStatus.readyForPickup => 'بانتظار تسليم الطلب للمندوب',
     OrderStatus.pickedUp => 'تم تسليم الطلب للمندوب',
@@ -254,10 +256,14 @@ class OrderCard extends StatelessWidget {
     context.pushRoute('/orders/order_details', arguments: id);
   }
 
-  DateTime? _tryParseDate(String? value) {
+  DateTime? _tryParseServerDate(String? value) {
     if (value == null || value.trim().isEmpty) return null;
-    return DateTime.tryParse(value) ??
-        DateTime.tryParse(value.replaceFirst(' ', 'T'));
+
+    final normalized = value.trim().replaceFirst(' ', 'T');
+    final hasTimezone = RegExp(r'(Z|[+-]\d{2}:?\d{2})$').hasMatch(normalized);
+    final dateText = hasTimezone ? normalized : '${normalized}Z';
+
+    return DateTime.tryParse(dateText)?.toLocal();
   }
 }
 
