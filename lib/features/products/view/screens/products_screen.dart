@@ -82,7 +82,6 @@ class _ProductsScreenState extends State<ProductsScreen> {
           children: [
             Builder(
               builder: (context) {
-                print("rebuild appsimpleappbarwithsearch");
                 return AppSimpleAppBarWithSearch(
                   title: "المنتجات",
                   onSearchChanged: (value) {
@@ -119,69 +118,69 @@ class _ProductsScreenState extends State<ProductsScreen> {
                   ),
                   Padding(
                     padding: EdgeInsets.fromLTRB(20, 16, 20, 0),
-                    child: Row(
-                      spacing: 12,
-                      children: [
-                        Expanded(
-                          child: BlocBuilder<ProductsBloc, ProductsState>(
-                            buildWhen: (previous, current) =>
-                                previous.totalProductsCountStatus !=
-                                current.totalProductsCountStatus,
-                            builder: (context, state) {
-                              switch (state.totalProductsCountStatus) {
-                                case BlocStatus.loading:
-                                  return StatePointerLoading();
-                                case BlocStatus.success:
-                                  return StatePointer(
-                                    title: "إجمالي المنتجات النشطة",
-                                    value: state.totalProductsCount?.count ?? 0,
-                                  );
-                                default:
-                                  return SizedBox();
-                              }
-                            },
+                    child: IntrinsicHeight(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        spacing: 12,
+                        children: [
+                          Expanded(
+                            child: BlocBuilder<ProductsBloc, ProductsState>(
+                              buildWhen: (previous, current) =>
+                                  previous.totalProductsCountStatus !=
+                                  current.totalProductsCountStatus,
+                              builder: (context, state) {
+                                switch (state.totalProductsCountStatus) {
+                                  case BlocStatus.loading:
+                                    return StatePointerLoading();
+                                  case BlocStatus.success:
+                                    return StatePointer(
+                                      title: "إجمالي المنتجات النشطة",
+                                      value: state.totalProductsCount?.count ?? 0,
+                                    );
+                                  default:
+                                    return SizedBox();
+                                }
+                              },
+                            ),
                           ),
-                        ),
-                        BlocBuilder<ProductsBloc, ProductsState>(
-                          buildWhen: (previous, current) =>
-                              previous.lowStockStatus != current.lowStockStatus,
-                          builder: (context, state) {
-                            switch (state.lowStockStatus) {
-                              case BlocStatus.loading:
-                                return StatePointerLoading();
-                              case BlocStatus.success:
-                                return Expanded(
-                                  child: StatePointer(
-                                    isCritical: true,
-                                    title: "منخفض المخزون",
-                                    value: state.lowStock?.data?.total ?? 0,
-                                  ),
-                                );
-                              case BlocStatus.failed:
-                                return Expanded(
-                                  child: FailureWidget(
-                                    message:
-                                        state.errorMessage ?? "Unknown Error",
-                                    onRetry: () {
-                                      context.read<ProductsBloc>().add(
-                                        GetLowStockEvent(
-                                          params: GetLowStockParams(),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                );
-                              default:
-                                return SizedBox();
-                            }
-                          },
-                        ),
-                      ],
+                          Expanded(
+                            child: BlocBuilder<ProductsBloc, ProductsState>(
+                              buildWhen: (previous, current) =>
+                                  previous.lowStockStatus != current.lowStockStatus,
+                              builder: (context, state) {
+                                switch (state.lowStockStatus) {
+                                  case BlocStatus.loading:
+                                    return StatePointerLoading();
+                                  case BlocStatus.success:
+                                    return StatePointer(
+
+                                      title: "منخفض المخزون",
+                                      value: state.lowStock?.data?.total ?? 0,
+                                    );
+                                  case BlocStatus.failed:
+                                    return FailureWidget(
+                                      message:
+                                          state.errorMessage ?? "Unknown Error",
+                                      onRetry: () {
+                                        context.read<ProductsBloc>().add(
+                                          GetLowStockEvent(
+                                            params: GetLowStockParams(),
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  default:
+                                    return SizedBox();
+                                }
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   BlocBuilder<ProductsBloc, ProductsState>(
                     builder: (context, state) {
-                      print(state.categoriesStatus);
                       switch (state.categories) {
                         case null:
                           return ProductsTabBarLoading();

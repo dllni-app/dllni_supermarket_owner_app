@@ -19,6 +19,7 @@ class CourierHandoverUseCase
 
 class CourierHandoverParams with Params {
   final int orderId;
+  final int stage;
 
-  CourierHandoverParams({required this.orderId});
+  CourierHandoverParams({required this.orderId, this.stage = 3});
 }

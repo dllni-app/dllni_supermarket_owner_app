@@ -30,29 +30,6 @@ class ProductCard extends StatefulWidget {
   State<ProductCard> createState() => _ProductCardState();
 }
 
-class _AvailabilityChip extends StatelessWidget {
-  final bool isAvailable;
-  const _AvailabilityChip({required this.isAvailable});
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(
-        color: isAvailable ? Color(0x2928C76F) : Color(0x662F2B3D),
-        borderRadius: BorderRadius.all(Radius.circular(6)),
-      ),
-      child: Text(
-        isAvailable ? "متوفر" : "غير متوفر",
-        style: TextStyle(
-          color: isAvailable ? Color(0xFF24B364) : Color(0xE52F2B3D),
-          fontSize: 10,
-          fontWeight: FontWeight.w700,
-          height: 1.5,
-        ),
-      ),
-    );
-  }
-}
 
 class _ProductCardState extends State<ProductCard> {
   late bool enabled;
@@ -100,10 +77,16 @@ class _ProductCardState extends State<ProductCard> {
                         alignment: Alignment.bottomCenter,
                         children: [
                           widget.product.imageUrls?.isEmpty == true
-                              ? AppImage.asset(AppImages.image1, size: 96)
+                              ? AppImage.asset(AppImages.image1,
+                              width:context.width*.25,
+                            height:context.width*.25,
+                            fit: BoxFit.cover,
+
+                          )
                               : AppImage.network(
                                   widget.product.imageUrls?[0] ?? "",
-                                  size: 96,
+                                  width:context.width*.25,
+                                  height:context.width*.25,
                                   fit: BoxFit.cover,
                                 ),
                           if (unavailable)
@@ -148,146 +131,143 @@ class _ProductCardState extends State<ProductCard> {
                     SizedBox(width: 16),
                     Expanded(
                       child: SizedBox(
-                        height: 105,
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(vertical: 4),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Expanded(
-                                    child: AppText(
-                                      widget.product.name ?? "",
-                                      // scrollText: true,
-                                      textAlign: TextAlign.start,
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w700,
-                                        height: 1.25,
-                                        color: Color(0xFF202020),
-                                      ),
+
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment:
+                                  MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: AppText(
+                                    widget.product.name ?? "",
+                                    // scrollText: true,
+                                    textAlign: TextAlign.start,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w700,
+                                      height: 1.25,
+                                      color: Color(0xFF202020),
                                     ),
                                   ),
-                                  if (widget.onEdit != null ||
-                                      widget.onDelete != null)
-                                    Theme(
-                                      data: Theme.of(context).copyWith(
-                                        splashColor: Colors.transparent,
-                                        highlightColor: Colors.transparent,
-                                      ),
-                                      child: PopupMenuButton<String>(
-                                        icon: Icon(
-                                          Icons.more_vert,
-                                          size: 20,
-                                          color: Colors.grey,
-                                        ),
-                                        onSelected: (value) async {
-                                          if (value == 'edit' &&
-                                              widget.onEdit != null) {
-                                            await widget.onEdit!(
-                                              widget.product,
-                                            );
-                                          } else if (value == 'delete' &&
-                                              widget.onDelete != null) {
-                                            widget.onDelete!(widget.product);
-                                          }
-                                        },
-                                        itemBuilder: (context) => [
-                                          if (widget.onEdit != null)
-                                            PopupMenuItem(
-                                              value: 'edit',
-                                              child: Text(
-                                                "تعديل",
-                                                textAlign: TextAlign.start,
-                                                style: TextStyle(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w500,
-                                                ),
-                                              ),
-                                            ),
-                                          if (widget.onDelete != null)
-                                            PopupMenuItem(
-                                              value: 'delete',
-                                              child: Text(
-                                                "حذف",
-                                                textAlign: TextAlign.start,
-                                                style: TextStyle(
-                                                  fontSize: 14,
-                                                  color: Color(0xFFEF4444),
-                                                  fontWeight: FontWeight.w500,
-                                                ),
-                                              ),
-                                            ),
-                                        ],
-                                      ),
-                                    )
-                                  else
-                                    Icon(
-                                      Icons.more_vert,
-                                      size: 16,
-                                      color: Colors.grey,
+                                ),
+                                if (widget.onEdit != null ||
+                                    widget.onDelete != null)
+                                  Theme(
+                                    data: Theme.of(context).copyWith(
+                                      splashColor: Colors.transparent,
+                                      highlightColor: Colors.transparent,
                                     ),
-                                ],
-                              ),
-                              if (!limited)
-                                _AvailabilityChip(isAvailable: available),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Row(
-                                    children: [
-                                      AppText(
-                                        widget.product.price ?? "",
-                                        style: TextStyle(
-                                          color: Color(0xFFFF660E),
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w700,
-                                          height: 1.555,
-                                        ),
+                                    child: PopupMenuButton<String>(
+                                      icon: Icon(
+                                        Icons.more_vert,
+                                        size: 20,
+                                        color: Colors.grey,
                                       ),
-                                      SizedBox(width: 4),
-                                      AppText(
-                                        "ل.س",
-                                        style: TextStyle(
-                                          color: Color(0xFF9CA3AF),
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w500,
-                                          height: 1.333,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Builder(
-                                    builder: (context) {
-                                      return AppSwitch(
-                                        value: enabled,
-                                        onChanged: (value) {
-                                          enabled = !enabled;
-                                          context.read<ProductsBloc>().add(
-                                            UpdateProductEvent(
-                                              params:
-                                                  UpdateProductParams.toggle(
-                                                    productId:
-                                                        widget.product.id!,
-                                                    isActive: enabled,
-                                                  ),
-                                            ),
+                                      onSelected: (value) async {
+                                        if (value == 'edit' &&
+                                            widget.onEdit != null) {
+                                          await widget.onEdit!(
+                                            widget.product,
                                           );
-                                          setState(() {});
-                                        },
-                                      );
-                                    },
+                                        } else if (value == 'delete' &&
+                                            widget.onDelete != null) {
+                                          widget.onDelete!(widget.product);
+                                        }
+                                      },
+                                      itemBuilder: (context) => [
+                                        if (widget.onEdit != null)
+                                          PopupMenuItem(
+                                            value: 'edit',
+                                            child: Text(
+                                              "تعديل",
+                                              textAlign: TextAlign.start,
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ),
+                                        if (widget.onDelete != null)
+                                          PopupMenuItem(
+                                            value: 'delete',
+                                            child: Text(
+                                              "حذف",
+                                              textAlign: TextAlign.start,
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                color: Color(0xFFEF4444),
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                  )
+                                else
+                                  Icon(
+                                    Icons.more_vert,
+                                    size: 16,
+                                    color: Colors.grey,
                                   ),
-                                ],
-                              ),
-                            ],
-                          ),
+                              ],
+                            ),
+                            if (!limited)
+                              _AvailabilityChip(isAvailable: available),
+                            Row(
+                              mainAxisAlignment:
+                                  MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: [
+                                    AppText(
+                                      widget.product.price ?? "",
+                                      style: TextStyle(
+                                        color: Color(0xFFFF660E),
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w700,
+                                        height: 1.555,
+                                      ),
+                                    ),
+                                    SizedBox(width: 4),
+                                    AppText(
+                                      "ل.س",
+                                      style: TextStyle(
+                                        color: Color(0xFF9CA3AF),
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w500,
+                                        height: 1.333,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Builder(
+                                  builder: (context) {
+                                    return AppSwitch(
+                                      value: enabled,
+                                      onChanged: (value) {
+                                        enabled = !enabled;
+                                        context.read<ProductsBloc>().add(
+                                          UpdateProductEvent(
+                                            params:
+                                                UpdateProductParams.toggle(
+                                                  productId:
+                                                      widget.product.id!,
+                                                  isActive: enabled,
+                                                ),
+                                          ),
+                                        );
+                                        setState(() {});
+                                      },
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -335,5 +315,28 @@ class _ProductCardState extends State<ProductCard> {
   void initState() {
     super.initState();
     enabled = widget.product.isAvailable ?? true;
+  }
+}
+class _AvailabilityChip extends StatelessWidget {
+  final bool isAvailable;
+  const _AvailabilityChip({required this.isAvailable});
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: isAvailable ? Color(0x2928C76F) : Color(0x662F2B3D),
+        borderRadius: BorderRadius.all(Radius.circular(6)),
+      ),
+      child: Text(
+        isAvailable ? "متوفر" : "غير متوفر",
+        style: TextStyle(
+          color: isAvailable ? Color(0xFF24B364) : Color(0xE52F2B3D),
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+          height: 1.5,
+        ),
+      ),
+    );
   }
 }

@@ -27,6 +27,29 @@ class OrdersScreen extends StatefulWidget {
 
 class _OrdersScreenState extends State<OrdersScreen> {
   String? selectedStatus;
+
+  OrderStatus _mapOrderStatus(String? status) {
+    return switch (status) {
+      'pending' => OrderStatus.pending,
+      'accepted' => OrderStatus.accepted,
+      'preparing' => OrderStatus.preparing,
+      'ready_for_pickup' => OrderStatus.readyForPickup,
+      'picked_up' || 'out_for_delivery' => OrderStatus.pickedUp,
+      'completed' || 'delivered' => OrderStatus.completed,
+      'rejected' => OrderStatus.rejected,
+      'cancelled' || 'canceled' => OrderStatus.cancelled,
+      _ => OrderStatus.pending,
+    };
+  }
+
+  int _stageForStatus(String? status) {
+    return switch (status) {
+      'accepted' => 1,
+      'preparing' => 2,
+      _ => 3,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider<OrdersBloc>(
@@ -34,21 +57,12 @@ class _OrdersScreenState extends State<OrdersScreen> {
         ..add(GetOrdersEvent(params: GetOrdersParams()))
         ..add(GetOrderCountsEvent(params: GetOrderCountsParams())),
       child: BlocListener<OrdersBloc, OrdersState>(
-        listenWhen: (previous, current) =>
-            previous.courierHandoverStatus != current.courierHandoverStatus,
+        listenWhen: (previous, current) => previous.courierHandoverStatus != current.courierHandoverStatus,
         listener: (context, state) {
           if (state.courierHandoverStatus == BlocStatus.failed) {
-            AppToast.showToast(
-              context: context,
-              message: state.errorMessage ?? "Unknown Error",
-              type: ToastificationType.error,
-            );
+            AppToast.showToast(context: context, message: state.errorMessage ?? 'Unknown Error', type: ToastificationType.error);
           } else if (state.courierHandoverStatus == BlocStatus.success) {
-            AppToast.showToast(
-              context: context,
-              message: "تم تسليم الطلب للمندوب",
-              type: ToastificationType.success,
-            );
+            AppToast.showToast(context: context, message: 'تم تحديث حالة الطلب', type: ToastificationType.success);
           }
         },
         child: Scaffold(
@@ -59,205 +73,77 @@ class _OrdersScreenState extends State<OrdersScreen> {
               Expanded(
                 child: Column(
                   children: [
-                    SizedBox(height: 8),
-
-                    // Padding(
-                    //   padding: const EdgeInsets.symmetric(horizontal: 20),
-                    //   child: WarningAlert(
-                    //     icon: FontAwesomeIcons.clock.data,
-                    //     title: "طلب متأخر #2475",
-                    //     description: "تجاوز الوقت المحدد بـ 5 دقائق.",
-                    //     labelButton: "عرض",
-                    //   ),
-                    // ),
-                    //* this just for get number of orders for each status
+                    const SizedBox(height: 8),
                     BlocBuilder<OrdersBloc, OrdersState>(
-                      buildWhen: (previous, current) =>
-                          previous.orderCountsStatus !=
-                          current.orderCountsStatus,
+                      buildWhen: (previous, current) => previous.orderCountsStatus != current.orderCountsStatus,
                       builder: (context, state) {
                         if (state.orderCountsStatus == BlocStatus.loading) {
                           return ProductsTabBarLoading();
-                        } else if (state.orderCountsStatus ==
-                            BlocStatus.failed) {
+                        } else if (state.orderCountsStatus == BlocStatus.failed) {
                           return FailureWidget(
-                            message: state.errorMessage ?? "Unknown Error",
-                            onRetry: () {
-                              context.read<OrdersBloc>().add(
-                                GetOrderCountsEvent(
-                                  params: GetOrderCountsParams(),
-                                ),
-                              );
-                            },
+                            message: state.errorMessage ?? 'Unknown Error',
+                            onRetry: () => context.read<OrdersBloc>().add(GetOrderCountsEvent(params: GetOrderCountsParams())),
                           );
-                        } else if (state.orderCountsStatus ==
-                            BlocStatus.success) {
+                        } else if (state.orderCountsStatus == BlocStatus.success) {
                           return OrdersTabBar(
                             items: [
-                              OrdersTabBarItem(
-                                title: "الكل",
-                                count: state.orderCounts?.data?.total ?? 0,
-                              ),
-                              OrdersTabBarItem(
-                                title: "طلب جديد",
-                                count: state.orderCounts?.data?.pending ?? 0,
-                                leadingColor: context.primary,
-                              ),
-                              OrdersTabBarItem(
-                                title: "قيد التحضير",
-                                count: state.orderCounts?.data?.preparing ?? 0,
-                                leadingColor: AppColors.accent,
-                              ),
-                              OrdersTabBarItem(
-                                title: "جاهز للتسليم",
-                                count:
-                                    state.orderCounts?.data?.readyForDelivery ??
-                                    0,
-                                leadingColor: Color(0xFF24B364),
-                              ),
-                              OrdersTabBarItem(
-                                title: "مكتمل",
-                                count: state.orderCounts?.data?.completed ?? 0,
-                                leadingColor: Color(0xFF24B364),
-                              ),
+                              OrdersTabBarItem(title: 'الكل', count: state.orderCounts?.data?.total ?? 0),
+                              OrdersTabBarItem(title: 'طلب جديد', count: state.orderCounts?.data?.pending ?? 0, leadingColor: context.primary),
+                              OrdersTabBarItem(title: 'قيد التحضير', count: state.orderCounts?.data?.preparing ?? 0, leadingColor: AppColors.accent),
+                              OrdersTabBarItem(title: 'جاهز للتسليم', count: state.orderCounts?.data?.readyForDelivery ?? 0, leadingColor: const Color(0xFF24B364)),
+                              OrdersTabBarItem(title: 'مكتمل', count: state.orderCounts?.data?.completed ?? 0, leadingColor: const Color(0xFF24B364)),
                             ],
                             onChanged: (index) {
-                              print(index);
-                              if (index == 0) {
-                                selectedStatus = null;
-                              } else if (index == 1) {
-                                selectedStatus = 'pending';
-                              } else if (index == 2) {
-                                selectedStatus = 'preparing';
-                              } else if (index == 3) {
-                                selectedStatus = 'ready_for_pickup';
-                              } else if (index == 4) {
-                                selectedStatus = 'completed';
-                              }
-                              context.read<OrdersBloc>().add(
-                                GetOrdersEvent(
-                                  params: GetOrdersParams(
-                                    page: 1,
-                                    status: selectedStatus,
-                                  ),
-                                  isReload: true,
-                                ),
-                              );
+                              if (index == 0) selectedStatus = null;
+                              if (index == 1) selectedStatus = 'pending';
+                              if (index == 2) selectedStatus = 'preparing';
+                              if (index == 3) selectedStatus = 'ready_for_pickup';
+                              if (index == 4) selectedStatus = 'completed';
+                              context.read<OrdersBloc>().add(GetOrdersEvent(params: GetOrdersParams(page: 1, status: selectedStatus), isReload: true));
                             },
                           );
                         }
-                        return SizedBox();
+                        return const SizedBox();
                       },
                     ),
                     Expanded(
                       child: BlocBuilder<OrdersBloc, OrdersState>(
-                        buildWhen: (previous, current) =>
-                            previous.orders != current.orders ||
-                            previous.courierHandoverStatus !=
-                                current.courierHandoverStatus ||
-                            previous.courierHandoverLoadingOrderId !=
-                                current.courierHandoverLoadingOrderId,
+                        buildWhen: (previous, current) => previous.orders != current.orders || previous.courierHandoverStatus != current.courierHandoverStatus || previous.courierHandoverLoadingOrderId != current.courierHandoverLoadingOrderId,
                         builder: (context, state) {
                           return state.orders!.builder(
                             loadingWidget: Shimmer.fromColors(
-                              baseColor: Color(0xFFE0E0E0),
-                              highlightColor: Color(0xFFCCCCCC),
+                              baseColor: const Color(0xFFE0E0E0),
+                              highlightColor: const Color(0xFFCCCCCC),
                               child: ListView.separated(
                                 shrinkWrap: true,
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 20,
-                                  vertical: 16,
-                                ),
-                                itemBuilder: (_, index) => [
-                                  Container(
-                                    width: double.infinity,
-                                    height: 300,
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                  ),
-                                  Container(
-                                    width: double.infinity,
-                                    height: 300,
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                  ),
-                                  Container(
-                                    width: double.infinity,
-                                    height: 300,
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                  ),
-                                  Container(
-                                    width: double.infinity,
-                                    height: 80,
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                  ),
-                                ][index],
-                                separatorBuilder: (_, _) =>
-                                    SizedBox(height: 12),
+                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                                itemBuilder: (_, index) => Container(width: double.infinity, height: index == 3 ? 80 : 220, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18))),
+                                separatorBuilder: (_, _) => const SizedBox(height: 12),
                                 itemCount: 4,
                               ),
                             ),
-                            emptyWidget: AppText.labelMedium(
-                              'لا يوجد طلبات',
-                              fontWeight: FontWeight.w400,
-                            ),
+                            emptyWidget: AppText.labelMedium('لا يوجد طلبات', fontWeight: FontWeight.w400),
                             successWidget: () {
                               return ListView.separated(
-                                padding: EdgeInsetsDirectional.symmetric(
-                                  horizontal: 24,
-                                  vertical: 8,
-                                ),
+                                padding: const EdgeInsetsDirectional.symmetric(horizontal: 20, vertical: 10),
                                 itemBuilder: (context, index) {
                                   if (state.orders!.length <= index) {
                                     if (state.orders!.length == index) {
-                                      context.read<OrdersBloc>().add(
-                                        GetOrdersEvent(
-                                          isReload: false,
-                                          params: GetOrdersParams(
-                                            page: state.orders!.pageNumber,
-                                            status: selectedStatus,
-                                          ),
-                                        ),
-                                      );
+                                      context.read<OrdersBloc>().add(GetOrdersEvent(isReload: false, params: GetOrdersParams(page: state.orders!.pageNumber, status: selectedStatus)));
                                     }
                                     return Shimmer.fromColors(
-                                      baseColor: Color(0xFFE0E0E0),
-                                      highlightColor: Color(0xFFCCCCCC),
-                                      child: Container(
-                                        width: double.infinity,
-                                        height: 80,
-                                        decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius: BorderRadius.circular(
-                                            8,
-                                          ),
-                                        ),
-                                      ),
+                                      baseColor: const Color(0xFFE0E0E0),
+                                      highlightColor: const Color(0xFFCCCCCC),
+                                      child: Container(width: double.infinity, height: 80, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18))),
                                     );
                                   }
+
+                                  final order = state.orders!.list[index];
+                                  final stage = _stageForStatus(order.status);
+
                                   return OrderCard(
-                                    order: state.orders!.list[index],
-                                    status:
-                                        state.orders!.list[index].status ==
-                                            "pending"
-                                        ? OrderStatus.pending
-                                        : state.orders!.list[index].status ==
-                                              "preparing"
-                                        ? OrderStatus.preparing
-                                        : state.orders!.list[index].status ==
-                                              "ready_for_pickup"
-                                        ? OrderStatus.readyForPickup
-                                        : OrderStatus.completed,
+                                    order: order,
+                                    status: _mapOrderStatus(order.status),
                                     onAcceptTap: () {
                                       showModalBottomSheet(
                                         context: context,
@@ -265,15 +151,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                         backgroundColor: Colors.transparent,
                                         builder: (_) => BlocProvider.value(
                                           value: context.read<OrdersBloc>(),
-                                          child: AcceptOrderBottomSheet(
-                                            status: selectedStatus,
-                                            orderId:
-                                                state.orders!.list[index].id!,
-                                            orderNumber: state
-                                                .orders!
-                                                .list[index]
-                                                .orderNumber!,
-                                          ),
+                                          child: AcceptOrderBottomSheet(status: selectedStatus, orderId: order.id!, orderNumber: order.orderNumber!),
                                         ),
                                       );
                                     },
@@ -284,15 +162,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                         backgroundColor: Colors.transparent,
                                         builder: (_) => BlocProvider.value(
                                           value: context.read<OrdersBloc>(),
-                                          child: RejectOrderBottomSheet(
-                                            status: selectedStatus,
-                                            orderId:
-                                                state.orders!.list[index].id!,
-                                            orderNumber: state
-                                                .orders!
-                                                .list[index]
-                                                .orderNumber!,
-                                          ),
+                                          child: RejectOrderBottomSheet(status: selectedStatus, orderId: order.id!, orderNumber: order.orderNumber!),
                                         ),
                                       );
                                     },
@@ -300,51 +170,23 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                     onCourierHandoverTap: () {
                                       context.read<OrdersBloc>().add(
                                         CourierHandoverEvent(
-                                          params: CourierHandoverParams(
-                                            orderId:
-                                                state.orders!.list[index].id!,
-                                          ),
+                                          params: CourierHandoverParams(orderId: order.id!, stage: stage),
                                           ordersListStatus: selectedStatus,
                                         ),
                                       );
                                     },
-                                    isCourierHandoverLoading:
-                                        state.courierHandoverStatus ==
-                                            BlocStatus.loading &&
-                                        state.courierHandoverLoadingOrderId ==
-                                            state.orders!.list[index].id,
+                                    isCourierHandoverLoading: state.courierHandoverStatus == BlocStatus.loading && state.courierHandoverLoadingOrderId == order.id,
                                   );
                                 },
-                                separatorBuilder: (context, index) =>
-                                    SizedBox(height: 16),
+                                separatorBuilder: (context, index) => const SizedBox(height: 14),
                                 itemCount: state.orders!.listLength(1),
                               );
                             },
                             failedWidget: FailureWidget(
-                              message: state.errorMessage ?? "Unknown Error",
-                              onRetry: () {
-                                context.read<OrdersBloc>().add(
-                                  GetOrdersEvent(
-                                    params: GetOrdersParams(
-                                      page: 1,
-                                      status: selectedStatus,
-                                    ),
-                                    isReload: true,
-                                  ),
-                                );
-                              },
+                              message: state.errorMessage ?? 'Unknown Error',
+                              onRetry: () => context.read<OrdersBloc>().add(GetOrdersEvent(params: GetOrdersParams(page: 1, status: selectedStatus), isReload: true)),
                             ),
-                            onTapRetry: () {
-                              context.read<OrdersBloc>().add(
-                                GetOrdersEvent(
-                                  params: GetOrdersParams(
-                                    page: 1,
-                                    status: selectedStatus,
-                                  ),
-                                  isReload: true,
-                                ),
-                              );
-                            },
+                            onTapRetry: () => context.read<OrdersBloc>().add(GetOrdersEvent(params: GetOrdersParams(page: 1, status: selectedStatus), isReload: true)),
                           );
                         },
                       ),
@@ -359,5 +201,3 @@ class _OrdersScreenState extends State<OrdersScreen> {
     );
   }
 }
-
-// ,

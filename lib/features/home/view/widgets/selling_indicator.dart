@@ -12,7 +12,7 @@ class SellingIndicator extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: percent >= 0 ? const Color(0x3322C55E) : const Color(0x33EF4444),
+        color: percent > 0 ? const Color(0x3322C55E) : const Color(0x33EF4444),
         borderRadius: BorderRadius.all(Radius.circular(100)),
       ),
       child: Row(
