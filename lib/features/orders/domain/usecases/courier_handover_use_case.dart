@@ -17,9 +17,18 @@ class CourierHandoverUseCase
   }
 }
 
+enum OrderLifecycleAction {
+  markPreparing,
+  markReadyForPickup,
+  courierHandover,
+}
+
 class CourierHandoverParams with Params {
   final int orderId;
-  final int stage;
+  final OrderLifecycleAction action;
 
-  CourierHandoverParams({required this.orderId, this.stage = 3});
+  CourierHandoverParams({
+    required this.orderId,
+    this.action = OrderLifecycleAction.courierHandover,
+  });
 }
