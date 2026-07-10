@@ -12,6 +12,7 @@ import '../models/courier_handover_model.dart';
 import '../../domain/usecases/courier_handover_use_case.dart';
 import '../models/get_order_counts_model.dart';
 import '../../domain/usecases/get_order_counts_use_case.dart';
+import '../../domain/usecases/update_preparation_estimate_params.dart';
 
 @lazySingleton
 class OrdersRemoteDataSource with HandlingApiManager {
@@ -58,6 +59,20 @@ class OrdersRemoteDataSource with HandlingApiManager {
         endPoint: '/api/v1/sm-orders/${params.orderId}',
         params: params.getParams(),
         data: params.getBody().isEmpty ? null : params.getBody(),
+      ),
+      jsonConvert: getOrderDetailsModelFromJson,
+    );
+  }
+
+  Future<GetOrderDetailsModel> updatePreparationEstimate(
+    UpdatePreparationEstimateParams params,
+  ) {
+    return wrapHandlingApi(
+      tryCall: () => dioNetwork.patchData(
+        endPoint:
+            '/api/v1/store-owner/orders/${params.orderId}/preparation-estimate',
+        data: params.getBody(),
+        params: params.getParams(),
       ),
       jsonConvert: getOrderDetailsModelFromJson,
     );
