@@ -16,6 +16,7 @@ import '../../domain/usecases/courier_handover_use_case.dart';
 import '../models/courier_handover_model.dart';
 import '../../domain/usecases/get_order_counts_use_case.dart';
 import '../models/get_order_counts_model.dart';
+import '../../domain/usecases/update_preparation_estimate_params.dart';
 
 @LazySingleton(as: OrdersRepo)
 class OrdersRepoImpl with HandlingException implements OrdersRepo {
@@ -44,11 +45,19 @@ class OrdersRepoImpl with HandlingException implements OrdersRepo {
     );
   }
 
-
   @override
   DataResponse<GetOrderDetailsModel> getOrderDetails(GetOrderDetailsParams params) {
     return wrapHandlingException(
       tryCall: () => ordersRemoteDataSource.getOrderDetails(params),
+    );
+  }
+
+  @override
+  DataResponse<GetOrderDetailsModel> updatePreparationEstimate(
+    UpdatePreparationEstimateParams params,
+  ) {
+    return wrapHandlingException(
+      tryCall: () => ordersRemoteDataSource.updatePreparationEstimate(params),
     );
   }
 
@@ -61,11 +70,10 @@ class OrdersRepoImpl with HandlingException implements OrdersRepo {
     );
   }
 
-
   @override
   DataResponse<GetOrderCountsModel> getOrderCounts(GetOrderCountsParams params) {
     return wrapHandlingException(
       tryCall: () => ordersRemoteDataSource.getOrderCounts(params),
     );
-  }}
-
+  }
+}
