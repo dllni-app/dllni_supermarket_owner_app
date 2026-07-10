@@ -170,7 +170,7 @@ class OrderDetailsAppBar extends StatelessWidget {
                           ? null
                           : () => showEditPreparationEstimateDialog(
                                 context: context,
-                                orderId: orderId,
+                                orderId: orderId!,
                                 onUpdated: () {
                                   context.read<OrdersBloc>().add(
                                         GetOrderDetailsEvent(
@@ -197,7 +197,7 @@ class OrderDetailsAppBar extends StatelessWidget {
                 ],
                 if (canChangeStatus)
                   _OrderDetailsStatusActionButton(
-                    title: actionTitle,
+                    title: actionTitle!,
                     color: _actionColorForStatus(status),
                     isLoading: isLoading,
                     onTap: isLoading
@@ -206,7 +206,7 @@ class OrderDetailsAppBar extends StatelessWidget {
                             context.read<OrdersBloc>().add(
                                   CourierHandoverEvent(
                                     params: CourierHandoverParams(
-                                      orderId: orderId,
+                                      orderId: orderId!,
                                       action: _lifecycleActionForStatus(status),
                                     ),
                                   ),
