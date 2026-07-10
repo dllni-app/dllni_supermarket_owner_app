@@ -8,6 +8,7 @@ import '../../../products/view/widgets/arrow_back_button.dart';
 import '../../domain/usecases/courier_handover_use_case.dart';
 import '../../domain/usecases/get_order_details_use_case.dart';
 import '../manager/bloc/orders_bloc.dart';
+import 'edit_preparation_estimate_dialog.dart';
 
 class OrderDetailsAppBar extends StatelessWidget {
   const OrderDetailsAppBar({
@@ -47,6 +48,10 @@ class OrderDetailsAppBar extends StatelessWidget {
     return status == 'accepted' ||
         status == 'preparing' ||
         status == 'ready_for_pickup';
+  }
+
+  bool _canEditPreparationEstimate(String? status) {
+    return status == 'accepted' || status == 'preparing';
   }
 
   @override
@@ -90,6 +95,11 @@ class OrderDetailsAppBar extends StatelessWidget {
       builder: (context, state) {
         final status = state.orderDetails?.data?.status;
         final actionTitle = _actionTitleForStatus(status);
+        final canEditEstimate =
+            orderId != null && _canEditPreparationEstimate(status);
+        final canChangeStatus = orderId != null &&
+            actionTitle != null &&
+            _canChangeStatus(status);
         final isLoading = orderId != null &&
             state.courierHandoverStatus == BlocStatus.loading &&
             state.courierHandoverLoadingOrderId == orderId;
@@ -129,16 +139,16 @@ class OrderDetailsAppBar extends StatelessWidget {
                       children: [
                         AppText(
                           title,
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: AppColors.white,
                             fontWeight: FontWeight.w500,
                             fontSize: 20,
                           ),
                         ),
-                        SizedBox(height: 1),
+                        const SizedBox(height: 1),
                         AppText(
                           'id:$productId',
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: Color(0x99FFFFFF),
                             fontWeight: FontWeight.w500,
                             fontSize: 14,
@@ -150,27 +160,59 @@ class OrderDetailsAppBar extends StatelessWidget {
                   ),
                 ],
               ),
-              if (orderId != null &&
-                  actionTitle != null &&
-                  _canChangeStatus(status)) ...[
+              if (canEditEstimate || canChangeStatus) ...[
                 const SizedBox(height: 16),
-                _OrderDetailsStatusActionButton(
-                  title: actionTitle,
-                  color: _actionColorForStatus(status),
-                  isLoading: isLoading,
-                  onTap: isLoading
-                      ? null
-                      : () {
-                          context.read<OrdersBloc>().add(
-                                CourierHandoverEvent(
-                                  params: CourierHandoverParams(
-                                    orderId: orderId,
-                                    action: _lifecycleActionForStatus(status),
+                if (canEditEstimate) ...[
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: isLoading
+                          ? null
+                          : () => showEditPreparationEstimateDialog(
+                                context: context,
+                                orderId: orderId!,
+                                onUpdated: () {
+                                  context.read<OrdersBloc>().add(
+                                        GetOrderDetailsEvent(
+                                          params: GetOrderDetailsParams(
+                                            orderId: orderId,
+                                          ),
+                                        ),
+                                      );
+                                },
+                              ),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.white,
+                        side: const BorderSide(color: AppColors.white),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      icon: const Icon(Icons.timer_outlined),
+                      label: const Text('تعديل وقت التجهيز'),
+                    ),
+                  ),
+                  if (canChangeStatus) const SizedBox(height: 10),
+                ],
+                if (canChangeStatus)
+                  _OrderDetailsStatusActionButton(
+                    title: actionTitle!,
+                    color: _actionColorForStatus(status),
+                    isLoading: isLoading,
+                    onTap: isLoading
+                        ? null
+                        : () {
+                            context.read<OrdersBloc>().add(
+                                  CourierHandoverEvent(
+                                    params: CourierHandoverParams(
+                                      orderId: orderId!,
+                                      action: _lifecycleActionForStatus(status),
+                                    ),
                                   ),
-                                ),
-                              );
-                        },
-                ),
+                                );
+                          },
+                  ),
               ],
             ],
           ),

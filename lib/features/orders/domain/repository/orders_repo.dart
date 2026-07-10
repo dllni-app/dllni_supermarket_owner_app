@@ -11,6 +11,7 @@ import '../usecases/courier_handover_use_case.dart';
 import '../../data/models/courier_handover_model.dart';
 import '../usecases/get_order_counts_use_case.dart';
 import '../../data/models/get_order_counts_model.dart';
+import '../usecases/update_preparation_estimate_params.dart';
 
 abstract class OrdersRepo {
   DataResponse<GetOrdersModel> getOrders(GetOrdersParams params);
@@ -20,6 +21,10 @@ abstract class OrdersRepo {
   DataResponse<RejectOrderModel> rejectOrder(RejectOrderParams params);
 
   DataResponse<GetOrderDetailsModel> getOrderDetails(GetOrderDetailsParams params);
+
+  DataResponse<GetOrderDetailsModel> updatePreparationEstimate(
+    UpdatePreparationEstimateParams params,
+  );
 
   DataResponse<CourierHandoverModel> courierHandover(CourierHandoverParams params);
 
