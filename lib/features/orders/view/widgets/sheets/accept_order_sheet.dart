@@ -1,460 +1,171 @@
 import 'package:common_package/common_package.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:toastification/toastification.dart';
 
-import '../../../../../core/themes/app_colors.dart';
-import '../../../../../core/themes/app_shadows.dart';
-import '../../../../../core/widgets/app_buttons.dart';
-import '../../../../home/view/widgets/home_menu_field.dart';
 import '../../../domain/usecases/accept_order_use_case.dart';
 import '../../../domain/usecases/get_orders_use_case.dart';
 import '../../manager/bloc/orders_bloc.dart';
+import '../preparation_time_selector.dart';
 
-class AcceptOrderBottomSheet extends StatelessWidget {
+class AcceptOrderBottomSheet extends StatefulWidget {
   const AcceptOrderBottomSheet({
     super.key,
     required this.orderId,
     required this.orderNumber,
     required this.status,
   });
+
   final int orderId;
   final String orderNumber;
   final String? status;
+
+  @override
+  State<AcceptOrderBottomSheet> createState() =>
+      _AcceptOrderBottomSheetState();
+}
+
+class _AcceptOrderBottomSheetState extends State<AcceptOrderBottomSheet> {
+  int? _preparationTimeMinutes;
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(top: 350),
-      decoration: BoxDecoration(
-        color: AppColors.white,
+      decoration: const BoxDecoration(
+        color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          Column(
-            // mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 20,
-                ),
-                decoration: const BoxDecoration(
-                  border: Border(bottom: BorderSide(color: Color(0xFFF3F4F6))),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: SafeArea(
+        top: false,
+        child: BlocConsumer<OrdersBloc, OrdersState>(
+          listenWhen: (previous, current) =>
+              previous.acceptOrderStatus != current.acceptOrderStatus,
+          listener: (context, state) {
+            if (state.acceptOrderStatus == BlocStatus.failed) {
+              AppToast.showToast(
+                context: context,
+                message: state.errorMessage ?? 'تعذر قبول الطلب',
+                type: ToastificationType.error,
+              );
+            } else if (state.acceptOrderStatus == BlocStatus.success) {
+              AppToast.showToast(
+                context: context,
+                message: 'تم قبول الطلب وبدء البحث عن مندوب',
+                type: ToastificationType.success,
+              );
+              context.read<OrdersBloc>().add(
+                    GetOrdersEvent(
+                      isReload: true,
+                      params: GetOrdersParams(status: widget.status),
+                    ),
+                  );
+              context.pop();
+            }
+          },
+          builder: (context, state) {
+            final loading = state.acceptOrderStatus == BlocStatus.loading;
+            return Padding(
+              padding: EdgeInsets.fromLTRB(
+                24,
+                20,
+                24,
+                MediaQuery.paddingOf(context).bottom + 24,
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-
+                    Row(
                       children: [
-                        AppText(
-                          "قبول الطلب #$orderNumber",
-                          style: TextStyle(
-                            color: const Color(0xFF111827),
-                            fontSize: 20,
-                            fontWeight: FontWeight.w700,
-                            height: 1.4,
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              AppText(
+                                'قبول الطلب #${widget.orderNumber}',
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              const Text(
+                                'يمكن قبول الطلب بدون تقدير. يبدأ البحث عن مندوب فوراً ويمكنه التوجه قبل اكتمال التجهيز.',
+                                style: TextStyle(color: Color(0xFF6B7280)),
+                              ),
+                            ],
                           ),
                         ),
-                        SizedBox(height: 2),
-                        AppText(
-                          "يرجى تأكيد تفاصيل التجهيز قبل البدء",
-                          style: TextStyle(
-                            color: const Color(0xFF6B7280),
-                            fontSize: 14,
-                            height: 1.42,
-                          ),
+                        IconButton(
+                          onPressed: loading ? null : () => context.pop(),
+                          icon: const Icon(Icons.close),
                         ),
                       ],
                     ),
-                    InkWell(
-                      onTap: () => context.pop(),
-                      customBorder: CircleBorder(),
-                      child: CircleAvatar(
-                        backgroundColor: Color(0xFFF9FAFB),
-                        radius: 16,
-                        child: Icon(
-                          FontAwesomeIcons.x.data,
-                          size: 14,
-                          color: Color(0xFF9CA3AF),
-                        ),
+                    const SizedBox(height: 20),
+                    PreparationTimeSelector(
+                      onChanged: (value) =>
+                          _preparationTimeMinutes = value,
+                    ),
+                    const SizedBox(height: 20),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF9FAFB),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFFE5E7EB)),
+                      ),
+                      child: const Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(Icons.local_shipping_outlined,
+                              color: Color(0xFF2563EB)),
+                          SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              'الوقت المتوقع للمعلومة فقط. لن يتمكن المندوب من استلام الطلب حتى تحديده كجاهز للاستلام.',
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.icon(
+                        onPressed: loading
+                            ? null
+                            : () {
+                                context.read<OrdersBloc>().add(
+                                      AcceptOrderEvent(
+                                        params: AcceptOrderParams(
+                                          orderId: widget.orderId,
+                                          preparationTimeMinutes:
+                                              _preparationTimeMinutes,
+                                        ),
+                                      ),
+                                    );
+                              },
+                        icon: loading
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Icon(Icons.check_circle_outline),
+                        label: const Text('تأكيد القبول'),
                       ),
                     ),
                   ],
                 ),
               ),
-
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      SizedBox(height: 24),
-                      // Row(
-                      //   children: [
-                      //     const Icon(
-                      //       FontAwesomeIcons.clock.data,
-                      //       size: 14,
-                      //       color: Color(0xFF3B82F6),
-                      //     ),
-                      //     const SizedBox(width: 8),
-                      //     AppText(
-                      //       "وقت التجهيز المتوقع",
-                      //       style: const TextStyle(
-                      //         color: Color(0xFF374151),
-                      //         fontSize: 14,
-                      //         fontWeight: FontWeight.w700,
-                      //         height: 1.42,
-                      //       ),
-                      //     ),
-                      //   ],
-                      // ),
-                      // SizedBox(height: 12),
-                      // TimeChoices(
-                      //   minutes: [15, 25, 35, 45],
-                      //   onChanged: (value) {
-                      //     print(value);
-                      //   },
-                      // ),
-                      // SizedBox(height: 12),
-                      // HomeTextField(
-                      //   hintText: "أدخل وقت مخصص (دقيقة)",
-                      //   prefix: Icon(
-                      //     FontAwesomeIcons.solidHourglassHalf.data,
-                      //     color: Color(0xFF9CA3AF),
-                      //     size: 16,
-                      //   ),
-                      // ),
-                      // SizedBox(height: 24),
-                      // HomeMenuField(
-                      //   hintText: "اختر موظف...",
-                      //   items: [
-                      //     DropdownMenuItem(
-                      //       value: "موظف 1",
-                      //       child: Text("موظف 1"),
-                      //     ),
-                      //     DropdownMenuItem(
-                      //       value: "موظف 2",
-                      //       child: Text("موظف 2"),
-                      //     ),
-                      //   ],
-                      //   onChanged: (value) {
-                      //     print(value);
-                      //   },
-                      //   title: "تعيين موظف مسؤول",
-                      //   icon: FontAwesomeIcons.userGroup.data,
-                      // ),
-                      SizedBox(height: 24),
-                      // HomeTextFieldWithTitle(
-                      //   title: "ملاحظات المطبخ",
-                      //   hintText: "أضف ملاحظات خاصة للتجهيز...",
-                      //   icon: FontAwesomeIcons.noteSticky.data,
-                      //   maxLines: 3,
-                      // ),
-                      // SizedBox(height: 24),
-                      Container(
-                        padding: EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Color(0xFFF9FAFB),
-                          borderRadius: BorderRadius.all(Radius.circular(12)),
-                          border: Border.all(color: Color(0xFFF3F4F6)),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            AppText(
-                              "الإجراءات التلقائية",
-                              style: TextStyle(
-                                color: Color(0xFF6B7280),
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                                height: 1.333,
-                                letterSpacing: .6,
-                              ),
-                            ),
-                            SizedBox(height: 12),
-                            Row(
-                              children: [
-                                Container(
-                                  width: 32,
-                                  height: 32,
-                                  decoration: BoxDecoration(
-                                    color: AppColors.white,
-                                    border: Border.all(
-                                      color: const Color(0xFFE5E7EB),
-                                    ),
-                                    borderRadius: BorderRadius.all(
-                                      Radius.circular(16),
-                                    ),
-                                    boxShadow: [AppShadows.shadow],
-                                  ),
-                                  child: Icon(
-                                    FontAwesomeIcons.boxesStacked.data,
-                                    size: 14,
-                                    color: Color(0xFF2563EB),
-                                  ),
-                                ),
-                                SizedBox(width: 12),
-                                Column(
-                                  children: [
-                                    AppText(
-                                      "سيتم خصم المخزون",
-                                      style: TextStyle(
-                                        color: Color(0xFF1F2937),
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w700,
-                                        height: 1.42,
-                                      ),
-                                    ),
-                                    AppText(
-                                      "تحديث تلقائي للكميات المتاحة",
-                                      style: TextStyle(
-                                        color: Color(0xFF6B7280),
-                                        fontSize: 10,
-                                        height: 1.5,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 12),
-                            Divider(height: 1, color: Color(0xFFE5E7EB)),
-                            SizedBox(height: 12),
-                            Row(
-                              children: [
-                                Container(
-                                  width: 32,
-                                  height: 32,
-                                  decoration: BoxDecoration(
-                                    color: AppColors.white,
-                                    border: Border.all(
-                                      color: const Color(0xFFE5E7EB),
-                                    ),
-                                    borderRadius: BorderRadius.all(
-                                      Radius.circular(16),
-                                    ),
-                                    boxShadow: [AppShadows.shadow],
-                                  ),
-                                  child: Icon(
-                                    FontAwesomeIcons.bell.data,
-                                    size: 14,
-                                    color: Color(0xFF2563EB),
-                                  ),
-                                ),
-                                SizedBox(width: 12),
-                                Column(
-                                  children: [
-                                    AppText(
-                                      "سيتم إشعار العميل",
-                                      style: TextStyle(
-                                        color: Color(0xFF1F2937),
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w700,
-                                        height: 1.42,
-                                      ),
-                                    ),
-                                    AppText(
-                                      'إرسال حالة "قيد التحضير" فوراً',
-                                      style: TextStyle(
-                                        color: Color(0xFF6B7280),
-                                        fontSize: 10,
-                                        height: 1.5,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-          Positioned(
-            bottom: 0,
-            width: context.width,
-            child: Container(
-              padding: EdgeInsets.fromLTRB(
-                24,
-                24,
-                24,
-                context.padding.bottom + 24,
-              ),
-              decoration: BoxDecoration(
-                color: AppColors.white,
-                border: Border(top: BorderSide(color: Color(0xFFF3F4F6))),
-              ),
-              child: Row(
-                spacing: 12,
-                children: [
-                  Expanded(
-                    child: AppButton(
-                      title: "تأكيد القبول",
-                      onTap: () {
-                        context.read<OrdersBloc>().add(
-                          AcceptOrderEvent(
-                            params: AcceptOrderParams(orderId: orderId),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  AppOutlinedButton(
-                    title: "إلغاء",
-                    color: const Color(0xFFFF4C51),
-                    onTap: () => context.pop(),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          BlocConsumer<OrdersBloc, OrdersState>(
-            buildWhen: (previous, current) =>
-                previous.acceptOrderStatus != current.acceptOrderStatus,
-            listenWhen: (previous, current) =>
-                previous.acceptOrderStatus != current.acceptOrderStatus,
-            listener: (context, state) {
-              if (state.acceptOrderStatus == BlocStatus.failed) {
-                print(state.errorMessage);
-                AppToast.showToast(
-                  context: context,
-                  message: state.errorMessage ?? "Unknown Error",
-                  type: ToastificationType.error,
-                );
-              } else if (state.acceptOrderStatus == BlocStatus.success) {
-                AppToast.showToast(
-                  context: context,
-                  message: "تم قبول الطلب بنجاح",
-                  type: ToastificationType.success,
-                );
-                context.read<OrdersBloc>().add(
-                  GetOrdersEvent(
-                    isReload: true,
-                    params: GetOrdersParams(status: status),
-                  ),
-                );
-                context.pop();
-              }
-            },
-            builder: (context, state) => switch (state.acceptOrderStatus) {
-              BlocStatus.loading => Positioned.fill(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: const Color(0x4D000000),
-                    borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(24),
-                    ),
-                  ),
-                  alignment: Alignment.center,
-                  child: CircularProgressIndicator(),
-                ),
-              ),
-              _ => SizedBox(),
-            },
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class TimeChip extends StatelessWidget {
-  const TimeChip({
-    super.key,
-    required this.minute,
-    required this.isSelected,
-    required this.onTap,
-  });
-  final int minute;
-  final bool isSelected;
-  final void Function() onTap;
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      type: MaterialType.transparency,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.all(Radius.circular(12)),
-        child: Ink(
-          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-          decoration: BoxDecoration(
-            color: isSelected ? Color(0xFFEFF6FF) : AppColors.white,
-            borderRadius: BorderRadius.all(Radius.circular(12)),
-            border: Border.all(
-              color: isSelected ? Color(0xFF3B82F6) : Color(0xFFE5E7EB),
-            ),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AppText(
-                minute.toString(),
-                style: TextStyle(
-                  color: isSelected ? Color(0xFF1D4ED8) : Color(0xFF4B5563),
-                  fontSize: 14,
-                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                  height: 1.42,
-                ),
-              ),
-              AppText(
-                "دقيقة",
-                style: TextStyle(
-                  color: isSelected ? Color(0xFF1D4ED8) : Color(0xFF4B5563),
-                  fontSize: 10,
-                  height: 2,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class TimeChoices extends StatefulWidget {
-  const TimeChoices({
-    super.key,
-    required this.minutes,
-    required this.onChanged,
-  });
-  final List<int> minutes;
-  final void Function(int value) onChanged;
-  @override
-  State<TimeChoices> createState() => _TimeChoicesState();
-}
-
-class _TimeChoicesState extends State<TimeChoices> {
-  int _selectedIndex = 0;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      spacing: 4,
-      children: List.generate(
-        widget.minutes.length,
-        (index) => Expanded(
-          child: TimeChip(
-            onTap: () {
-              if (index != _selectedIndex) {
-                _selectedIndex = index;
-                setState(() {});
-                widget.onChanged(_selectedIndex);
-              }
-            },
-            minute: widget.minutes[index],
-            isSelected: index == _selectedIndex,
-          ),
+            );
+          },
         ),
       ),
     );
