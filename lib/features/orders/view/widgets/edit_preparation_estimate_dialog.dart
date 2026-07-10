@@ -12,11 +12,12 @@ Future<void> showEditPreparationEstimateDialog({
   required int orderId,
   required VoidCallback onUpdated,
 }) async {
+  final rootContext = context;
   final controller = TextEditingController();
   var loading = false;
 
   await showDialog<void>(
-    context: context,
+    context: rootContext,
     builder: (dialogContext) => StatefulBuilder(
       builder: (context, setState) {
         Future<void> submit() async {
@@ -53,13 +54,15 @@ Future<void> showEditPreparationEstimateDialog({
             (_) {
               Navigator.of(dialogContext).pop();
               onUpdated();
-              AppToast.showToast(
-                context: context,
-                message: minutes == null
-                    ? 'تم مسح وقت التجهيز المتوقع'
-                    : 'تم تحديث وقت التجهيز المتوقع',
-                type: ToastificationType.success,
-              );
+              if (rootContext.mounted) {
+                AppToast.showToast(
+                  context: rootContext,
+                  message: minutes == null
+                      ? 'تم مسح وقت التجهيز المتوقع'
+                      : 'تم تحديث وقت التجهيز المتوقع',
+                  type: ToastificationType.success,
+                );
+              }
             },
           );
         }
