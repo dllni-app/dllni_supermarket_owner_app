@@ -340,14 +340,16 @@ class _ActionSection extends StatelessWidget {
           ? const Color(0xFF24B364)
           : null;
 
-      return SizedBox(
-        width: context.width,
-        child: AppButton(
-          color: buttonColor,
-          title: buttonTitle,
-          onTap: onCourierHandoverTap,
-        ),
-      );
+      return status == OrderStatus.readyForPickup
+          ? SizedBox(
+              width: context.width,
+              child: AppButton(
+                color: buttonColor!,
+                title: buttonTitle,
+                onTap: onCourierHandoverTap,
+              ),
+            )
+          : SizedBox.shrink();
     }
 
     return SizedBox(
