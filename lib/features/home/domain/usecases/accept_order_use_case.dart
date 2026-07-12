@@ -17,8 +17,14 @@ class AcceptOrderUseCase implements UseCase<AcceptOrderModel, AcceptOrderParams>
   }
 }
 
-class AcceptOrderParams with Params{
+class AcceptOrderParams with Params {
   final int orderId;
+  final int? preparationTimeMinutes;
 
-  AcceptOrderParams({required this.orderId});
+  const AcceptOrderParams({required this.orderId, this.preparationTimeMinutes});
+
+  @override
+  BodyMap getBody() =>
+      {'preparationTimeMinutes': preparationTimeMinutes}
+        ..removeWhere((key, value) => value == null);
 }
