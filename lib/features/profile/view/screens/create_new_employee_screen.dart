@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:common_package/common_package.dart';
 import 'package:dllni_supermarket_owner_app/core/widgets/failure_widget.dart';
 import 'package:dllni_supermarket_owner_app/features/products/view/widgets/product_image_field.dart';
@@ -67,6 +69,7 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
   Future<void> _loadInitialPhone() async {
     final parsed = await parseInitialPhone(params.user?.phone);
     if (!mounted) return;
+    log(parsed?.phoneNumber ?? "");
     setState(() {
       _initialPhone = parsed;
       _phone = parsed;
@@ -108,17 +111,17 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
 
     if (newPassword.isEmpty || confirmation.isEmpty) {
       _passwordMismatch = false;
-      return "?????? ????? ???? ?????? ????????";
+      return "الرجاء إدخال كلمة المرور وتأكيدها";
     }
 
     if (newPassword.length < 8) {
       _passwordMismatch = false;
-      return "???? ?????? ??? ?? ???? 8 ???? ??? ?????";
+      return "كلمة المرور يجب أن تكون 8 أحرف على الأقل";
     }
 
     if (newPassword != confirmation) {
       _passwordMismatch = true;
-      return "????? ?????? ??? ?????????";
+      return "كلمتا المرور غير متطابقتين";
     }
 
     _passwordMismatch = false;
@@ -147,7 +150,7 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
       (l) async {
         AppToast.showToast(
           context: context,
-          message: "?? ??? ??????? ??? ??? ????? ???? ??????: ${l.message}",
+          message: "تم حفظ الموظف، لكن فشل تحديث كلمة المرور: ${l.message}",
           type: ToastificationType.warning,
         );
         context.pop(true);
@@ -155,7 +158,7 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
       (r) async {
         AppToast.showToast(
           context: context,
-          message: r.message ?? "?? ????? ?????",
+          message: r.message ?? "تم الحفظ بنجاح",
           type: ToastificationType.success,
         );
         context.pop(true);
@@ -267,7 +270,7 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
       if (!mounted) return;
       AppToast.showToast(
         context: context,
-        message: "?????? ????? ??? ??????",
+        message: "الرجاء إدخال رقم الهاتف",
         type: ToastificationType.error,
       );
       return;
@@ -312,8 +315,8 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
           children: [
             AppSimpleAppBar(
               title: widget.params != null
-                  ? "?????? ??????"
-                  : "????? ???? ????",
+                  ? "تفاصيل الموظف"
+                  : "إضافة موظف جديد",
             ),
             Expanded(
               child: SingleChildScrollView(
@@ -321,7 +324,7 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
                 child: Column(
                   children: [
                     _ProfileForm(
-                      title: "???????? ????????",
+                      title: "البيانات الأساسية",
                       icon: FontAwesomeIcons.user.data,
                       iconColor: Color(0xFF064E3B),
                       child: Column(
@@ -331,12 +334,12 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
                             onPickImage: (imagePath) {
                               this.imagePath = imagePath;
                             },
-                            title: "???? ??????",
+                            title: "صورة الموظف",
                           ),
                           SizedBox(height: 16),
                           AppTextField(
-                            title: "????? ??????",
-                            hintText: "???? ????? ?????? ??????",
+                            title: "الاسم الكامل",
+                            hintText: "أدخل الاسم الكامل للموظف",
                             isRequired: true,
                             controller: TextEditingController(
                               text: params.user?.name,
@@ -347,8 +350,8 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
                           ),
                           SizedBox(height: 16),
                           AppTextField(
-                            title: "???????",
-                            hintText: "???? ????? ??????",
+                            title: "الايميل",
+                            hintText: "أدخل ايميل للموظف",
                             isRequired: true,
                             controller: TextEditingController(
                               text: params.user?.email,
@@ -360,7 +363,7 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
                           SizedBox(height: 16),
                           AppPhoneNumberField(
                             key: _phoneFieldKey,
-                            label: '??? ??????',
+                            label: 'رقم الهاتف',
                             hintText: "9xxxxxxxx",
                             isRequired: true,
                             initialValue: _initialPhone,
@@ -372,8 +375,8 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
                     ),
                     SizedBox(height: 16),
                     _ProfileForm(
-                      title: "????? ??????? ??????",
-                      subtitle: "???? ????????? ???????? ???? ??????",
+                      title: "تحديد صلاحيات الموظف",
+                      subtitle: "اختر الصلاحيات المناسبة لدور الموظف",
                       icon: FontAwesomeIcons.shieldHalved.data,
                       iconColor: Color(0xFFD97706),
                       child: BlocBuilder<ProfileBloc, ProfileState>(
@@ -455,7 +458,7 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
                                 ),
                                 AlertMessage(
                                   message:
-                                      "????? ????? ??????? ?????? ?? ?? ??? ?? ???? ????? ????????",
+                                      "يمكنك تعديل صلاحيات الموظف في أي وقت من صفحة إدارة الموظفين",
                                   color: Color(0xFF064E3B),
                                   icon: FontAwesomeIcons.solidLightbulb.data,
                                 ),
@@ -468,17 +471,17 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
                     ),
                     SizedBox(height: 16),
                     _ProfileForm(
-                      title: "?????? ???? ??????",
+                      title: "بيانات كلمة المرور",
                       subtitle: _isCreateMode
-                          ? "???? ?????? ?????? ??? ????? ???? ????"
-                          : "??????? ?? ??????? - ???? ?????? ????? ??? ?? ???? ????? ???? ??????",
+                          ? "كلمة المرور مطلوبة عند إنشاء موظف جديد"
+                          : "اختياري في التعديل - اترك الحقول فارغة إذا لا تريد تغيير كلمة المرور",
                       icon: FontAwesomeIcons.lock.data,
                       iconColor: Color(0xFF1E3A8A),
                       child: Column(
                         children: [
                           _buildPasswordField(
-                            title: "???? ?????? ???????",
-                            hintText: "8 ???? ??? ?????",
+                            title: "كلمة المرور الجديدة",
+                            hintText: "8 أحرف على الأقل",
                             controller: _newPasswordController,
                             obscureText: _obscureNewPassword,
                             hasError: _passwordMismatch,
@@ -490,8 +493,8 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
                           ),
                           SizedBox(height: 16),
                           _buildPasswordField(
-                            title: "????? ???? ??????",
-                            hintText: "??? ????? ???? ??????",
+                            title: "تأكيد كلمة المرور",
+                            hintText: "أعد إدخال كلمة المرور",
                             controller: _confirmPasswordController,
                             obscureText: _obscureConfirmPassword,
                             hasError: _passwordMismatch,
@@ -514,7 +517,7 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
                                 SizedBox(width: 6),
                                 Expanded(
                                   child: AppText(
-                                    "????? ?????? ??? ?????????",
+                                    "كلمتا المرور غير متطابقتين",
                                     style: TextStyle(
                                       color: Color(0xFFEF4444),
                                       fontSize: 12,
@@ -530,7 +533,7 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
                     ),
                     SizedBox(height: 16),
                     _ProfileForm(
-                      title: "???? ??????",
+                      title: "حالة الحساب",
                       icon: FontAwesomeIcons.toggleOn.data,
                       iconColor: Color(0xFF10B981),
                       child: Column(
@@ -553,7 +556,7 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
                                     spacing: 4,
                                     children: [
                                       AppText(
-                                        "????? ??????",
+                                        "تفعيل الحساب",
                                         style: TextStyle(
                                           color: Color(0xFF111827),
                                           fontSize: 14,
@@ -562,7 +565,7 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
                                         ),
                                       ),
                                       AppText(
-                                        "?????? ?????? ??????? ??????",
+                                        "السماح للموظف بالدخول للنظام",
                                         style: TextStyle(
                                           color: Color(0xFF6B7280),
                                           fontSize: 12,
@@ -587,7 +590,7 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
                           SizedBox(height: 16),
                           AlertMessage(
                             message:
-                                "?????? ??? - ?????? ?????? ?? ????? ?????? ??? ?????",
+                                "الحساب نشط - سيتمكن الموظف من تسجيل الدخول فور الحفظ",
                             icon: FontAwesomeIcons.solidCircleCheck.data,
                             color: Color(0xFF10B981),
                           ),
@@ -617,7 +620,7 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
                               AppToast.showToast(
                                 context: context,
                                 message:
-                                    "?? ??? ??????? ??? ???? ????? ???? ?????? ???? ???? ???? ??????",
+                                    "تم حفظ الموظف، لكن تعذر تحديث كلمة المرور لعدم توفر معرف الموظف",
                                 type: ToastificationType.warning,
                               );
                               context.pop(true);
@@ -630,7 +633,7 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
                           AppToast.showToast(
                             context: context,
                             message:
-                                "?? ${params.id != null ? "???????" : "???????"} ?????",
+                                "تم ${params.id != null ? "التعديل" : "الإضافة"} بنجاح",
                             type: ToastificationType.success,
                           );
                           context.pop(true);
@@ -649,7 +652,7 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
                           children: [
                             Expanded(
                               child: AppButton(
-                                title: "??? ??????",
+                                title: "حفظ وتفعيل",
                                 onTap: () async {
                                   await _onSavePressed(
                                     context.read<ProfileBloc>(),
@@ -659,7 +662,7 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
                             ),
                             SizedBox(width: 16),
                             AppOutlinedButton(
-                              title: "?????",
+                              title: "إلغاء",
                               color: const Color(0xFFFF4C51),
                             ),
                           ],
@@ -709,7 +712,7 @@ class PermissionLoading extends StatelessWidget {
           ),
           AlertMessage(
             message:
-                "????? ????? ??????? ?????? ?? ?? ??? ?? ???? ????? ????????",
+                "يمكنك تعديل صلاحيات الموظف في أي وقت من صفحة إدارة الموظفين",
             color: Color(0xFF064E3B),
             icon: FontAwesomeIcons.solidLightbulb.data,
           ),
@@ -971,29 +974,29 @@ PermissionDetails getPermissionDetails(String permission) {
     // --- STORES (Blue) ---
     case 'stores.view':
       return PermissionDetails(
-        "??? ???????",
-        "?????? ?????? ??? ????? ?????? ???????? ?????? ???????.",
+        "عرض المتاجر",
+        "صلاحية الوصول إلى قائمة الفروع واستعراض بيانات المواقع.",
         FontAwesomeIcons.shop.data,
         storeColor,
       );
     case 'stores.create':
       return PermissionDetails(
-        "????? ???? ????",
-        "????? ???? ?? ???????? ????? ?? ?????? ?????? ?????????.",
+        "إضافة متجر جديد",
+        "إدراج فروع أو مستودعات جديدة في النظام وتحديد إعداداتها.",
         FontAwesomeIcons.circlePlus.data,
         storeColor,
       );
     case 'stores.update':
       return PermissionDetails(
-        "????? ?????? ??????",
-        "????? ??????? ?????? ??????? ??? ??????? ?????? ?????.",
+        "تحديث بيانات المتجر",
+        "تعديل معلومات الفروع القائمة مثل الموقع، وساعات العمل.",
         FontAwesomeIcons.penToSquare.data,
         storeColor,
       );
     case 'stores.delete':
       return PermissionDetails(
-        "??? ??????",
-        "????? ?????? ?????? ?? ?????? ?? ??????? ???? ?????.",
+        "حذف المتجر",
+        "إزالة بيانات المتجر من النظام أو أرشفتها بشكل نهائي.",
         FontAwesomeIcons.trashCan.data,
         deleteColor,
       );
@@ -1001,29 +1004,29 @@ PermissionDetails getPermissionDetails(String permission) {
     // --- PRODUCTS (Green) ---
     case 'products.view':
       return PermissionDetails(
-        "??????? ????????",
-        "??????? ??? ?????? ????????? ???????? ?????????? ????????.",
+        "استعراض المنتجات",
+        "الاطلاع على كتالوج المنتجات، الأسعار، والمواصفات المتوفرة.",
         FontAwesomeIcons.boxesStacked.data,
         productColor,
       );
     case 'products.create':
       return PermissionDetails(
-        "????? ????",
-        "????? ????? ????? ?? ?????? ?? ????? ??????? ??????.",
+        "إضافة منتج",
+        "تسجيل أصناف جديدة في النظام مع تحديد الأسعار والصور.",
         FontAwesomeIcons.boxOpen.data,
         productColor,
       );
     case 'products.update':
       return PermissionDetails(
-        "????? ????????",
-        "????? ?????? ?????? ??????? ??? ????? ??????? ?? ?????.",
+        "تعديل المنتجات",
+        "تغيير تفاصيل المنتج القائمة مثل تحديث الأسعار أو الوصف.",
         FontAwesomeIcons.filePen.data,
         productColor,
       );
     case 'products.delete':
       return PermissionDetails(
-        "??? ??????",
-        "????? ???? ?????? ??????? ?? ????? ????? ??????.",
+        "حذف المنتج",
+        "إلغاء توفر المنتج وإزالته من قوائم البيع والبحث.",
         FontAwesomeIcons.eraser.data,
         deleteColor,
       );
@@ -1031,29 +1034,29 @@ PermissionDetails getPermissionDetails(String permission) {
     // --- ORDERS (Orange) ---
     case 'orders.view':
       return PermissionDetails(
-        "?????? ???????",
-        "??? ?????? ????? ??????? ??? ????????? ????? ????????.",
+        "متابعة الطلبات",
+        "عرض تفاصيل طلبات الشراء، سجل المبيعات، وحالة الفواتير.",
         FontAwesomeIcons.receipt.data,
         orderColor,
       );
     case 'orders.create':
       return PermissionDetails(
-        "????? ???",
-        "????? ?????? ??? ????? ?????? ?????? ?????? ??????.",
+        "إنشاء طلب",
+        "إدراج عمليات بيع جديدة يدويًا وتحديد بيانات العميل.",
         FontAwesomeIcons.cartPlus.data,
         orderColor,
       );
     case 'orders.update':
       return PermissionDetails(
-        "????? ???????",
-        "????? ???? ????? ?? ?????? ???????.",
+        "تحديث الطلبات",
+        "تعديل حالة الطلب أو مراجعة الكميات.",
         FontAwesomeIcons.truckRampBox.data,
         orderColor,
       );
     case 'orders.delete':
       return PermissionDetails(
-        "????? ?????",
-        "??? ???????? ???????? ??????? ?? ?????? ?????????.",
+        "إلغاء الطلب",
+        "حذف العمليات الشرائية الخاطئة أو معالجة المرتجعات.",
         FontAwesomeIcons.rectangleXmark.data,
         deleteColor,
       );
@@ -1061,29 +1064,29 @@ PermissionDetails getPermissionDetails(String permission) {
     // --- INVENTORY (Blue Grey) ---
     case 'inventory.view':
       return PermissionDetails(
-        "????? ???????",
-        "??????? ??? ??????? ??????? ??????? ???????? ???????.",
+        "رقابة المخزون",
+        "الاطلاع على مستويات المخزون الحالية وتنبيهات النواقص.",
         FontAwesomeIcons.warehouse.data,
         inventoryColor,
       );
     case 'inventory.create':
       return PermissionDetails(
-        "????? ?????",
-        "????? ????? ????? ???????? ?????? ????? ???????.",
+        "إدخال مخزني",
+        "إضافة كميات جديدة للمستودع وتوثيق حركات التوريد.",
         FontAwesomeIcons.fileImport.data,
         inventoryColor,
       );
     case 'inventory.update':
       return PermissionDetails(
-        "????? ???????",
-        "????? ????? ??????? ??????? ????? ??????.",
+        "تسوية المخزون",
+        "تعديل كميات الأصناف لمطابقة الجرد الفعلي.",
         FontAwesomeIcons.arrowRotateLeft.data,
         inventoryColor,
       );
     case 'inventory.delete':
       return PermissionDetails(
-        "??? ????? ??????",
-        "????? ?????? ????? ??????? ?? ??????? ???????.",
+        "حذف سجلات المخزن",
+        "إزالة بيانات الجرد القديمة أو الحركات الخاطئة.",
         FontAwesomeIcons.folderMinus.data,
         deleteColor,
       );
@@ -1091,29 +1094,29 @@ PermissionDetails getPermissionDetails(String permission) {
     // --- OFFERS (Pink) ---
     case 'offers.view':
       return PermissionDetails(
-        "??? ??????",
-        "??????? ??? ????? ???????? ???????? ????????? ??????.",
+        "عرض العروض",
+        "الاطلاع على قائمة الخصومات والحملات الترويجية النشطة.",
         FontAwesomeIcons.tags.data,
         offerColor,
       );
     case 'offers.create':
       return PermissionDetails(
-        "????? ???",
-        "????? ????? ????? ????? ?????? ???????? ????????.",
+        "إضافة عرض",
+        "إطلاق حملات تخفيض جديدة وتحديد المنتجات المشمولة.",
         FontAwesomeIcons.tag.data,
         offerColor,
       );
     case 'offers.update':
       return PermissionDetails(
-        "????? ??????",
-        "????? ??? ????? ?? ????? ????? ?????? ???????.",
+        "تحديث العروض",
+        "تعديل نسب الخصم أو تمديد فترات صلاحية الحملات.",
         FontAwesomeIcons.clockRotateLeft.data,
         offerColor,
       );
     case 'offers.delete':
       return PermissionDetails(
-        "????? ?????",
-        "????? ?????? ????????? ?????? ??????? ????????.",
+        "إيقاف العرض",
+        "إلغاء العروض الترويجية وإعادة الأسعار لطبيعتها.",
         FontAwesomeIcons.ban.data,
         deleteColor,
       );
@@ -1121,29 +1124,29 @@ PermissionDetails getPermissionDetails(String permission) {
     // --- STAFF (Purple) ---
     case 'staff.view':
       return PermissionDetails(
-        "??? ????????",
-        "??????? ????? ???? ?????? ?????? ???????? ????????.",
+        "عرض الموظفين",
+        "استعراض قائمة طاقم العمل، بيانات الاتصال، والأدوار.",
         FontAwesomeIcons.usersGear.data,
         staffColor,
       );
     case 'staff.create':
       return PermissionDetails(
-        "????? ????",
-        "????? ?????? ????? ???????? ?????? ?????????.",
+        "توظيف موظف",
+        "إنشاء حسابات جديدة للموظفين وتعيين الصلاحيات.",
         FontAwesomeIcons.userPlus.data,
         staffColor,
       );
     case 'staff.update':
       return PermissionDetails(
-        "????? ?????? ??????",
-        "????? ??????? ???????? ?????? ???????? ????????.",
+        "تعديل بيانات الموظف",
+        "تحديث معلومات الموظفين وتعديل مسمياتهم الوظيفية.",
         FontAwesomeIcons.userPen.data,
         staffColor,
       );
     case 'staff.delete':
       return PermissionDetails(
-        "????? ??????",
-        "????? ???? ?????? ????? ?? ?????? ??????.",
+        "إنهاء الخدمة",
+        "تعطيل حساب الموظف ومنعه من الوصول للنظام.",
         FontAwesomeIcons.userSlash.data,
         deleteColor,
       );
@@ -1151,29 +1154,29 @@ PermissionDetails getPermissionDetails(String permission) {
     // --- COUPONS (Cyan) ---
     case 'coupons.view':
       return PermissionDetails(
-        "????? ?????????",
-        "??????? ??? ???? ?????? ???? ???????.",
+        "إدارة الكوبونات",
+        "الاطلاع على رموز الخصم، ونسب التوفير.",
         FontAwesomeIcons.ticket.data,
         couponColor,
       );
     case 'coupons.create':
       return PermissionDetails(
-        "????? ?????",
-        "????? ????? ??? ????? ?????? ???? ?????????.",
+        "إنشاء كوبون",
+        "توليد أكواد خصم جديدة وتحديد شروط الاستخدام.",
         FontAwesomeIcons.plus.data,
         couponColor,
       );
     case 'coupons.update':
       return PermissionDetails(
-        "????? ???????",
-        "????? ??? ????? ?? ????? ???? ??????.",
+        "تحديث الكوبون",
+        "تعديل قيم الخصم أو تغيير حالة النشاط.",
         FontAwesomeIcons.wrench.data,
         couponColor,
       );
     case 'coupons.delete':
       return PermissionDetails(
-        "??? ???????",
-        "????? ??? ????? ??????? ???? ????????.",
+        "حذف الكوبون",
+        "إلغاء كود الخصم نهائيًا ومنع استخدامه.",
         FontAwesomeIcons.xmark.data,
         deleteColor,
       );
@@ -1181,8 +1184,8 @@ PermissionDetails getPermissionDetails(String permission) {
     // --- REPORTS (Indigo) ---
     case 'reports.view':
       return PermissionDetails(
-        "????? ????????",
-        "??????? ?????????? ??????? ??????? ????????.",
+        "تحليل التقارير",
+        "استخراج الإحصائيات المالية والرسوم البيانية.",
         FontAwesomeIcons.chartLine.data,
         reportColor,
       );
