@@ -23,6 +23,14 @@ import '../manager/bloc/profile_bloc.dart';
 import '../widgets/map_view.dart';
 import '../widgets/pick_image.dart';
 
+class ProfileParams {
+  String? logo64Based, cover64Based;
+  String? storeName, description;
+  String? city, town, address;
+  String? phone, whatsapp, instagram, facebook;
+  double? lat, long;
+}
+
 @AutoRoutePage(path: "/profile")
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -43,75 +51,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   String? _lastPhoneRaw;
   String? _lastWhatsappRaw;
-
-  Future<void> _loadInitialPhones({
-    required String? phone,
-    required String? whatsapp,
-  }) async {
-    if (_lastPhoneRaw == phone && _lastWhatsappRaw == whatsapp) return;
-
-    _lastPhoneRaw = phone;
-    _lastWhatsappRaw = whatsapp;
-
-    final parsedPhone = await parseInitialPhone(phone);
-    final parsedWhatsapp = await parseInitialPhone(whatsapp);
-
-    if (!mounted) return;
-    setState(() {
-      _initialPhone = parsedPhone;
-      _phone = parsedPhone;
-      _initialWhatsapp = parsedWhatsapp;
-      _whatsapp = parsedWhatsapp;
-    });
-  }
-
-  Future<String?> _validateOptionalPhone(PhoneNumber? number) async {
-    final raw = number?.phoneNumber?.trim() ?? '';
-    if (raw.isEmpty) return null;
-    return validatePhoneNumber(number);
-  }
-
-  Future<void> _onSavePressed(ProfileBloc bloc) async {
-    final phoneError = await _phoneFieldKey.currentState?.validate();
-    if (phoneError != null) {
-      if (!mounted) return;
-      AppToast.showToast(
-        context: context,
-        message: phoneError,
-        type: ToastificationType.error,
-      );
-      return;
-    }
-
-    final whatsappError = await _whatsappFieldKey.currentState?.validate();
-    if (whatsappError != null) {
-      if (!mounted) return;
-      AppToast.showToast(
-        context: context,
-        message: whatsappError,
-        type: ToastificationType.error,
-      );
-      return;
-    }
-
-    final phone = formatPhoneForApi(_phone);
-    if (phone == null) {
-      if (!mounted) return;
-      AppToast.showToast(
-        context: context,
-        message: 'الرجاء إدخال رقم الجوال',
-        type: ToastificationType.error,
-      );
-      return;
-    }
-
-    params.phone = phone;
-    params.whatsapp = formatPhoneForApi(_whatsapp);
-
-    bloc.add(
-      UpdateStoreDataEvent(params: UpdateStoreDataParams(params: params)),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -572,7 +511,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     title: "إلغاء",
                                     color: const Color(0xFFFF4C51),
                                     onTap: () {
-                                      print("Reject");
+                                      context.pop();
                                     },
                                   ),
                                 ],
@@ -593,12 +532,73 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
   }
-}
 
-class ProfileParams {
-  String? logo64Based, cover64Based;
-  String? storeName, description;
-  String? city, town, address;
-  String? phone, whatsapp, instagram, facebook;
-  double? lat, long;
+  Future<void> _loadInitialPhones({
+    required String? phone,
+    required String? whatsapp,
+  }) async {
+    if (_lastPhoneRaw == phone && _lastWhatsappRaw == whatsapp) return;
+
+    _lastPhoneRaw = phone;
+    _lastWhatsappRaw = whatsapp;
+
+    final parsedPhone = await parseInitialPhone(phone);
+    final parsedWhatsapp = await parseInitialPhone(whatsapp);
+
+    if (!mounted) return;
+    setState(() {
+      _initialPhone = parsedPhone;
+      _phone = parsedPhone;
+      _initialWhatsapp = parsedWhatsapp;
+      _whatsapp = parsedWhatsapp;
+    });
+  }
+
+  Future<void> _onSavePressed(ProfileBloc bloc) async {
+    final phoneError = await _phoneFieldKey.currentState?.validate();
+    if (phoneError != null) {
+      if (!mounted) return;
+      AppToast.showToast(
+        context: context,
+        message: phoneError,
+        type: ToastificationType.error,
+      );
+      return;
+    }
+
+    final whatsappError = await _whatsappFieldKey.currentState?.validate();
+    if (whatsappError != null) {
+      if (!mounted) return;
+      AppToast.showToast(
+        context: context,
+        message: whatsappError,
+        type: ToastificationType.error,
+      );
+      return;
+    }
+
+    final phone = formatPhoneForApi(_phone);
+    if (phone == null) {
+      if (!mounted) return;
+      AppToast.showToast(
+        context: context,
+        message: 'الرجاء إدخال رقم الجوال',
+        type: ToastificationType.error,
+      );
+      return;
+    }
+
+    params.phone = phone;
+    params.whatsapp = formatPhoneForApi(_whatsapp);
+
+    bloc.add(
+      UpdateStoreDataEvent(params: UpdateStoreDataParams(params: params)),
+    );
+  }
+
+  Future<String?> _validateOptionalPhone(PhoneNumber? number) async {
+    final raw = number?.phoneNumber?.trim() ?? '';
+    if (raw.isEmpty) return null;
+    return validatePhoneNumber(number);
+  }
 }

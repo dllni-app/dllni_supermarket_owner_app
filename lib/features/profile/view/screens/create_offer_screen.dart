@@ -33,6 +33,164 @@ class CreateOfferScreen extends StatefulWidget {
   State<CreateOfferScreen> createState() => _CreateOfferScreenState();
 }
 
+class DiscountChooser extends StatefulWidget {
+  final void Function(String discountType) onChanged;
+  const DiscountChooser({super.key, required this.onChanged});
+
+  @override
+  State<DiscountChooser> createState() => _DiscountChooserState();
+}
+
+class NoProductSelected extends StatelessWidget {
+  const NoProductSelected({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return DottedBorder(
+      options: RoundedRectDottedBorderOptions(
+        dashPattern: const [8, 8],
+        strokeWidth: 2,
+        color: const Color(0x1F2F2B3D),
+        radius: const Radius.circular(16),
+      ),
+      child: Container(
+        width: double.infinity,
+        height: 190,
+        decoration: BoxDecoration(
+          color: const Color(0xFFF9FAFB),
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                borderRadius: BorderRadius.all(Radius.circular(16)),
+                boxShadow: [AppShadows.shadow],
+              ),
+              child: Icon(
+                FontAwesomeIcons.boxOpen.data,
+                size: 18,
+                color: const Color(0xFF9CA3AF),
+              ),
+            ),
+            SizedBox(height: 8),
+            AppText(
+              "اضغط لرفع صورة",
+              style: TextStyle(
+                color: const Color(0xE52F2B3D),
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                height: 1.333,
+              ),
+            ),
+            SizedBox(height: 4),
+            AppText(
+              "PNG, JPG حتى 5MB",
+              style: TextStyle(
+                color: const Color(0x662F2B3D),
+                fontSize: 10,
+                height: 1.5,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class OfferCheckbox extends StatefulWidget {
+  final GetProductsModelDataItem product;
+  final void Function(bool value) onChanged;
+  const OfferCheckbox({
+    super.key,
+    required this.product,
+    required this.onChanged,
+  });
+
+  @override
+  State<OfferCheckbox> createState() => _OfferCheckboxState();
+}
+
+class OfferLoading extends StatelessWidget {
+  const OfferLoading({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey.shade300,
+      highlightColor: Colors.grey.shade100,
+      child: OfferCheckbox(
+        onChanged: (value) {},
+        product: GetProductsModelDataItem.fromJson({
+          "id": 1,
+          "storeId": 1,
+          "store": {
+            "id": 1,
+            "ownerUserId": 5,
+            "name": "Seller Supermarket",
+            "slug": "seller-supermarket-ef2d127d",
+            "description": "Supermarket owned by seller user for API testing.",
+            "address": "789 Store St",
+            "city": null,
+            "neighborhood": null,
+            "latitude": "31.97000000",
+            "longitude": "35.94000000",
+            "phone": "+962 6 555 0001",
+            "email": "seller@supermarket.example.com",
+            "cover": null,
+            "logo": null,
+            "averageRating": "4.00",
+            "totalReviews": 0,
+            "trustScore": 85,
+            "warningCount": 0,
+            "isActive": true,
+            "isFeatured": false,
+            "suspensionUntil": null,
+            "createdAt": "2026-03-15 22:21:55",
+            "updatedAt": "2026-03-15 22:21:55",
+          },
+          "categoryId": 1,
+          "category": {
+            "id": 1,
+            "storeId": 1,
+            "name": "الألبان",
+            "slug": "dairy",
+            "description": null,
+            "sortOrder": 1,
+            "imagePath": null,
+            "isActive": true,
+            "productsCount": 0,
+            "createdAt": "2026-03-15 22:22:00",
+            "updatedAt": "2026-03-15 22:22:00",
+          },
+          "masterProductId": 1,
+          "name": "حليب كامل الدسم 1 لتر",
+          "barcode": null,
+          "sourceType": "manual",
+          "description": null,
+          "price": "6.00",
+          "discountedPrice": null,
+          "image": null,
+          "imageUrl": null,
+          "images": [],
+          "imageUrls": [],
+          "stockQuantity": 200,
+          "lowStockThreshold": 10,
+          "expiresAt": null,
+          "isAvailable": true,
+          "createdAt": "2026-03-15 22:22:00",
+          "updatedAt": "2026-03-15 22:22:00",
+        }),
+      ),
+    );
+  }
+}
+
 class _CreateOfferScreenState extends State<CreateOfferScreen> {
   String discountType = "%";
   List<GetProductsModelDataItem> selectedProducts = [];
@@ -40,14 +198,6 @@ class _CreateOfferScreenState extends State<CreateOfferScreen> {
     offerType: "percent",
     isActive: true,
   );
-
-  @override
-  void initState() {
-    context.read<ProfileBloc>()
-      ..add(GetProductsEvent(isReload: true, params: GetProductsParams()))
-      ..add(GetProductsCountEvent(params: GetProductsCountParams()));
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -158,6 +308,7 @@ class _CreateOfferScreenState extends State<CreateOfferScreen> {
                               AppSwitch(
                                 onChanged: (value) {
                                   offer.isActive = value;
+                                  setState(() {});  
                                 },
                                 value: offer.isActive ?? false,
                               ),
@@ -315,7 +466,6 @@ class _CreateOfferScreenState extends State<CreateOfferScreen> {
                               ),
                             );
 
-                            /// this [setState()] to get new selected products if exists
                             setState(() {});
                           },
                           child: Container(
@@ -473,6 +623,7 @@ class _CreateOfferScreenState extends State<CreateOfferScreen> {
                           AppOutlinedButton(
                             title: "إلغاء",
                             color: const Color(0xFFFF4C51),
+                            onTap: () => context.pop(),
                           ),
                         ],
                       );
@@ -486,6 +637,14 @@ class _CreateOfferScreenState extends State<CreateOfferScreen> {
         ],
       ),
     );
+  }
+
+  @override
+  void initState() {
+    context.read<ProfileBloc>()
+      ..add(GetProductsEvent(isReload: true, params: GetProductsParams()))
+      ..add(GetProductsCountEvent(params: GetProductsCountParams()));
+    super.initState();
   }
 
   bool _validateAndSubmit() {
@@ -616,154 +775,73 @@ class _CreateOfferScreenState extends State<CreateOfferScreen> {
   }
 }
 
-class NoProductSelected extends StatelessWidget {
-  const NoProductSelected({super.key});
+class _DiscountChooserChip extends StatelessWidget {
+  final String label;
+  final bool isSelected;
+  const _DiscountChooserChip({required this.label, required this.isSelected});
 
   @override
   Widget build(BuildContext context) {
-    return DottedBorder(
-      options: RoundedRectDottedBorderOptions(
-        dashPattern: const [8, 8],
-        strokeWidth: 2,
-        color: const Color(0x1F2F2B3D),
-        radius: const Radius.circular(16),
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 9, horizontal: 16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(100)),
+        color: isSelected ? null : AppColors.white,
+        gradient: isSelected ? AppGradients.gradient : null,
+        border: isSelected ? Border.all(color: Color(0xFFE5E7EB)) : null,
+        boxShadow: [AppShadows.shadow],
       ),
-      child: Container(
-        width: double.infinity,
-        height: 190,
-        decoration: BoxDecoration(
-          color: const Color(0xFFF9FAFB),
-          borderRadius: BorderRadius.circular(24),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: AppColors.white,
-                borderRadius: BorderRadius.all(Radius.circular(16)),
-                boxShadow: [AppShadows.shadow],
-              ),
-              child: Icon(
-                FontAwesomeIcons.boxOpen.data,
-                size: 18,
-                color: const Color(0xFF9CA3AF),
-              ),
-            ),
-            SizedBox(height: 8),
-            AppText(
-              "اضغط لرفع صورة",
-              style: TextStyle(
-                color: const Color(0xE52F2B3D),
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                height: 1.333,
-              ),
-            ),
-            SizedBox(height: 4),
-            AppText(
-              "PNG, JPG حتى 5MB",
-              style: TextStyle(
-                color: const Color(0x662F2B3D),
-                fontSize: 10,
-                height: 1.5,
-              ),
-            ),
-          ],
+      child: AppText(
+        label,
+        style: TextStyle(
+          color: isSelected ? AppColors.white : Color(0xFF4B5563),
+          fontSize: 14,
+          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+          height: 1.42,
         ),
       ),
     );
   }
 }
 
-class OfferLoading extends StatelessWidget {
-  const OfferLoading({super.key});
-
+class _DiscountChooserState extends State<DiscountChooser> {
+  int selectedChip = 0;
   @override
   Widget build(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: Colors.grey.shade300,
-      highlightColor: Colors.grey.shade100,
-      child: OfferCheckbox(
-        onChanged: (value) {},
-        product: GetProductsModelDataItem.fromJson({
-          "id": 1,
-          "storeId": 1,
-          "store": {
-            "id": 1,
-            "ownerUserId": 5,
-            "name": "Seller Supermarket",
-            "slug": "seller-supermarket-ef2d127d",
-            "description": "Supermarket owned by seller user for API testing.",
-            "address": "789 Store St",
-            "city": null,
-            "neighborhood": null,
-            "latitude": "31.97000000",
-            "longitude": "35.94000000",
-            "phone": "+962 6 555 0001",
-            "email": "seller@supermarket.example.com",
-            "cover": null,
-            "logo": null,
-            "averageRating": "4.00",
-            "totalReviews": 0,
-            "trustScore": 85,
-            "warningCount": 0,
-            "isActive": true,
-            "isFeatured": false,
-            "suspensionUntil": null,
-            "createdAt": "2026-03-15 22:21:55",
-            "updatedAt": "2026-03-15 22:21:55",
-          },
-          "categoryId": 1,
-          "category": {
-            "id": 1,
-            "storeId": 1,
-            "name": "الألبان",
-            "slug": "dairy",
-            "description": null,
-            "sortOrder": 1,
-            "imagePath": null,
-            "isActive": true,
-            "productsCount": 0,
-            "createdAt": "2026-03-15 22:22:00",
-            "updatedAt": "2026-03-15 22:22:00",
-          },
-          "masterProductId": 1,
-          "name": "حليب كامل الدسم 1 لتر",
-          "barcode": null,
-          "sourceType": "manual",
-          "description": null,
-          "price": "6.00",
-          "discountedPrice": null,
-          "image": null,
-          "imageUrl": null,
-          "images": [],
-          "imageUrls": [],
-          "stockQuantity": 200,
-          "lowStockThreshold": 10,
-          "expiresAt": null,
-          "isAvailable": true,
-          "createdAt": "2026-03-15 22:22:00",
-          "updatedAt": "2026-03-15 22:22:00",
-        }),
-      ),
+    return Row(
+      spacing: 8,
+      children: [
+        Expanded(
+          child: GestureDetector(
+            onTap: () {
+              if (selectedChip == 0) return;
+              selectedChip = 0;
+              setState(() {});
+              widget.onChanged("نسبة مئوية");
+            },
+            child: _DiscountChooserChip(
+              isSelected: selectedChip == 0,
+              label: "نسبة مئوية",
+            ),
+          ),
+        ),
+        Expanded(
+          child: GestureDetector(
+            onTap: () {
+              if (selectedChip == 1) return;
+              selectedChip = 1;
+              setState(() {});
+              widget.onChanged("مبلغ ثابت");
+            },
+            child: _DiscountChooserChip(
+              isSelected: selectedChip == 1,
+              label: "مبلغ ثابت",
+            ),
+          ),
+        ),
+      ],
     );
   }
-}
-
-class OfferCheckbox extends StatefulWidget {
-  const OfferCheckbox({
-    super.key,
-    required this.product,
-    required this.onChanged,
-  });
-  final GetProductsModelDataItem product;
-  final void Function(bool value) onChanged;
-
-  @override
-  State<OfferCheckbox> createState() => _OfferCheckboxState();
 }
 
 class _OfferCheckboxState extends State<OfferCheckbox> {
@@ -837,86 +915,9 @@ class _OfferCheckboxState extends State<OfferCheckbox> {
   }
 }
 
-class DiscountChooser extends StatefulWidget {
-  const DiscountChooser({super.key, required this.onChanged});
-  final void Function(String discountType) onChanged;
-
-  @override
-  State<DiscountChooser> createState() => _DiscountChooserState();
-}
-
-class _DiscountChooserState extends State<DiscountChooser> {
-  int selectedChip = 0;
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      spacing: 8,
-      children: [
-        Expanded(
-          child: GestureDetector(
-            onTap: () {
-              if (selectedChip == 0) return;
-              selectedChip = 0;
-              setState(() {});
-              widget.onChanged("نسبة مئوية");
-            },
-            child: _DiscountChooserChip(
-              isSelected: selectedChip == 0,
-              label: "نسبة مئوية",
-            ),
-          ),
-        ),
-        Expanded(
-          child: GestureDetector(
-            onTap: () {
-              if (selectedChip == 1) return;
-              selectedChip = 1;
-              setState(() {});
-              widget.onChanged("مبلغ ثابت");
-            },
-            child: _DiscountChooserChip(
-              isSelected: selectedChip == 1,
-              label: "مبلغ ثابت",
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _DiscountChooserChip extends StatelessWidget {
-  const _DiscountChooserChip({required this.label, required this.isSelected});
-  final String label;
-  final bool isSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 9, horizontal: 16),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.all(Radius.circular(100)),
-        color: isSelected ? null : AppColors.white,
-        gradient: isSelected ? AppGradients.gradient : null,
-        border: isSelected ? Border.all(color: Color(0xFFE5E7EB)) : null,
-        boxShadow: [AppShadows.shadow],
-      ),
-      child: AppText(
-        label,
-        style: TextStyle(
-          color: isSelected ? AppColors.white : Color(0xFF4B5563),
-          fontSize: 14,
-          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-          height: 1.42,
-        ),
-      ),
-    );
-  }
-}
-
 class _ProductsCounterChip extends StatelessWidget {
-  const _ProductsCounterChip({required this.productsCounter});
   final int productsCounter;
+  const _ProductsCounterChip({required this.productsCounter});
 
   @override
   Widget build(BuildContext context) {
@@ -940,8 +941,8 @@ class _ProductsCounterChip extends StatelessWidget {
 }
 
 class _TextFieldWithoutTitle extends StatelessWidget {
-  const _TextFieldWithoutTitle({required this.onSearchChanged});
   final void Function(String value) onSearchChanged;
+  const _TextFieldWithoutTitle({required this.onSearchChanged});
 
   @override
   Widget build(BuildContext context) {

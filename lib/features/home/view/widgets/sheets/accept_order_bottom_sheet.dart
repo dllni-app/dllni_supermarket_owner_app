@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:toastification/toastification.dart';
 
-import '../../../domain/usecases/accept_order_use_case.dart';
 import '../../../../orders/view/widgets/preparation_time_selector.dart';
+import '../../../domain/usecases/accept_order_use_case.dart';
 import '../../../domain/usecases/get_new_orders_use_case.dart';
 import '../../manager/bloc/home_bloc.dart';
 

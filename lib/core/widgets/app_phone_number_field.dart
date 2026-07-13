@@ -46,6 +46,7 @@ class AppPhoneNumberFieldState extends State<AppPhoneNumberField> {
     final input = TextFormField(
       decoration: _decoration(context),
       keyboardType: TextInputType.phone,
+      initialValue: widget.initialValue?.phoneNumber,
       textAlign: TextAlign.left,
       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
       onChanged: (value) {

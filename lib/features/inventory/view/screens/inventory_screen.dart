@@ -9,7 +9,6 @@ import 'package:shimmer/shimmer.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/themes/app_colors.dart';
-import '../../../../core/utils/app_images.dart';
 import '../../../../core/widgets/app_app_bars.dart';
 import '../../../../core/widgets/failure_widget.dart';
 import '../../../products/domain/usecases/get_low_stock_use_case.dart';
@@ -58,6 +57,7 @@ class EditProductAmount extends StatefulWidget {
 class InventoryCard extends StatelessWidget {
   final String name;
   final String companyName;
+  final String imageUrl;
   final num amount;
   final num lowStock;
   final String unit;
@@ -68,6 +68,7 @@ class InventoryCard extends StatelessWidget {
     super.key,
     required this.name,
     required this.companyName,
+    required this.imageUrl,
     required this.amount,
     required this.lowStock,
     required this.unit,
@@ -77,7 +78,7 @@ class InventoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = lowStock >= amount ? Color(0xFFE64449) : Color(0xFF24B364);
+    final color = lowStock > amount ? Color(0xFFE64449) : Color(0xFF24B364);
     return Container(
       padding: EdgeInsets.only(right: 8),
       margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -94,11 +95,12 @@ class InventoryCard extends StatelessWidget {
             children: [
               Padding(
                 padding: const EdgeInsets.only(top: 8.0),
-                child: AppImage.asset(
-                  AppImages.burgerImage,
+                child: AppImage.network(
+                  imageUrl,
                   width: 70,
                   height: 87,
                   fit: BoxFit.cover,
+                  errorWidget: Icon(FontAwesomeIcons.productHunt.data),
                   borderRadius: BorderRadius.all(Radius.circular(12)),
                 ),
               ),
@@ -294,6 +296,7 @@ class ProductsLoading extends StatelessWidget {
           ...List.generate(
             2,
             (index) => InventoryCard(
+              imageUrl: "https://via.placeholder.com/150",
               amount: 4.5,
               lowStock: 5,
               companyName: "شركة كرزة",
@@ -665,6 +668,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                                       }
                                       final item = visible[index];
                                       return InventoryCard(
+                                        imageUrl: item.imageUrl ?? '',
                                         amount: item.stockQuantity ?? 0,
                                         lowStock: item.lowStockThreshold ?? 0,
                                         companyName: item.category?.name ?? '',

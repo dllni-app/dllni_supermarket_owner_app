@@ -21,13 +21,10 @@ class AcceptOrderParams with Params {
   final int orderId;
   final int? preparationTimeMinutes;
 
-  const AcceptOrderParams({
-    required this.orderId,
-    this.preparationTimeMinutes,
-  });
+  const AcceptOrderParams({required this.orderId, this.preparationTimeMinutes});
 
   @override
-  BodyMap getBody() => {
-        'preparationTimeMinutes': preparationTimeMinutes,
-      }..removeWhere((key, value) => value == null);
+  BodyMap getBody() =>
+      {'preparationTimeMinutes': preparationTimeMinutes}
+        ..removeWhere((key, value) => value == null);
 }

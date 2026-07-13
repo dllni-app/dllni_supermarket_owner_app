@@ -58,7 +58,14 @@ class _OrdersScreenState extends State<OrdersScreen> {
         ..add(GetOrderCountsEvent(params: GetOrderCountsParams())),
       child: BlocListener<OrdersBloc, OrdersState>(
         listenWhen: (previous, current) =>
-            previous.courierHandoverStatus != current.courierHandoverStatus,
+            (previous.acceptOrderStatus != current.acceptOrderStatus &&
+                current.acceptOrderStatus == BlocStatus.success) ||
+            (previous.rejectOrderStatus != current.rejectOrderStatus &&
+                current.rejectOrderStatus == BlocStatus.success) ||
+            (previous.courierHandoverStatus != current.courierHandoverStatus &&
+                current.courierHandoverStatus == BlocStatus.success) ||
+            (previous.courierHandoverStatus != current.courierHandoverStatus &&
+                current.courierHandoverStatus == BlocStatus.failed),
         listener: (context, state) {
           if (state.courierHandoverStatus == BlocStatus.failed) {
             AppToast.showToast(
@@ -66,13 +73,20 @@ class _OrdersScreenState extends State<OrdersScreen> {
               message: state.errorMessage ?? 'Unknown Error',
               type: ToastificationType.error,
             );
-          } else if (state.courierHandoverStatus == BlocStatus.success) {
+            return;
+          }
+
+          if (state.courierHandoverStatus == BlocStatus.success) {
             AppToast.showToast(
               context: context,
               message: 'تم تحديث حالة الطلب',
               type: ToastificationType.success,
             );
           }
+
+          context.read<OrdersBloc>().add(
+            GetOrderCountsEvent(params: GetOrderCountsParams()),
+          );
         },
         child: Scaffold(
           backgroundColor: const Color(0xffF5F6FA),
@@ -85,18 +99,22 @@ class _OrdersScreenState extends State<OrdersScreen> {
                     const SizedBox(height: 8),
                     BlocBuilder<OrdersBloc, OrdersState>(
                       buildWhen: (previous, current) =>
-                          previous.orderCountsStatus != current.orderCountsStatus,
+                          previous.orderCountsStatus !=
+                              current.orderCountsStatus ||
+                          previous.orderCounts != current.orderCounts,
                       builder: (context, state) {
-                        if (state.orderCountsStatus == BlocStatus.loading) {
+                        if (state.orderCountsStatus == BlocStatus.loading &&
+                            state.orderCounts == null) {
                           return ProductsTabBarLoading();
-                        } else if (state.orderCountsStatus == BlocStatus.failed) {
+                        } else if (state.orderCountsStatus == BlocStatus.failed &&
+                            state.orderCounts == null) {
                           return FailureWidget(
                             message: state.errorMessage ?? 'Unknown Error',
                             onRetry: () => context.read<OrdersBloc>().add(
                               GetOrderCountsEvent(params: GetOrderCountsParams()),
                             ),
                           );
-                        } else if (state.orderCountsStatus == BlocStatus.success) {
+                        } else if (state.orderCounts != null) {
                           return OrdersTabBar(
                             items: [
                               OrdersTabBarItem(
@@ -144,6 +162,11 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                     status: selectedStatus,
                                   ),
                                   isReload: true,
+                                ),
+                              );
+                              context.read<OrdersBloc>().add(
+                                GetOrderCountsEvent(
+                                  params: GetOrderCountsParams(),
                                 ),
                               );
                             },
