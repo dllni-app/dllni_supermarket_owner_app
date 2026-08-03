@@ -423,36 +423,56 @@ class _CreateNewEmployeeScreenState extends State<CreateNewEmployeeScreen> {
                                               .id!,
                                         ) ??
                                         false,
-                                    name: state
+                                    name:
+                                        state
+                                            .employeePermissions!
+                                            .data!
+                                            .permissions![index]
+                                            .code ??
+                                        state
+                                            .employeePermissions!
+                                            .data!
+                                            .permissions![index]
+                                            .name ??
+                                        '',
+                                    title: state
                                         .employeePermissions!
                                         .data!
                                         .permissions![index]
-                                        .name!,
+                                        .slug,
+                                    description: state
+                                        .employeePermissions!
+                                        .data!
+                                        .permissions![index]
+                                        .description,
                                     id: state
                                         .employeePermissions!
                                         .data!
                                         .permissions![index]
                                         .id!,
                                     onChanged: (value) {
-                                      if (value) {
-                                        params.permissionIds?.add(
-                                          state
-                                              .employeePermissions!
-                                              .data!
-                                              .permissions![index]
-                                              .id!,
-                                        );
-                                      } else {
-                                        params.permissionIds?.removeWhere(
-                                          (id) =>
-                                              id ==
-                                              state
-                                                  .employeePermissions!
-                                                  .data!
-                                                  .permissions![index]
-                                                  .id!,
-                                        );
-                                      }
+                                      setState(() {
+                                        final permissionId = state
+                                            .employeePermissions!
+                                            .data!
+                                            .permissions![index]
+                                            .id!;
+
+                                        if (value) {
+                                          if (!(params.permissionIds?.contains(
+                                                permissionId,
+                                              ) ??
+                                              false)) {
+                                            params.permissionIds?.add(
+                                              permissionId,
+                                            );
+                                          }
+                                        } else {
+                                          params.permissionIds?.removeWhere(
+                                            (id) => id == permissionId,
+                                          );
+                                        }
+                                      });
                                     },
                                   ),
                                 ),
@@ -731,32 +751,33 @@ class PermissionDetails {
   PermissionDetails(this.title, this.description, this.icon, this.color);
 }
 
-class _PermissionChooser extends StatefulWidget {
+class _PermissionChooser extends StatelessWidget {
   const _PermissionChooser({
     required this.name,
     required this.id,
     required this.onChanged,
     required this.value,
+    this.title,
+    this.description,
   });
+
   final String name;
+  final String? title;
+  final String? description;
   final int id;
   final void Function(bool value) onChanged;
   final bool value;
 
   @override
-  State<_PermissionChooser> createState() => _PermissionChooserState();
-}
-
-class _PermissionChooserState extends State<_PermissionChooser> {
-  bool isEnabled = false;
-  @override
-  void initState() {
-    isEnabled = widget.value;
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final fallbackDetails = getPermissionDetails(name);
+    final resolvedTitle = title?.trim().isNotEmpty == true
+        ? title!.trim()
+        : fallbackDetails.title;
+    final resolvedDescription = description?.trim().isNotEmpty == true
+        ? description!.trim()
+        : fallbackDetails.description;
+
     return Container(
       padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -767,12 +788,10 @@ class _PermissionChooserState extends State<_PermissionChooser> {
       child: Row(
         children: [
           Checkbox(
-            value: isEnabled,
+            value: value,
             onChanged: (value) {
               if (value == null) return;
-              isEnabled = !isEnabled;
-              widget.onChanged(value);
-              setState(() {});
+              onChanged(value);
             },
             side: BorderSide(width: 2, color: Color(0xFFD1D5DB)),
             shape: RoundedRectangleBorder(
@@ -788,13 +807,13 @@ class _PermissionChooserState extends State<_PermissionChooser> {
                   spacing: 8,
                   children: [
                     Icon(
-                      getPermissionDetails(widget.name).icon,
-                      color: getPermissionDetails(widget.name).color,
+                      fallbackDetails.icon,
+                      color: fallbackDetails.color,
                       size: 14,
                     ),
                     Expanded(
                       child: AppText(
-                        getPermissionDetails(widget.name).title,
+                        resolvedTitle,
                         textAlign: TextAlign.start,
                         style: TextStyle(
                           color: Color(0xFF111827),
@@ -807,7 +826,7 @@ class _PermissionChooserState extends State<_PermissionChooser> {
                   ],
                 ),
                 AppText(
-                  getPermissionDetails(widget.name).description,
+                  resolvedDescription,
                   textAlign: TextAlign.start,
                   style: TextStyle(
                     color: Color(0xFF6B7280),
@@ -971,6 +990,50 @@ PermissionDetails getPermissionDetails(String permission) {
   const reportColor = Color(0xFF3F51B5); // Indigo
   const deleteColor = Color(0xFFF44336); // Red
   switch (permission) {
+    // --- GROUPED SUPERMARKET OWNER PERMISSIONS ---
+    case 'so.products':
+      return PermissionDetails(
+        "إدارة المنتجات",
+        "إضافة المنتجات وتعديل بياناتها",
+        FontAwesomeIcons.cubes.data,
+        productColor,
+      );
+    case 'so.offers_coupons':
+      return PermissionDetails(
+        "إدارة العروض والكوبونات",
+        "التحكم بأقسام العروض والكوبونات",
+        FontAwesomeIcons.tags.data,
+        offerColor,
+      );
+    case 'so.orders':
+      return PermissionDetails(
+        "إدارة الطلبات",
+        "عرض الطلبات ومتابعتها وتحديث حالاتها",
+        FontAwesomeIcons.receipt.data,
+        orderColor,
+      );
+    case 'so.staff_register':
+      return PermissionDetails(
+        "إدارة الموظفين",
+        "إضافة الموظفين وتعديل بياناتهم ومراقبة سجل نشاطهم",
+        FontAwesomeIcons.usersGear.data,
+        staffColor,
+      );
+    case 'so.store_hours':
+      return PermissionDetails(
+        "إدارة بيانات المتجر",
+        "تعديل بيانات المتجر وساعات العمل",
+        FontAwesomeIcons.shop.data,
+        storeColor,
+      );
+    case 'so.warehouse':
+      return PermissionDetails(
+        "إدارة المخزن",
+        "الإشراف على المخزن وتنظيم عمله",
+        FontAwesomeIcons.warehouse.data,
+        inventoryColor,
+      );
+
     // --- STORES (Blue) ---
     case 'stores.view':
       return PermissionDetails(
