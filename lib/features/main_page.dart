@@ -116,6 +116,6 @@ class _MainTab {
   });
 
   final String title;
-  final int icon;
+  final IconData icon;
   final Widget screen;
 }
