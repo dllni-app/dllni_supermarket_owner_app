@@ -17,104 +17,71 @@ int? _asInt(dynamic value) {
   return null;
 }
 
-double? _asDouble(dynamic value) {
-  if (value == null) return null;
-  if (value is double) return value;
-  if (value is num) return value.toDouble();
-  if (value is String) return double.tryParse(value);
-  return null;
-}
+GetEmployeePermissionsModel getEmployeePermissionsModelFromJson(str) =>
+    GetEmployeePermissionsModel.fromJson(str);
 
-num? _asNum(dynamic value) {
-  if (value == null) return null;
-  if (value is num) return value;
-  if (value is String) return num.tryParse(value);
-  return null;
-}
+String getEmployeePermissionsModelToJson(
+  GetEmployeePermissionsModel data,
+) =>
+    json.encode(data.toJson());
 
-bool? _asBool(dynamic value) {
-  if (value == null) return null;
-  if (value is bool) return value;
-  if (value is num) {
-    if (value == 1) return true;
-    if (value == 0) return false;
-  }
-  if (value is String) {
-    final normalized = value.trim().toLowerCase();
-    if (normalized == 'true' || normalized == '1') return true;
-    if (normalized == 'false' || normalized == '0') return false;
-  }
-  return null;
-}
+GetEmployeePermissionsModelData getEmployeePermissionsModelDataFromJson(str) =>
+    GetEmployeePermissionsModelData.fromJson(str);
 
-List<dynamic>? _asDynamicList(dynamic value) {
-  if (value is! List) return null;
-  return value.map(_asDynamic).toList();
-}
+String getEmployeePermissionsModelDataToJson(
+  GetEmployeePermissionsModelData data,
+) =>
+    json.encode(data.toJson());
 
-dynamic _asDynamic(dynamic value) {
-  if (value == null) return null;
-  if (value is List) {
-    return value.map(_asDynamic).toList();
-  }
-  if (value is Map) {
-    final map = <String, dynamic>{};
-    value.forEach((key, nestedValue) {
-      map['$key'] = _asDynamic(nestedValue);
-    });
-    return map;
-  }
-  if (value is String || value is num || value is bool) {
-    return value;
-  }
-  return value.toString();
-}
+GetEmployeePermissionsModelDataPermissionsItem
+getEmployeePermissionsModelDataPermissionsItemFromJson(str) =>
+    GetEmployeePermissionsModelDataPermissionsItem.fromJson(str);
 
-GetEmployeePermissionsModel getEmployeePermissionsModelFromJson(str) => GetEmployeePermissionsModel.fromJson(str);
-
-String getEmployeePermissionsModelToJson(GetEmployeePermissionsModel data) => json.encode(data.toJson());
-
-
-GetEmployeePermissionsModelData getEmployeePermissionsModelDataFromJson(str) => GetEmployeePermissionsModelData.fromJson(str);
-
-String getEmployeePermissionsModelDataToJson(GetEmployeePermissionsModelData data) => json.encode(data.toJson());
-
-
-GetEmployeePermissionsModelDataPermissionsItem getEmployeePermissionsModelDataPermissionsItemFromJson(str) => GetEmployeePermissionsModelDataPermissionsItem.fromJson(str);
-
-String getEmployeePermissionsModelDataPermissionsItemToJson(GetEmployeePermissionsModelDataPermissionsItem data) => json.encode(data.toJson());
-
+String getEmployeePermissionsModelDataPermissionsItemToJson(
+  GetEmployeePermissionsModelDataPermissionsItem data,
+) =>
+    json.encode(data.toJson());
 
 class GetEmployeePermissionsModel {
   GetEmployeePermissionsModelData? data;
 
-  GetEmployeePermissionsModel({
-    this.data,
-  });
+  GetEmployeePermissionsModel({this.data});
 
   factory GetEmployeePermissionsModel.fromJson(Map<String, dynamic> json) {
     return GetEmployeePermissionsModel(
-      data: json['data'] is Map ? GetEmployeePermissionsModelData.fromJson(Map<String, dynamic>.from(json['data'] as Map)) : null,
+      data: json['data'] is Map
+          ? GetEmployeePermissionsModelData.fromJson(
+              Map<String, dynamic>.from(json['data'] as Map),
+            )
+          : null,
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'data': data?.toJson(),
-    };
+    return {'data': data?.toJson()};
   }
 }
 
 class GetEmployeePermissionsModelData {
   List<GetEmployeePermissionsModelDataPermissionsItem>? permissions;
 
-  GetEmployeePermissionsModelData({
-    this.permissions,
-  });
+  GetEmployeePermissionsModelData({this.permissions});
 
-  factory GetEmployeePermissionsModelData.fromJson(Map<String, dynamic> json) {
+  factory GetEmployeePermissionsModelData.fromJson(
+    Map<String, dynamic> json,
+  ) {
     return GetEmployeePermissionsModelData(
-      permissions: json['permissions'] is List ? (json['permissions'] as List).whereType<Map>().map((item) => GetEmployeePermissionsModelDataPermissionsItem.fromJson(Map<String, dynamic>.from(item))).toList() : null,
+      permissions: json['permissions'] is List
+          ? (json['permissions'] as List)
+              .whereType<Map>()
+              .map(
+                (item) =>
+                    GetEmployeePermissionsModelDataPermissionsItem.fromJson(
+                      Map<String, dynamic>.from(item),
+                    ),
+              )
+              .toList()
+          : null,
     );
   }
 
@@ -128,30 +95,42 @@ class GetEmployeePermissionsModelData {
 class GetEmployeePermissionsModelDataPermissionsItem {
   int? id;
   String? name;
-  dynamic slug;
-  dynamic group;
+  String? code;
+  String? slug;
+  String? description;
+  String? group;
 
   GetEmployeePermissionsModelDataPermissionsItem({
     this.id,
     this.name,
+    this.code,
     this.slug,
+    this.description,
     this.group,
   });
 
-  factory GetEmployeePermissionsModelDataPermissionsItem.fromJson(Map<String, dynamic> json) {
+  factory GetEmployeePermissionsModelDataPermissionsItem.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    final code = _asString(json['name']);
+    final slug = _asString(json['slug']);
+
     return GetEmployeePermissionsModelDataPermissionsItem(
       id: _asInt(json['id']),
-      name: _asString(json['name']),
-      slug: _asDynamic(json['slug']),
-      group: _asDynamic(json['group']),
+      name: slug ?? code,
+      code: code,
+      slug: slug,
+      description: _asString(json['description']),
+      group: _asString(json['group']),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'name': name,
+      'name': code ?? name,
       'slug': slug,
+      'description': description,
       'group': group,
     };
   }
