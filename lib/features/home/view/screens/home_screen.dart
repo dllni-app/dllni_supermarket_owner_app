@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/helpers/seller_permission_access.dart';
 import '../../domain/usecases/get_dashboard_overview_use_case.dart';
 import '../manager/bloc/home_bloc.dart';
 import '../widgets/home_app_bar.dart';
@@ -14,37 +15,54 @@ import '../widgets/quick_actions_section.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
+    final access = SellerPermissionAccess.current();
+    final canManageOrders = access.can(SupermarketPermissionCodes.orders);
+    final canManageProducts = access.can(SupermarketPermissionCodes.products);
+
     return BlocProvider(
-      create: (context) => getIt<HomeBloc>()
-        ..add(GetDashboardOverviewEvent(params: GetDashboardOverviewParams()))
-        ..add(GetNewOrdersEvent(params: GetNewOrdersParams()))
-        ..add(GetDailyCountEvent(params: GetDailyCountParams())),
-      // ..add(GetPreparingOrdersEvent(params: GetPreparingOrdersParams()))
-      child: const Scaffold(
-        backgroundColor: Color(0xFFF6F7FB),
+      create: (context) {
+        final bloc = getIt<HomeBloc>()
+          ..add(
+            GetDashboardOverviewEvent(params: GetDashboardOverviewParams()),
+          );
+
+        if (canManageOrders) {
+          bloc
+            ..add(GetNewOrdersEvent(params: GetNewOrdersParams()))
+            ..add(GetDailyCountEvent(params: GetDailyCountParams()));
+        }
+
+        return bloc;
+      },
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF6F7FB),
         body: Column(
           children: [
-            HomeAppBar(
-            ),
+            const HomeAppBar(),
             Expanded(
               child: SingleChildScrollView(
-                padding: EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(height: 24),
-                    OverviewSection(
-                      showQuickPoints: false,
-                    ),
-                    SizedBox(height: 20),
-                    OrdersChartCard(),
-                    SizedBox(height: 34),
-                    QuickActionsSection(),
-                    SizedBox(height: 14),
-                    NewOrdersSection(),
-                    SizedBox(height: 24),
+                    const SizedBox(height: 24),
+                    const OverviewSection(showQuickPoints: false),
+                    if (canManageOrders) ...[
+                      const SizedBox(height: 20),
+                      const OrdersChartCard(),
+                    ],
+                    if (canManageProducts) ...[
+                      const SizedBox(height: 34),
+                      const QuickActionsSection(),
+                    ],
+                    if (canManageOrders) ...[
+                      const SizedBox(height: 14),
+                      const NewOrdersSection(),
+                    ],
+                    const SizedBox(height: 24),
                   ],
                 ),
               ),
