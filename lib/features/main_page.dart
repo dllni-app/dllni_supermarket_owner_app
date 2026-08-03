@@ -9,6 +9,7 @@ import 'inventory/view/screens/inventory_screen.dart';
 import 'orders/view/screens/orders_screen.dart';
 import 'products/view/screens/products_screen.dart';
 import 'profile/view/screens/more_screen.dart';
+import 'profile/view/screens/profile_permission_screen.dart';
 
 @AutoRoutePage(path: "/")
 class MainPage extends StatefulWidget {
@@ -31,13 +32,14 @@ class _MainPageState extends State<MainPage>
     super.initState();
 
     final access = SellerPermissionAccess.current();
-    tabs = [
-      _MainTab(
-        originalIndex: 0,
-        title: 'الرئيسية',
-        icon: FontAwesomeIcons.solidHouse.data,
-        screen: HomeScreen(),
-      ),
+    final primaryTabs = <_MainTab>[
+      if (access.can(SupermarketPermissionCodes.orders))
+        _MainTab(
+          originalIndex: 0,
+          title: 'الرئيسية',
+          icon: FontAwesomeIcons.solidHouse.data,
+          screen: HomeScreen(),
+        ),
       if (access.can(SupermarketPermissionCodes.orders))
         _MainTab(
           originalIndex: 1,
@@ -59,6 +61,49 @@ class _MainPageState extends State<MainPage>
           icon: FontAwesomeIcons.boxesStacked.data,
           screen: InventoryScreen(),
         ),
+    ];
+
+    final profilePermissionTabs = <_MainTab>[
+      if (access.can(SupermarketPermissionCodes.storeData))
+        _MainTab(
+          originalIndex: 5,
+          title: 'بيانات المتجر',
+          icon: FontAwesomeIcons.store.data,
+          screen: const ProfilePermissionScreen(
+            permission: SupermarketPermissionCodes.storeData,
+          ),
+        ),
+      if (access.can(SupermarketPermissionCodes.offersAndCoupons))
+        _MainTab(
+          originalIndex: 6,
+          title: 'العروض',
+          icon: FontAwesomeIcons.tags.data,
+          screen: const ProfilePermissionScreen(
+            permission: SupermarketPermissionCodes.offersAndCoupons,
+          ),
+        ),
+      if (access.can(SupermarketPermissionCodes.employees))
+        _MainTab(
+          originalIndex: 7,
+          title: 'الموظفون',
+          icon: FontAwesomeIcons.users.data,
+          screen: const ProfilePermissionScreen(
+            permission: SupermarketPermissionCodes.employees,
+          ),
+        ),
+    ];
+
+    const maximumTabs = 5;
+    const reservedMoreTabs = 1;
+    final availableProfileSlots =
+        maximumTabs - reservedMoreTabs - primaryTabs.length;
+
+    if (availableProfileSlots > 0) {
+      primaryTabs.addAll(profilePermissionTabs.take(availableProfileSlots));
+    }
+
+    tabs = [
+      ...primaryTabs,
       _MainTab(
         originalIndex: 4,
         title: 'المزيد',
