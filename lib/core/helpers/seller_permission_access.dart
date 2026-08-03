@@ -22,6 +22,8 @@ final class SellerPermissionAccess {
   final bool isOwner;
   final bool hasExplicitPermissions;
 
+  bool get hasFullAccess => isOwner || !hasExplicitPermissions;
+
   factory SellerPermissionAccess.current() {
     final rawSession = SharedPreferencesHelper.getData(key: 'user');
     final session = _decodeSession(rawSession);
@@ -58,7 +60,7 @@ final class SellerPermissionAccess {
   bool can(String permission) {
     // Sessions created before the backend permission payload was introduced keep
     // the previous full-access behavior until the user signs in again.
-    return isOwner || !hasExplicitPermissions || permissions.contains(permission);
+    return hasFullAccess || permissions.contains(permission);
   }
 
   static Map<String, dynamic>? _decodeSession(dynamic rawSession) {
