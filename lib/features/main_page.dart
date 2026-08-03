@@ -33,39 +33,45 @@ class _MainPageState extends State<MainPage>
     final access = SellerPermissionAccess.current();
     tabs = [
       _MainTab(
+        originalIndex: 0,
         title: 'الرئيسية',
         icon: FontAwesomeIcons.solidHouse.data,
         screen: HomeScreen(),
       ),
       if (access.can(SupermarketPermissionCodes.orders))
         _MainTab(
+          originalIndex: 1,
           title: 'الطلبات',
           icon: FontAwesomeIcons.receipt.data,
           screen: OrdersScreen(),
         ),
       if (access.can(SupermarketPermissionCodes.products))
         _MainTab(
+          originalIndex: 2,
           title: 'المنتجات',
           icon: FontAwesomeIcons.cubes.data,
           screen: ProductsScreen(),
         ),
       if (access.can(SupermarketPermissionCodes.warehouse))
         _MainTab(
+          originalIndex: 3,
           title: 'المخزون',
           icon: FontAwesomeIcons.boxesStacked.data,
           screen: InventoryScreen(),
         ),
       _MainTab(
+        originalIndex: 4,
         title: 'المزيد',
         icon: FontAwesomeIcons.bars.data,
         screen: MoreScreen(),
       ),
     ];
 
-    final requestedIndex = widget.initialPage;
-    selectedTab = requestedIndex == 4
-        ? tabs.length - 1
-        : (requestedIndex ?? 0).clamp(0, tabs.length - 1).toInt();
+    final requestedIndex = widget.initialPage ?? 0;
+    final permittedIndex = tabs.indexWhere(
+      (tab) => tab.originalIndex == requestedIndex,
+    );
+    selectedTab = permittedIndex < 0 ? 0 : permittedIndex;
 
     tabController = TabController(
       length: tabs.length,
@@ -110,11 +116,13 @@ class _MainPageState extends State<MainPage>
 
 class _MainTab {
   const _MainTab({
+    required this.originalIndex,
     required this.title,
     required this.icon,
     required this.screen,
   });
 
+  final int originalIndex;
   final String title;
   final IconData icon;
   final Widget screen;
