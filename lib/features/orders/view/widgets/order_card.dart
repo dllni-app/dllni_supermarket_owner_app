@@ -28,8 +28,7 @@ class OrderCard extends StatelessWidget {
   bool get hasPrimaryAction =>
       status == OrderStatus.pending ||
       status == OrderStatus.accepted ||
-      status == OrderStatus.preparing ||
-      status == OrderStatus.readyForPickup;
+      status == OrderStatus.preparing;
 
   String get orderDelay {
     final parsedDate = _tryParseServerDate(order.createdAt);
@@ -49,7 +48,7 @@ class OrderCard extends StatelessWidget {
     OrderStatus.accepted => 'تم قبول الطلب - بانتظار بدء التحضير',
     OrderStatus.preparing => 'يتم تجهيز المنتجات',
     OrderStatus.readyForPickup => 'الطلب جاهز وبانتظار المندوب',
-    OrderStatus.pickedUp => 'تم تسليم الطلب للمندوب',
+    OrderStatus.pickedUp => 'استلم المندوب الطلب',
     OrderStatus.completed => 'تم تسليم الطلب',
     OrderStatus.rejected => 'تم رفض الطلب',
     OrderStatus.cancelled => 'تم إلغاء الطلب',
@@ -79,7 +78,7 @@ class OrderCard extends StatelessWidget {
     OrderStatus.accepted => 'تم قبول الطلب',
     OrderStatus.preparing => 'قيد التحضير',
     OrderStatus.readyForPickup => 'جاهز للتسليم',
-    OrderStatus.pickedUp => 'قيد التسليم',
+    OrderStatus.pickedUp => 'تم الاستلام',
     OrderStatus.completed => 'مكتمل',
     OrderStatus.rejected => 'مرفوض',
     OrderStatus.cancelled => 'ملغي',
