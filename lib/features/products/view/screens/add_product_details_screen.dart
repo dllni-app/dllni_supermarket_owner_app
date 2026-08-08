@@ -14,12 +14,15 @@ import '../../../../core/widgets/failure_widget.dart';
 import '../../../../core/widgets/step_details.dart';
 import '../../data/models/get_categories_model.dart';
 import '../../data/models/get_products_model.dart';
+import '../../data/models/search_master_products_model.dart';
 import '../../domain/usecases/add_product_use_case.dart';
 import '../../domain/usecases/get_categories_use_case.dart';
+import '../../domain/usecases/search_master_products_use_case.dart';
 import '../../domain/usecases/update_product_use_case.dart';
 import '../manager/bloc/products_bloc.dart';
 import '../widgets/product_pick_images.dart';
 import '../widgets/product_text_field.dart';
+import '../widgets/product_typeahead_field.dart';
 
 @AutoRoutePage(path: "/products/new_product/details")
 class AddProductDetailsScreen extends StatefulWidget {
@@ -42,6 +45,11 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
   late final TextEditingController _lowStockController;
   late final TextEditingController _priceController;
   late final TextEditingController _discountedController;
+  late final TextEditingController _categoryController;
+  late final TextEditingController _masterProductController;
+
+  String? _selectedCategoryName;
+  String? _selectedMasterProductName;
 
   @override
   void initState() {
@@ -67,6 +75,8 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
     _discountedController = TextEditingController(
       text: params.discountedPrice == null ? '' : '${params.discountedPrice}',
     );
+    _categoryController = TextEditingController();
+    _masterProductController = TextEditingController();
     _prepareMainImageFromGeneratedBytes();
   }
 
@@ -96,6 +106,8 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
     _lowStockController.dispose();
     _priceController.dispose();
     _discountedController.dispose();
+    _categoryController.dispose();
+    _masterProductController.dispose();
     super.dispose();
   }
 
@@ -107,6 +119,81 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
     params.price = num.tryParse(_priceController.text.trim());
     final d = _discountedController.text.trim();
     params.discountedPrice = d.isEmpty ? null : num.tryParse(d);
+  }
+
+  List<GetCategoriesModelDataItem> _categorySuggestions(
+    GetCategoriesModel? categories,
+    String search,
+  ) {
+    final items = categories?.data ?? const <GetCategoriesModelDataItem>[];
+    final query = search.trim().toLowerCase();
+    if (query.isEmpty) {
+      return items;
+    }
+    return items.where((category) {
+      final name = (category.name ?? '').toLowerCase();
+      final slug = (category.slug ?? '').toLowerCase();
+      return name.contains(query) || slug.contains(query);
+    }).toList();
+  }
+
+  Future<List<SearchMasterProductsDataItem>> _masterProductSuggestions(
+    String search,
+  ) async {
+    final query = search.trim();
+    final response = await getIt<SearchMasterProductsUseCase>()(
+      SearchMasterProductsParams(
+        page: 1,
+        index: query.isEmpty ? null : query,
+      ),
+    );
+
+    return response.fold(
+      (failure) => throw Exception(failure.message),
+      (model) => (model.data ?? const <SearchMasterProductsDataItem>[])
+          .where((item) => item.masterProductId != null)
+          .toList(),
+    );
+  }
+
+  String? _categoryImageUrl(dynamic imageData) {
+    if (imageData == null) return null;
+    if (imageData is String) {
+      final value = imageData.trim();
+      return value.isEmpty ? null : value;
+    }
+    if (imageData is Map) {
+      const keys = ['url', 'imageUrl', 'image_url', 'path', 'image'];
+      for (final key in keys) {
+        final value = imageData[key];
+        if (value is String && value.trim().isNotEmpty) {
+          return value.trim();
+        }
+      }
+    }
+    return null;
+  }
+
+  String? _masterProductSubtitle(SearchMasterProductsDataItem item) {
+    final parts = <String>[];
+    if (item.brand != null && item.brand!.trim().isNotEmpty) {
+      parts.add(item.brand!.trim());
+    }
+    if (item.masterProductId != null) {
+      parts.add('#${item.masterProductId}');
+    }
+    return parts.isEmpty ? null : parts.join(' • ');
+  }
+
+  GetCategoriesModelDataItem? _selectedCategory(
+    GetCategoriesModel? categories,
+  ) {
+    final categoryId = params.categoryId;
+    if (categoryId == null) return null;
+    for (final category in categories?.data ?? const <GetCategoriesModelDataItem>[]) {
+      if (category.id == categoryId) return category;
+    }
+    return null;
   }
 
   @override
@@ -125,7 +212,7 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 20.0),
                   child: Column(
                     children: [
-                      SizedBox(height: 16),
+                      const SizedBox(height: 16),
                       StepDetails(
                         number: 1,
                         title: "المعلومات الأساسية",
@@ -140,7 +227,7 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
                                 params.title = value;
                               },
                             ),
-                            SizedBox(height: 20),
+                            const SizedBox(height: 20),
                             AppTextField(
                               title: "وصف المنتج",
                               hintText: "وصف مكونات المنتج ومميزاته...",
@@ -150,49 +237,107 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
                                 params.description = value;
                               },
                             ),
-                            SizedBox(height: 20),
+                            const SizedBox(height: 20),
                             BlocBuilder<ProductsBloc, ProductsState>(
                               buildWhen: (previous, current) =>
                                   previous.categoriesStatus !=
-                                  current.categoriesStatus,
+                                      current.categoriesStatus ||
+                                  previous.categories != current.categories,
                               builder: (context, state) {
                                 return switch (state.categoriesStatus) {
                                   BlocStatus.loading =>
-                                    CircularProgressIndicator.adaptive(),
+                                    const CircularProgressIndicator.adaptive(),
                                   BlocStatus.failed => FailureWidget(
                                     message:
                                         state.errorMessage ?? "Unknown Error",
                                   ),
-                                  BlocStatus.success => ProductMenuField(
-                                    title: "التصنيف",
-                                    isRequired: true,
-                                    hintText: "اختر تصنيف...",
-                                    value: _categoryDropdownValue(
-                                      state.categories,
-                                      params.categoryId,
-                                    ),
-                                    onChanged: (value) {
-                                      if (value != null) {
-                                        params.categoryId = value;
+                                  BlocStatus.success => Builder(
+                                    builder: (context) {
+                                      final selected = _selectedCategory(
+                                        state.categories,
+                                      );
+                                      if (_categoryController.text.isEmpty &&
+                                          selected != null &&
+                                          (selected.name ?? '').isNotEmpty) {
+                                        _selectedCategoryName = selected.name;
+                                        _categoryController.text =
+                                            selected.name ?? '';
                                       }
+                                      return ProductTypeAheadField<
+                                        GetCategoriesModelDataItem
+                                      >(
+                                        title: "التصنيف",
+                                        isRequired: true,
+                                        hintText: "ابحث واختر تصنيف...",
+                                        controller: _categoryController,
+                                        suggestionsCallback: (search) =>
+                                            _categorySuggestions(
+                                              state.categories,
+                                              search,
+                                            ),
+                                        titleBuilder: (category) =>
+                                            category.name ?? 'بدون اسم',
+                                        imageUrlBuilder: (category) =>
+                                            _categoryImageUrl(
+                                              category.imagePath,
+                                            ),
+                                        subtitleBuilder: (category) {
+                                          final count = category.productsCount;
+                                          return count == null
+                                              ? null
+                                              : '$count منتج';
+                                        },
+                                        onTextChanged: (value) {
+                                          if (_selectedCategoryName != null &&
+                                              value != _selectedCategoryName) {
+                                            params.categoryId = null;
+                                            _selectedCategoryName = null;
+                                          }
+                                        },
+                                        onSelected: (category) {
+                                          params.categoryId = category.id;
+                                          _selectedCategoryName = category.name;
+                                        },
+                                      );
                                     },
-                                    items: List.generate(
-                                      state.categories!.data!.length,
-                                      (index) => DropdownMenuItem(
-                                        value:
-                                            state.categories!.data![index].id,
-                                        child: AppText(
-                                          state.categories!.data![index].name ??
-                                              "null",
-                                          style: TextStyle(fontFamily: "Cairo"),
-                                        ),
-                                      ),
-                                    ),
                                   ),
-                                  _ => SizedBox(),
+                                  _ => const SizedBox(),
                                 };
                               },
                             ),
+                            const SizedBox(height: 20),
+                            ProductTypeAheadField<
+                              SearchMasterProductsDataItem
+                            >(
+                              title: "المنتج الرئيسي",
+                              hintText: params.masterProductId == null
+                                  ? "ابحث واختر المنتج الرئيسي..."
+                                  : "المنتج الحالي #${params.masterProductId} - ابحث للتغيير",
+                              controller: _masterProductController,
+                              suggestionsCallback: _masterProductSuggestions,
+                              titleBuilder: (product) =>
+                                  product.name ?? 'بدون اسم',
+                              subtitleBuilder: _masterProductSubtitle,
+                              imageUrlBuilder: (product) =>
+                                  product.primaryImage,
+                              onTextChanged: (value) {
+                                if (_selectedMasterProductName != null &&
+                                    value != _selectedMasterProductName) {
+                                  params.masterProductId = null;
+                                  _selectedMasterProductName = null;
+                                } else if (_selectedMasterProductName == null &&
+                                    params.masterProductId != null &&
+                                    value.trim().isNotEmpty) {
+                                  params.masterProductId = null;
+                                }
+                              },
+                              onSelected: (product) {
+                                params.masterProductId =
+                                    product.masterProductId;
+                                _selectedMasterProductName = product.name;
+                              },
+                            ),
+                            const SizedBox(height: 20),
                             ProductPickMainImage(
                               title: "صورة رئيسية",
                               isRequired: !isEdit,
@@ -200,19 +345,17 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
                               networkImageUrl: params.initialMainImageUrl,
                               icon: FontAwesomeIcons.solidCamera.data,
                               onPickImage: (imagePath) {
-                                print(imagePath);
                                 params.mainImagePath = imagePath;
                               },
                             ),
-                            SizedBox(height: 16),
+                            const SizedBox(height: 16),
                             ProductPickAdditionalImages(
                               numOfImages: 6,
                               onPickImage: (imagesPath) {
-                                print(imagesPath);
                                 params.additionalImagesPath = imagesPath;
                               },
                             ),
-                            SizedBox(height: 24),
+                            const SizedBox(height: 24),
                             ProductUnit(
                               initialUnit:
                                   (params.unit != null &&
@@ -220,11 +363,10 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
                                   ? params.unit
                                   : null,
                               onChanged: (unit) {
-                                print(unit);
                                 params.unit = unit;
                               },
                             ),
-                            SizedBox(height: 24),
+                            const SizedBox(height: 24),
                             Row(
                               spacing: 10,
                               children: [
@@ -256,19 +398,18 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
                                 ),
                               ],
                             ),
-                            SizedBox(height: 24),
+                            const SizedBox(height: 24),
                             AppDatePicker(
                               title: "صلاحية المنتج",
                               initialDate: params.expiredAt,
                               onDateChanged: (expiredDate) {
-                                print(expiredDate);
                                 params.expiredAt = expiredDate;
                               },
                             ),
                           ],
                         ),
                       ),
-                      SizedBox(height: 16),
+                      const SizedBox(height: 16),
                       StepDetails(
                         number: 2,
                         title: "التسعير",
@@ -283,8 +424,8 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
                                 if (num.tryParse(value) == null) return;
                                 params.price = num.parse(value);
                               },
-                              suffixIcon: Padding(
-                                padding: const EdgeInsets.only(top: 12),
+                              suffixIcon: const Padding(
+                                padding: EdgeInsets.only(top: 12),
                                 child: Text(
                                   "ل.س",
                                   style: TextStyle(
@@ -295,7 +436,7 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
                               ),
                               keyboardType: TextInputType.number,
                             ),
-                            SizedBox(height: 20),
+                            const SizedBox(height: 20),
                             AppTextField(
                               title: "السعر بعد الحسم",
                               hintText: "0.00",
@@ -309,8 +450,8 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
                                 if (num.tryParse(value) == null) return;
                                 params.discountedPrice = num.parse(value);
                               },
-                              suffixIcon: Padding(
-                                padding: const EdgeInsets.only(top: 12),
+                              suffixIcon: const Padding(
+                                padding: EdgeInsets.only(top: 12),
                                 child: Text(
                                   "ل.س",
                                   style: TextStyle(
@@ -324,8 +465,7 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
                           ],
                         ),
                       ),
-                      SizedBox(height: 16),
-                      SizedBox(height: 16),
+                      const SizedBox(height: 32),
                       BlocConsumer<ProductsBloc, ProductsState>(
                         listenWhen: (p, c) {
                           if (isEdit) {
@@ -373,7 +513,7 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
                               (isEdit &&
                                   state.productStatus == BlocStatus.loading);
                           if (busy) {
-                            return CircularProgressIndicator();
+                            return const CircularProgressIndicator();
                           }
                           return Row(
                             children: [
@@ -419,7 +559,7 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
                                   },
                                 ),
                               ),
-                              SizedBox(width: 16),
+                              const SizedBox(width: 16),
                               AppOutlinedButton(
                                 title: "إلغاء",
                                 color: const Color(0xFFFF4C51),
@@ -429,7 +569,7 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
                           );
                         },
                       ),
-                      SizedBox(height: 170),
+                      const SizedBox(height: 170),
                     ],
                   ),
                 ),
@@ -440,17 +580,6 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
       ),
     );
   }
-}
-
-int? _categoryDropdownValue(GetCategoriesModel? categories, int? categoryId) {
-  if (categories?.data == null || categoryId == null) {
-    return null;
-  }
-  final has = categories!.data!.any((c) => c.id == categoryId);
-  if (!has) {
-    return null;
-  }
-  return categoryId;
 }
 
 UpdateStoreProductBody buildUpdateStoreProductBody(
