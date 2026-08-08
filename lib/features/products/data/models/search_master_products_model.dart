@@ -7,6 +7,37 @@ String? _asString(dynamic value) {
   return null;
 }
 
+String? _asImageUrl(dynamic value) {
+  if (value == null) return null;
+
+  if (value is String) {
+    final url = value.trim();
+    return url.isEmpty || url.toLowerCase() == 'null' ? null : url;
+  }
+
+  if (value is Map) {
+    const preferredKeys = [
+      'thumbnailUrl',
+      'thumbnail_url',
+      'url',
+      'imageUrl',
+      'image_url',
+      'path',
+      'image',
+    ];
+
+    for (final key in preferredKeys) {
+      final nested = _asImageUrl(value[key]);
+      if (nested != null) return nested;
+    }
+
+    final nestedData = _asImageUrl(value['data']);
+    if (nestedData != null) return nestedData;
+  }
+
+  return null;
+}
+
 int? _asInt(dynamic value) {
   if (value == null) return null;
   if (value is int) return value;
@@ -234,7 +265,7 @@ class SearchMasterProductsDataItem {
       unit: _asString(json['unit']),
       brand: _asString(json['brand']),
       description: _asString(json['description']),
-      primaryImage: _asString(json['primaryImage']),
+      primaryImage: _asImageUrl(json['primaryImage']),
       isActive: _asBool(json['isActive']),
     );
   }
