@@ -310,6 +310,7 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
                               SearchMasterProductsDataItem
                             >(
                               title: "المنتج الرئيسي",
+                              isRequired: true,
                               hintText: params.masterProductId == null
                                   ? "ابحث واختر المنتج الرئيسي..."
                                   : "المنتج الحالي #${params.masterProductId} - ابحث للتغيير",
@@ -320,6 +321,8 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
                               subtitleBuilder: _masterProductSubtitle,
                               imageUrlBuilder: (product) =>
                                   product.primaryImage,
+                              emptyText:
+                                  "لا يوجد منتج رئيسي مطابق، جرّب كلمة بحث أخرى",
                               onTextChanged: (value) {
                                 if (_selectedMasterProductName != null &&
                                     value != _selectedMasterProductName) {
@@ -336,6 +339,21 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
                                     product.masterProductId;
                                 _selectedMasterProductName = product.name;
                               },
+                            ),
+                            const SizedBox(height: 6),
+                            const Align(
+                              alignment: AlignmentDirectional.centerStart,
+                              child: Text(
+                                "اختيار المنتج الرئيسي إلزامي لربط منتج متجرك بالكتالوج المركزي وإظهار المقارنة مع المتاجر الأخرى.",
+                                textDirection: TextDirection.rtl,
+                                style: TextStyle(
+                                  color: Color(0xFF6B7280),
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w500,
+                                  height: 1.5,
+                                  fontFamily: 'Cairo',
+                                ),
+                              ),
                             ),
                             const SizedBox(height: 20),
                             ProductPickMainImage(
@@ -606,7 +624,7 @@ UpdateStoreProductBody buildUpdateStoreProductBody(
   }
   return UpdateStoreProductBody(
     categoryId: params.categoryId!,
-    masterProductId: params.masterProductId,
+    masterProductId: params.masterProductId!,
     name: params.title!.trim(),
     description: (params.description == null || params.description!.isEmpty)
         ? null
@@ -646,6 +664,15 @@ bool validateProductFields(
     AppToast.showToast(
       context: context,
       message: "يرجى اختيار تصنيف للمنتج",
+      type: ToastificationType.error,
+    );
+    return false;
+  }
+
+  if (params.masterProductId == null) {
+    AppToast.showToast(
+      context: context,
+      message: "يرجى اختيار المنتج الرئيسي من نتائج البحث",
       type: ToastificationType.error,
     );
     return false;
