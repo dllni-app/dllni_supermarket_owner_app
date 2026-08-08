@@ -225,18 +225,18 @@ class _LogoutButton extends StatelessWidget {
         showDialog<void>(
           context: context,
           builder: (dialogContext) => AlertDialog(
-            title: const AppText(
+            title: AppText(
               'تأكيد تسجيل الخروج',
               color: Color(0xFF111827),
             ),
-            content: const AppText(
+            content: AppText(
               'هل أنت متأكد أنك تريد تسجيل الخروج؟',
               color: Color(0xFF111827),
             ),
             actions: [
               TextButton(
                 onPressed: () => dialogContext.pop(),
-                child: const AppText('إلغاء'),
+                child: AppText('إلغاء'),
               ),
               ElevatedButton(
                 onPressed: () async {
@@ -245,7 +245,7 @@ class _LogoutButton extends StatelessWidget {
                   if (!context.mounted) return;
                   context.pushRouteAndRemoveUntil('/login');
                 },
-                child: const AppText('تسجيل الخروج'),
+                child: AppText('تسجيل الخروج'),
               ),
             ],
           ),
@@ -277,7 +277,7 @@ class _LogoutButton extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-            const AppText(
+            AppText(
               'تسجيل الخروج',
               style: TextStyle(
                 color: Color(0xFFEF4444),
