@@ -61,9 +61,7 @@ class _EmployeeManagementScreenState extends State<EmployeeManagementScreen> {
       body: BlocProvider(
         create: (context) => getIt<ProfileBloc>()
           ..add(
-            GetStoreEmployeesEvent(
-              params: GetStoreEmployeesParams(storeId: 1),
-            ),
+            GetStoreEmployeesEvent(params: GetStoreEmployeesParams(storeId: 1)),
           ),
         child: Column(
           children: [
@@ -84,7 +82,9 @@ class _EmployeeManagementScreenState extends State<EmployeeManagementScreen> {
                           final refresh = await context.pushRoute(
                             '/profile/employees/create_employee',
                           );
-                          if (refresh is! bool || !refresh || !context.mounted) {
+                          if (refresh is! bool ||
+                              !refresh ||
+                              !context.mounted) {
                             return;
                           }
                           context.read<ProfileBloc>().add(
@@ -151,9 +151,8 @@ class _EmployeeManagementScreenState extends State<EmployeeManagementScreen> {
                     return ListView.separated(
                       padding: const EdgeInsets.all(16),
                       itemCount: employees.length,
-                      itemBuilder: (context, index) => _EmployeeCard(
-                        employee: employees[index],
-                      ),
+                      itemBuilder: (context, index) =>
+                          _EmployeeCard(employee: employees[index]),
                       separatorBuilder: (_, _) => const SizedBox(height: 13),
                     );
                   }
@@ -176,7 +175,8 @@ class _EmployeeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final rawPhone = employee.user?.phone?.trim();
-    final hasPhone = rawPhone != null &&
+    final hasPhone =
+        rawPhone != null &&
         rawPhone.isNotEmpty &&
         rawPhone.toLowerCase() != 'null';
     final phoneText = hasPhone ? rawPhone : 'لا يوجد رقم هاتف';
@@ -215,7 +215,9 @@ class _EmployeeCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        _EmployeeStatusChip(isActive: employee.isActive ?? false),
+                        _EmployeeStatusChip(
+                          isActive: employee.isActive ?? false,
+                        ),
                         const SizedBox(width: 8),
                         const Icon(
                           Icons.phone,
@@ -261,7 +263,7 @@ class _EmployeeCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    const AppText(
+                    AppText(
                       'تاريخ الانضمام',
                       style: TextStyle(
                         color: Color(0xFF4B5563),
@@ -284,7 +286,7 @@ class _EmployeeCard extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 8),
-                const AppText(
+                AppText(
                   'الصلاحيات',
                   style: TextStyle(
                     color: Color(0xFF4B5563),
@@ -361,7 +363,7 @@ class _EmployeeCard extends StatelessWidget {
                     color: AppColors.white,
                   ),
                   const SizedBox(width: 8),
-                  const AppText(
+                  AppText(
                     'تفاصيل',
                     style: TextStyle(
                       color: AppColors.white,
@@ -411,11 +413,7 @@ class _EmployeeAvatar extends StatelessWidget {
         color: context.primary.withValues(alpha: .10),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Icon(
-        Icons.person_rounded,
-        size: 30,
-        color: context.primary,
-      ),
+      child: Icon(Icons.person_rounded, size: 30, color: context.primary),
     );
   }
 }
@@ -428,8 +426,9 @@ class _EmployeeStatusChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = isActive ? const Color(0xFF10B981) : const Color(0xFFF59E0B);
-    final background =
-        isActive ? const Color(0x1A10B981) : const Color(0x1AF59E0B);
+    final background = isActive
+        ? const Color(0x1A10B981)
+        : const Color(0x1AF59E0B);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
