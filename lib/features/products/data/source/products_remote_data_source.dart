@@ -137,9 +137,15 @@ class ProductsRemoteDataSource with HandlingApiManager {
     );
   }
 
-  Future<ImportProductsFileModel> importProductsFile(ImportProductsFileParams params) {
+  Future<ImportProductsFileModel> importProductsFile(
+    ImportProductsFileParams params,
+  ) {
     return wrapHandlingApi(
-      tryCall: () => dioNetwork.postData(endPoint: '/api/v1/sm-products/import', data: params.getBody(), params: params.getParams()),
+      tryCall: () => dioNetwork.postData(
+        endPoint: '/api/v1/sm-products/import',
+        data: params.getBody(),
+        params: params.getParams(),
+      ),
       jsonConvert: importProductsFileModelFromJson,
     );
   }
@@ -166,7 +172,7 @@ class ProductsRemoteDataSource with HandlingApiManager {
         data: params.getBody(),
         params: params.getParams(),
       ),
-      jsonConvert: (_) => ImportProductsFromMasterModel(),
+      jsonConvert: importProductsFromMasterModelFromJson,
     );
   }
 }
