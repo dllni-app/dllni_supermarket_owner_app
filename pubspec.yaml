@@ -43,6 +43,7 @@ dependencies:
   intl_phone_number_input: ^0.7.5
   logger: ^2.7.0
   flutter_svg: ^2.3.0
+  flutter_typeahead: ^6.0.0
   
 
 dev_dependencies:
