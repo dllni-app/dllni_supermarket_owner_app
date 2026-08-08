@@ -11,9 +11,11 @@ import '../../../../core/themes/app_shadows.dart';
 import '../../../../core/widgets/app_app_bars.dart';
 import '../../../../core/widgets/app_buttons.dart';
 import '../../../../core/widgets/failure_widget.dart';
+import '../../data/models/import_products_from_master_model.dart';
 import '../../data/models/search_master_products_model.dart';
 import '../../domain/usecases/import_products_from_master_use_case.dart';
 import '../manager/bloc/products_bloc.dart';
+import 'add_product_details_screen.dart';
 
 @AutoRoutePage(path: "/products/new_product/catalog")
 class SearchFromCatalogScreen extends StatefulWidget {
@@ -26,9 +28,9 @@ class SearchFromCatalogScreen extends StatefulWidget {
 
 class _CatalogProductCard extends StatelessWidget {
   final SearchMasterProductsDataItem product;
-
   final bool selected;
   final VoidCallback onToggle;
+
   const _CatalogProductCard({
     required this.product,
     required this.selected,
@@ -147,9 +149,9 @@ class _CatalogProductCard extends StatelessWidget {
 
 class _SearchField extends StatelessWidget {
   final TextEditingController controller;
-
   final void Function(String) onChanged;
   final void Function(String) onSubmitted;
+
   const _SearchField({
     required this.controller,
     required this.onChanged,
@@ -186,7 +188,11 @@ class _SearchField extends StatelessWidget {
         prefixIconConstraints: const BoxConstraints(maxWidth: 48),
         prefixIcon: const Padding(
           padding: EdgeInsets.only(right: 16),
-          child: Icon(Icons.search_rounded, color: Color(0xFF9CA3AF), size: 18),
+          child: Icon(
+            Icons.search_rounded,
+            color: Color(0xFF9CA3AF),
+            size: 18,
+          ),
         ),
         border: const OutlineInputBorder(
           borderSide: BorderSide(color: Color(0xFFE5E7EB)),
@@ -228,6 +234,104 @@ class _SearchFromCatalogScreenState extends State<SearchFromCatalogScreen> {
   void _onSearchSubmitted(BuildContext context, String value) {
     _searchDebounce?.cancel();
     _dispatchSearch(context, value);
+  }
+
+  num? _positiveAmount(String? value) {
+    final amount = num.tryParse(value ?? '');
+    if (amount == null || amount <= 0) return null;
+    return amount;
+  }
+
+  AddProductDetailsParams _detailsParams(ImportedMasterProduct product) {
+    return AddProductDetailsParams(
+      editingProductId: product.id,
+      masterProductId: product.masterProductId,
+      title: product.name,
+      description: product.description,
+      categoryId: product.categoryId,
+      initialMainImageUrl: product.primaryImage,
+      quantity: product.stockQuantity ?? 0,
+      lowStockQuantity: product.lowStockThreshold ?? 0,
+      expiredAt: DateTime.tryParse(product.expiresAt ?? ''),
+      price: _positiveAmount(product.price),
+      discountedPrice: _positiveAmount(product.discountedPrice),
+    );
+  }
+
+  Future<void> _openImportedProductDetails(
+    List<ImportedMasterProduct> products,
+  ) async {
+    var completedAll = true;
+
+    for (final product in products) {
+      if (!mounted || product.id == null) {
+        completedAll = false;
+        break;
+      }
+
+      final result = await context.pushRoute(
+        '/products/new_product/details',
+        arguments: _detailsParams(product),
+      );
+
+      if (result != true) {
+        completedAll = false;
+        break;
+      }
+    }
+
+    if (completedAll && mounted) {
+      context.pushRouteAndRemoveUntil('/', arguments: 2);
+    }
+  }
+
+  void _showIncompleteProductToast(
+    BuildContext screenContext,
+    List<ImportedMasterProduct> products,
+  ) {
+    if (!mounted) return;
+
+    setState(_selectedIds.clear);
+
+    toastification.show(
+      context: screenContext,
+      type: ToastificationType.warning,
+      alignment: Alignment.topCenter,
+      autoCloseDuration: const Duration(seconds: 8),
+      backgroundColor: AppColors.primary,
+      closeOnClick: true,
+      icon: const Icon(
+        Icons.edit_note_rounded,
+        color: AppColors.white,
+        size: 24,
+      ),
+      title: const Text(
+        'عليك اكمال بيانات المنتج والا لن يظهر للمستخدمين',
+        textDirection: TextDirection.rtl,
+        style: TextStyle(
+          color: AppColors.white,
+          fontFamily: 'Cairo',
+          fontSize: 13,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+      description: const Text(
+        'اضغط على الرسالة لإكمال بيانات المنتج',
+        textDirection: TextDirection.rtl,
+        style: TextStyle(
+          color: Color(0xFFE5E7EB),
+          fontFamily: 'Cairo',
+          fontSize: 11,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      callbacks: ToastificationCallbacks(
+        onTap: (_) {
+          if (!mounted || products.isEmpty) return;
+          _openImportedProductDetails(products);
+        },
+      ),
+    );
   }
 
   @override
@@ -308,8 +412,7 @@ class _SearchFromCatalogScreenState extends State<SearchFromCatalogScreen> {
                           return ListView.separated(
                             padding: const EdgeInsets.all(20),
                             itemBuilder: (context, index) {
-                              if (state.catalogMasterProducts!.length <=
-                                  index) {
+                              if (state.catalogMasterProducts!.length <= index) {
                                 if (state.catalogMasterProducts!.length ==
                                     index) {
                                   context.read<ProductsBloc>().add(
@@ -328,12 +431,14 @@ class _SearchFromCatalogScreenState extends State<SearchFromCatalogScreen> {
                                   ),
                                 );
                               }
+
                               final product =
                                   state.catalogMasterProducts!.list[index];
                               final masterProductId = product.masterProductId;
                               final selected =
                                   masterProductId != null &&
                                   _selectedIds.contains(masterProductId);
+
                               return _CatalogProductCard(
                                 product: product,
                                 selected: selected,
@@ -384,8 +489,11 @@ class _SearchFromCatalogScreenState extends State<SearchFromCatalogScreen> {
                     builder: (context, state) {
                       if (state.importProductsFromMasterStatus ==
                           BlocStatus.loading) {
-                        return Center(child: CircularProgressIndicator());
+                        return const Center(
+                          child: CircularProgressIndicator.adaptive(),
+                        );
                       }
+
                       return Padding(
                         padding: EdgeInsets.fromLTRB(
                           24,
@@ -398,12 +506,12 @@ class _SearchFromCatalogScreenState extends State<SearchFromCatalogScreen> {
                           children: [
                             Expanded(
                               child: AppButton(
-                                title: "تأكيد",
+                                title: 'تأكيد',
                                 onTap: () => _showSelectedSheet(context),
                               ),
                             ),
                             AppOutlinedButton(
-                              title: "إلغاء",
+                              title: 'إلغاء',
                               color: const Color(0xFFFF4C51),
                               onTap: () => setState(_selectedIds.clear),
                             ),
@@ -441,6 +549,7 @@ class _SearchFromCatalogScreenState extends State<SearchFromCatalogScreen> {
         .map((e) => e.masterProductId)
         .whereType<int>()
         .toList();
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -451,8 +560,8 @@ class _SearchFromCatalogScreenState extends State<SearchFromCatalogScreen> {
           products: selected,
           masterProductIds: masterProductIds,
           sheetContext: sheetContext,
-          onImportSuccess: () {
-            context.pushRouteAndRemoveUntil('/', arguments: 2);
+          onImportSuccess: (importedProducts) {
+            _showIncompleteProductToast(context, importedProducts);
           },
         ),
       ),
@@ -464,7 +573,7 @@ class _SelectedProductsSheet extends StatelessWidget {
   final List<SearchMasterProductsDataItem> products;
   final List<int> masterProductIds;
   final BuildContext sheetContext;
-  final VoidCallback onImportSuccess;
+  final ValueChanged<List<ImportedMasterProduct>> onImportSuccess;
 
   const _SelectedProductsSheet({
     required this.products,
@@ -482,8 +591,11 @@ class _SelectedProductsSheet extends StatelessWidget {
               current.importProductsFromMasterStatus == BlocStatus.failed),
       listener: (context, state) {
         if (state.importProductsFromMasterStatus == BlocStatus.success) {
+          final importedProducts =
+              state.importProductsFromMaster?.data ??
+              const <ImportedMasterProduct>[];
           Navigator.pop(sheetContext);
-          onImportSuccess();
+          onImportSuccess(importedProducts);
         } else if (state.importProductsFromMasterStatus == BlocStatus.failed) {
           AppToast.showToast(
             context: sheetContext,
@@ -498,6 +610,7 @@ class _SelectedProductsSheet extends StatelessWidget {
       builder: (context, state) {
         final importing =
             state.importProductsFromMasterStatus == BlocStatus.loading;
+
         return Container(
           decoration: const BoxDecoration(
             color: AppColors.white,
@@ -595,6 +708,7 @@ class _SheetProductCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final imageUrl = product.primaryImage ?? '';
+
     return Container(
       width: 130,
       decoration: BoxDecoration(
@@ -647,7 +761,7 @@ class _SheetProductCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'العلامة : ${product.brand}',
+                  'العلامة : ${product.brand ?? 'غير معروف'}',
                   textAlign: TextAlign.right,
                   style: const TextStyle(
                     fontFamily: 'Cairo',
