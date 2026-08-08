@@ -28,8 +28,7 @@ class AddProductParams with Params {
   BodyMap getBody() => {
     "storeId": 1,
     "categoryId": params.categoryId,
-    if (params.masterProductId != null)
-      "masterProductId": params.masterProductId,
+    "masterProductId": params.masterProductId,
     "name": params.title,
     if (params.description != null) "description": params.description,
     "sourceType": "manual",
