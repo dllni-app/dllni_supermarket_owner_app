@@ -146,6 +146,23 @@ class _MoreScreenState extends State<MoreScreen> {
                     ),
                     const SizedBox(height: 16),
                   ],
+                  if (access.hasFullAccess) ...[
+                    const SectionTitle(title: 'التقارير والإحصائيات'),
+                    const SizedBox(height: 16),
+                    _SectionContainer(
+                      children: [
+                        SectionCard(
+                          containerColor: const Color(0xffEDE9FE),
+                          iconColor: const Color(0xff7C3AED),
+                          icon: FontAwesomeIcons.chartLine.data,
+                          title: 'تقارير الأداء',
+                          subtitle: 'عرض أداء المبيعات والمنتجات والعروض',
+                          onTap: () => context.pushRoute('/performance_report'),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                  ],
                   _SectionContainer(
                     children: [
                       SectionCard(
