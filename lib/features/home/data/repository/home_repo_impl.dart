@@ -30,66 +30,50 @@ class HomeRepoImpl with HandlingException implements HomeRepo {
   HomeRepoImpl({required this.homeRemoteDataSource});
 
   @override
-  DataResponse<GetDashboardOverviewModel> getDashboardOverview(GetDashboardOverviewParams params) {
-    return wrapHandlingException(
-      tryCall: () => homeRemoteDataSource.getDashboardOverview(params),
-    );
-  }
+  DataResponse<GetDashboardOverviewModel> getDashboardOverview(GetDashboardOverviewParams params) =>
+      wrapHandlingException(tryCall: () => homeRemoteDataSource.getDashboardOverview(params));
 
   @override
-  DataResponse<GetNewOrdersModel> getNewOrders(GetNewOrdersParams params) {
-    return wrapHandlingException(
-      tryCall: () => homeRemoteDataSource.getNewOrders(params),
-    );
-  }
+  DataResponse<GetNewOrdersModel> getNewOrders(GetNewOrdersParams params) =>
+      wrapHandlingException(tryCall: () => homeRemoteDataSource.getNewOrders(params));
 
   @override
-  DataResponse<GetPreparingOrdersModel> getPreparingOrders(GetPreparingOrdersParams params) {
-    return wrapHandlingException(
-      tryCall: () => homeRemoteDataSource.getPreparingOrders(params),
-    );
-  }
+  DataResponse<GetPreparingOrdersModel> getPreparingOrders(GetPreparingOrdersParams params) =>
+      wrapHandlingException(tryCall: () => homeRemoteDataSource.getPreparingOrders(params));
 
   @override
-  DataResponse<RejectOrderModel> rejectOrder(RejectOrderParams params) {
-    return wrapHandlingException(
-      tryCall: () => homeRemoteDataSource.rejectOrder(params),
-    );
-  }
+  DataResponse<RejectOrderModel> rejectOrder(RejectOrderParams params) =>
+      wrapHandlingException(tryCall: () => homeRemoteDataSource.rejectOrder(params));
 
   @override
-  DataResponse<GetDailyCountModel> getDailyCount(GetDailyCountParams params) {
-    return wrapHandlingException(
-      tryCall: () => homeRemoteDataSource.getDailyCount(params),
-    );
-  }
+  DataResponse<GetDailyCountModel> getDailyCount(GetDailyCountParams params) =>
+      wrapHandlingException(tryCall: () => homeRemoteDataSource.getDailyCount(params));
 
   @override
-  DataResponse<AcceptOrderModel> acceptOrder(AcceptOrderParams params) {
-    return wrapHandlingException(
-      tryCall: () => homeRemoteDataSource.acceptOrder(params),
-    );
-  }
+  DataResponse<AcceptOrderModel> acceptOrder(AcceptOrderParams params) =>
+      wrapHandlingException(tryCall: () => homeRemoteDataSource.acceptOrder(params));
 
   @override
-  DataResponse<GetPerformanceReportModel> getPerformanceReport(GetPerformanceReportParams params) {
-    return wrapHandlingException(
-      tryCall: () => homeRemoteDataSource.getPerformanceReport(params),
-    );
-  }
-
+  DataResponse<GetPerformanceReportModel> getPerformanceReport(GetPerformanceReportParams params) =>
+      wrapHandlingException(tryCall: () => homeRemoteDataSource.getPerformanceReport(params));
 
   @override
-  DataResponse<FetchNotificationsModel> fetchNotifications(FetchNotificationsParams params) {
-    return wrapHandlingException(
-      tryCall: () => homeRemoteDataSource.fetchNotifications(params),
-    );
-  }
+  DataResponse<FetchNotificationsModel> fetchNotifications(FetchNotificationsParams params) =>
+      wrapHandlingException(tryCall: () => homeRemoteDataSource.fetchNotifications(params));
 
   @override
-  DataResponse<MakeReadAllNotificationsModel> makeReadAllNotifications(MakeReadAllNotificationsParams params) {
-    return wrapHandlingException(
-      tryCall: () => homeRemoteDataSource.makeReadAllNotifications(params),
-    );
-  }}
+  DataResponse<MakeReadAllNotificationsModel> makeReadAllNotifications(MakeReadAllNotificationsParams params) =>
+      wrapHandlingException(tryCall: () => homeRemoteDataSource.makeReadAllNotifications(params));
 
+  @override
+  DataResponse<MakeReadAllNotificationsModel> makeReadNotification(String notificationId) =>
+      wrapHandlingException(tryCall: () => homeRemoteDataSource.makeReadNotification(notificationId));
+
+  @override
+  DataResponse<MakeReadAllNotificationsModel> deleteNotification(String notificationId) =>
+      wrapHandlingException(tryCall: () => homeRemoteDataSource.deleteNotification(notificationId));
+
+  @override
+  DataResponse<MakeReadAllNotificationsModel> deleteAllNotifications() =>
+      wrapHandlingException(tryCall: () => homeRemoteDataSource.deleteAllNotifications());
+}
