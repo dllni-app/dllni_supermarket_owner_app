@@ -36,7 +36,7 @@ class AddUpdateStoreEmployeeParams with Params {
     "name": employee.user!.name,
     "email": employee.user!.email,
     "phone": employee.user!.phone,
-    "permissionIds[]": employee.permissionIds,
+    "permissionIds": employee.permissionIds,
     "isActive": employee.isActive == false ? 0 : 1,
     if (method == RequestMethod.put) "syncPermissions": 1,
     if (imagePath != null) "profileImage": File(imagePath!),
