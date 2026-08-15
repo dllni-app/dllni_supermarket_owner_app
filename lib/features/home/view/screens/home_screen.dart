@@ -43,27 +43,51 @@ class HomeScreen extends StatelessWidget {
           children: [
             const HomeAppBar(),
             Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 24),
-                    const OverviewSection(showQuickPoints: false),
-                    if (canManageOrders) ...[
-                      const SizedBox(height: 20),
-                      const OrdersChartCard(),
-                    ],
-                    if (canManageProducts) ...[
-                      const SizedBox(height: 34),
-                      const QuickActionsSection(),
-                    ],
-                    if (canManageOrders) ...[
-                      const SizedBox(height: 14),
-                      const NewOrdersSection(),
-                    ],
-                    const SizedBox(height: 24),
-                  ],
+              child: Builder(
+                builder: (context) => RefreshIndicator(
+                  onRefresh: () async {
+                    final bloc = context.read<HomeBloc>()
+                      ..add(
+                        GetDashboardOverviewEvent(
+                          params: GetDashboardOverviewParams(),
+                        ),
+                      );
+
+                    if (canManageOrders) {
+                      bloc
+                        ..add(GetNewOrdersEvent(
+                          params: GetNewOrdersParams(),
+                          isReload: true,
+                        ))
+                        ..add(GetDailyCountEvent(
+                          params: GetDailyCountParams(),
+                        ));
+                    }
+                  },
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 24),
+                        const OverviewSection(showQuickPoints: false),
+                        if (canManageOrders) ...[
+                          const SizedBox(height: 20),
+                          const OrdersChartCard(),
+                        ],
+                        if (canManageProducts) ...[
+                          const SizedBox(height: 34),
+                          const QuickActionsSection(),
+                        ],
+                        if (canManageOrders) ...[
+                          const SizedBox(height: 14),
+                          const NewOrdersSection(),
+                        ],
+                        const SizedBox(height: 24),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),
