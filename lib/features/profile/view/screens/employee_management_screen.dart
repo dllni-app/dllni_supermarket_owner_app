@@ -148,6 +148,19 @@ class _EmployeeManagementScreenState extends State<EmployeeManagementScreen> {
                   if (state.storeEmployeesStatus == BlocStatus.success) {
                     final employees =
                         state.storeEmployees?.data?.employees ?? const [];
+                    if (employees.isEmpty) {
+                      return Center(
+                        child: AppText(
+                          'لا يوجد موظفين حاليا',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: Color(0xFF4B5563),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      );
+                    }
                     return ListView.separated(
                       padding: const EdgeInsets.all(16),
                       itemCount: employees.length,
