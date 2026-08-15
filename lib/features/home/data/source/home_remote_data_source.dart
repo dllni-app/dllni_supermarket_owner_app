@@ -26,9 +26,7 @@ class HomeRemoteDataSource with HandlingApiManager {
 
   HomeRemoteDataSource({required this.dioNetwork});
 
-  Future<GetDashboardOverviewModel> getDashboardOverview(
-    GetDashboardOverviewParams params,
-  ) {
+  Future<GetDashboardOverviewModel> getDashboardOverview(GetDashboardOverviewParams params) {
     return wrapHandlingApi(
       tryCall: () => dioNetwork.getData(
         endPoint: '/api/v1/store-owner/dashboard',
@@ -50,9 +48,7 @@ class HomeRemoteDataSource with HandlingApiManager {
     );
   }
 
-  Future<GetPreparingOrdersModel> getPreparingOrders(
-    GetPreparingOrdersParams params,
-  ) {
+  Future<GetPreparingOrdersModel> getPreparingOrders(GetPreparingOrdersParams params) {
     return wrapHandlingApi(
       tryCall: () => dioNetwork.getData(
         endPoint: '/api/v1/sm-orders',
@@ -96,9 +92,7 @@ class HomeRemoteDataSource with HandlingApiManager {
     );
   }
 
-  Future<GetPerformanceReportModel> getPerformanceReport(
-    GetPerformanceReportParams params,
-  ) {
+  Future<GetPerformanceReportModel> getPerformanceReport(GetPerformanceReportParams params) {
     return wrapHandlingApi(
       tryCall: () => dioNetwork.getData(
         endPoint: '/api/v1/store-owner/dashboard/top-selling-products',
@@ -109,9 +103,7 @@ class HomeRemoteDataSource with HandlingApiManager {
     );
   }
 
-  Future<FetchNotificationsModel> fetchNotifications(
-    FetchNotificationsParams params,
-  ) {
+  Future<FetchNotificationsModel> fetchNotifications(FetchNotificationsParams params) {
     return wrapHandlingApi(
       tryCall: () => dioNetwork.getData(
         endPoint: '/api/v1/user/notifications',
@@ -122,14 +114,40 @@ class HomeRemoteDataSource with HandlingApiManager {
     );
   }
 
-  Future<MakeReadAllNotificationsModel> makeReadAllNotifications(
-    MakeReadAllNotificationsParams params,
-  ) {
+  Future<MakeReadAllNotificationsModel> makeReadAllNotifications(MakeReadAllNotificationsParams params) {
     return wrapHandlingApi(
       tryCall: () => dioNetwork.patchData(
         endPoint: '/api/v1/user/notifications/read-all',
         data: params.getBody(),
         params: params.getParams(),
+      ),
+      jsonConvert: (_) => MakeReadAllNotificationsModel(),
+    );
+  }
+
+  Future<MakeReadAllNotificationsModel> makeReadNotification(String notificationId) {
+    return wrapHandlingApi(
+      tryCall: () => dioNetwork.patchData(
+        endPoint: '/api/v1/user/notifications/$notificationId/read',
+        data: {},
+      ),
+      jsonConvert: (_) => MakeReadAllNotificationsModel(),
+    );
+  }
+
+  Future<MakeReadAllNotificationsModel> deleteNotification(String notificationId) {
+    return wrapHandlingApi(
+      tryCall: () => dioNetwork.deleteData(
+        endPoint: '/api/v1/user/notifications/$notificationId',
+      ),
+      jsonConvert: (_) => MakeReadAllNotificationsModel(),
+    );
+  }
+
+  Future<MakeReadAllNotificationsModel> deleteAllNotifications() {
+    return wrapHandlingApi(
+      tryCall: () => dioNetwork.deleteData(
+        endPoint: '/api/v1/user/notifications/all',
       ),
       jsonConvert: (_) => MakeReadAllNotificationsModel(),
     );
