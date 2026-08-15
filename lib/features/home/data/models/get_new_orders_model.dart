@@ -338,7 +338,9 @@ class GetNewOrdersModelDataItem {
       availableItems: json["items"] is! List
           ? []
           : (json["items"] as List)
-                .map<bool>((element) => element["isAvailableInStock"])
+                .map<bool>(
+                  (element) => _asBool(element["isAvailableInStock"]) ?? false,
+                )
                 .toList(),
     );
   }
