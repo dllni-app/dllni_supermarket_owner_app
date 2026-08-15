@@ -17,23 +17,18 @@ import '../usecases/fetch_notifications_use_case.dart';
 import '../../data/models/fetch_notifications_model.dart';
 import '../usecases/make_read_all_notifications_use_case.dart';
 import '../../data/models/make_read_all_notifications_model.dart';
+
 abstract class HomeRepo {
   DataResponse<GetDashboardOverviewModel> getDashboardOverview(GetDashboardOverviewParams params);
-
   DataResponse<GetNewOrdersModel> getNewOrders(GetNewOrdersParams params);
-
   DataResponse<GetPreparingOrdersModel> getPreparingOrders(GetPreparingOrdersParams params);
-
   DataResponse<RejectOrderModel> rejectOrder(RejectOrderParams params);
-
   DataResponse<GetDailyCountModel> getDailyCount(GetDailyCountParams params);
-
   DataResponse<AcceptOrderModel> acceptOrder(AcceptOrderParams params);
-
   DataResponse<GetPerformanceReportModel> getPerformanceReport(GetPerformanceReportParams params);
-
-
   DataResponse<FetchNotificationsModel> fetchNotifications(FetchNotificationsParams params);
-
   DataResponse<MakeReadAllNotificationsModel> makeReadAllNotifications(MakeReadAllNotificationsParams params);
+  DataResponse<MakeReadAllNotificationsModel> makeReadNotification(String notificationId);
+  DataResponse<MakeReadAllNotificationsModel> deleteNotification(String notificationId);
+  DataResponse<MakeReadAllNotificationsModel> deleteAllNotifications();
 }
