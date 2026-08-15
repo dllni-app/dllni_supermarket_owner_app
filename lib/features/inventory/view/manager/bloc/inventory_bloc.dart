@@ -214,6 +214,17 @@ class InventoryBloc extends Bloc<InventoryEvent, InventoryState> {
     emit(state.copyWith(invetoryCountsStatus: BlocStatus.loading));
     final res = await getInvetoryCountsUseCase(event.params);
     res.fold((l) {
+      // Counts are optional UI metadata. If the deployed API does not expose
+      // this route yet, keep the inventory list usable instead of showing a
+      // misleading account-not-found error for the whole screen.
+      if (l.statusCode == ResponseCode.notFound) {
+        emit(state.copyWith(
+          invetoryCountsStatus: state.invetoryCounts == null
+              ? BlocStatus.init
+              : BlocStatus.success,
+        ));
+        return;
+      }
       emit(state.copyWith(
         invetoryCountsStatus: BlocStatus.failed,
         errorMessage: l.message,
