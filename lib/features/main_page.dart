@@ -1,5 +1,6 @@
 import 'package:common_package/common_package.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../core/helpers/seller_permission_access.dart';
@@ -26,6 +27,7 @@ class _MainPageState extends State<MainPage>
   int selectedTab = 0;
   late final TabController tabController;
   late final List<_MainTab> tabs;
+  bool _isExitDialogVisible = false;
 
   @override
   void initState() {
@@ -125,6 +127,47 @@ class _MainPageState extends State<MainPage>
     );
   }
 
+  Future<void> _handleBackPressed() async {
+    if (selectedTab != 0) {
+      setState(() {
+        selectedTab = 0;
+      });
+      tabController.animateTo(0);
+      return;
+    }
+
+    if (_isExitDialogVisible) return;
+    _isExitDialogVisible = true;
+
+    final shouldExit = await showDialog<bool>(
+          context: context,
+          builder: (dialogContext) => AlertDialog(
+            title: const Text('الخروج من التطبيق'),
+            content: const Text('هل أنت متأكد من أنك تريد الخروج من التطبيق؟'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(false),
+                child: const Text('إلغاء'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(true),
+                child: const Text(
+                  'خروج',
+                  style: TextStyle(color: Colors.red),
+                ),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+
+    _isExitDialogVisible = false;
+
+    if (shouldExit && mounted) {
+      await SystemNavigator.pop();
+    }
+  }
+
   @override
   void dispose() {
     tabController.dispose();
@@ -133,27 +176,35 @@ class _MainPageState extends State<MainPage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: TabBarView(
-        physics: const NeverScrollableScrollPhysics(),
-        controller: tabController,
-        children: tabs.map((tab) => tab.screen).toList(growable: false),
-      ),
-      bottomNavigationBar: AppNavBar(
-        items: tabs
-            .map(
-              (tab) => AppNavBarItem(title: tab.title, icon: tab.icon),
-            )
-            .toList(growable: false),
-        selectedIndex: selectedTab,
-        onChanged: (index) {
-          if (index == selectedTab) return;
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) {
+          _handleBackPressed();
+        }
+      },
+      child: Scaffold(
+        body: TabBarView(
+          physics: const NeverScrollableScrollPhysics(),
+          controller: tabController,
+          children: tabs.map((tab) => tab.screen).toList(growable: false),
+        ),
+        bottomNavigationBar: AppNavBar(
+          items: tabs
+              .map(
+                (tab) => AppNavBarItem(title: tab.title, icon: tab.icon),
+              )
+              .toList(growable: false),
+          selectedIndex: selectedTab,
+          onChanged: (index) {
+            if (index == selectedTab) return;
 
-          setState(() {
-            selectedTab = index;
-          });
-          tabController.animateTo(selectedTab);
-        },
+            setState(() {
+              selectedTab = index;
+            });
+            tabController.animateTo(selectedTab);
+          },
+        ),
       ),
     );
   }
