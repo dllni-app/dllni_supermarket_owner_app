@@ -21,18 +21,19 @@ class ImportProductsFileUseCase
 
 class ImportProductsFileParams with Params {
   final int categoryId;
-  final int storeId;
   final String filePath;
 
   ImportProductsFileParams({
     required this.categoryId,
-    required this.storeId,
     required this.filePath,
   });
+
   @override
   BodyMap getBody() => {
-    "storeId": storeId,
-    "categoryId": categoryId,
-    "file": File(filePath),
+    // storeId is intentionally omitted. InjectStoreIdFromOwnerContext on the
+    // backend resolves the authenticated seller's store and injects it before
+    // request validation, preventing imports into another store.
+    'categoryId': categoryId,
+    'file': File(filePath),
   };
 }
