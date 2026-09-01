@@ -106,7 +106,9 @@ class _CreateOfferScreenState extends State<CreateOfferScreen> {
                           title: 'قيمة الخصم ($discountUnit)',
                           hintText: '0',
                           controller: _discountController,
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
                           suffixIcon: Padding(
                             padding: const EdgeInsets.only(top: 15),
                             child: Text(
@@ -127,11 +129,11 @@ class _CreateOfferScreenState extends State<CreateOfferScreen> {
                         ),
                         if (offer.offerType == 'percent') ...[
                           const SizedBox(height: 6),
-                          const Align(
+                          Align(
                             alignment: AlignmentDirectional.centerStart,
                             child: AppText(
                               'يمكن استخدام 100% لجعل المنتج مجانيًا خلال مدة العرض.',
-                              style: TextStyle(
+                              style: const TextStyle(
                                 color: Color(0xFF6B7280),
                                 fontSize: 11,
                               ),
@@ -152,15 +154,21 @@ class _CreateOfferScreenState extends State<CreateOfferScreen> {
                           decoration: BoxDecoration(
                             color: const Color(0x0D064E3B),
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: const Color(0x33064E3B)),
+                            border: Border.all(
+                              color: const Color(0x33064E3B),
+                            ),
                           ),
                           child: Row(
                             children: [
-                              const Icon(Icons.power, size: 16, color: Color(0xFF064E3B)),
+                              const Icon(
+                                Icons.power,
+                                size: 16,
+                                color: Color(0xFF064E3B),
+                              ),
                               const SizedBox(width: 8),
-                              const AppText(
+                              AppText(
                                 'تفعيل العرض',
-                                style: TextStyle(
+                                style: const TextStyle(
                                   color: Color(0xFF111827),
                                   fontSize: 14,
                                   fontWeight: FontWeight.w700,
@@ -168,7 +176,8 @@ class _CreateOfferScreenState extends State<CreateOfferScreen> {
                               ),
                               const Spacer(),
                               AppSwitch(
-                                onChanged: (value) => setState(() => offer.isActive = value),
+                                onChanged: (value) =>
+                                    setState(() => offer.isActive = value),
                                 value: offer.isActive ?? false,
                               ),
                             ],
@@ -201,7 +210,8 @@ class _CreateOfferScreenState extends State<CreateOfferScreen> {
                     number: 4,
                     title: 'ربط المنتجات',
                     leading: BlocBuilder<ProfileBloc, ProfileState>(
-                      buildWhen: (p, c) => p.productsCountStatus != c.productsCountStatus,
+                      buildWhen: (p, c) =>
+                          p.productsCountStatus != c.productsCountStatus,
                       builder: (context, state) => _ProductsCounterChip(
                         productsCounter: state.productsCount?.count ?? 0,
                       ),
@@ -210,20 +220,26 @@ class _CreateOfferScreenState extends State<CreateOfferScreen> {
                       buildWhen: (p, c) => p.products != c.products,
                       builder: (context, state) {
                         final products = state.products;
-                        if (products == null || products.status == BlocStatus.loading) {
-                          return const Center(child: CircularProgressIndicator.adaptive());
+                        if (products == null ||
+                            products.status == BlocStatus.loading) {
+                          return const Center(
+                            child: CircularProgressIndicator.adaptive(),
+                          );
                         }
                         if (products.status == BlocStatus.failed) {
                           return Column(
                             children: [
-                              AppText.labelMedium(state.errorMessage ?? 'تعذر تحميل المنتجات'),
+                              AppText.labelMedium(
+                                state.errorMessage ?? 'تعذر تحميل المنتجات',
+                              ),
                               TextButton(
-                                onPressed: () => context.read<ProfileBloc>().add(
-                                      GetProductsEvent(
-                                        params: GetProductsParams(page: 1),
-                                        isReload: true,
-                                      ),
-                                    ),
+                                onPressed: () =>
+                                    context.read<ProfileBloc>().add(
+                                          GetProductsEvent(
+                                            params: GetProductsParams(page: 1),
+                                            isReload: true,
+                                          ),
+                                        ),
                                 child: const Text('إعادة المحاولة'),
                               ),
                             ],
@@ -234,7 +250,7 @@ class _CreateOfferScreenState extends State<CreateOfferScreen> {
                         return Column(
                           children: [
                             if (visible.isEmpty)
-                              const AppText('لا يوجد منتجات حالياً')
+                              AppText('لا يوجد منتجات حالياً')
                             else
                               ...visible.map(
                                 (product) => Padding(
@@ -242,7 +258,8 @@ class _CreateOfferScreenState extends State<CreateOfferScreen> {
                                   child: OfferCheckbox(
                                     product: product,
                                     selected: _isSelected(product),
-                                    onChanged: (selected) => _setProductSelected(product, selected),
+                                    onChanged: (selected) =>
+                                        _setProductSelected(product, selected),
                                   ),
                                 ),
                               ),
@@ -253,7 +270,9 @@ class _CreateOfferScreenState extends State<CreateOfferScreen> {
                                   MaterialPageRoute(
                                     builder: (_) => BlocProvider.value(
                                       value: context.read<ProfileBloc>(),
-                                      child: ProductsScreen(selectedProducts: selectedProducts),
+                                      child: ProductsScreen(
+                                        selectedProducts: selectedProducts,
+                                      ),
                                     ),
                                   ),
                                 );
@@ -263,15 +282,19 @@ class _CreateOfferScreenState extends State<CreateOfferScreen> {
                               child: Container(
                                 width: double.infinity,
                                 alignment: Alignment.center,
-                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                ),
                                 decoration: BoxDecoration(
                                   color: const Color(0xFFF9FAFB),
                                   borderRadius: BorderRadius.circular(14),
-                                  border: Border.all(color: const Color(0xFFE5E7EB)),
+                                  border: Border.all(
+                                    color: const Color(0xFFE5E7EB),
+                                  ),
                                 ),
-                                child: const AppText(
+                                child: AppText(
                                   'عرض جميع المنتجات',
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     color: Color(0xFF6B7280),
                                     fontWeight: FontWeight.w700,
                                     fontSize: 12,
@@ -282,7 +305,8 @@ class _CreateOfferScreenState extends State<CreateOfferScreen> {
                             if (selectedProducts.isNotEmpty) ...[
                               const SizedBox(height: 14),
                               Align(
-                                alignment: AlignmentDirectional.centerStart,
+                                alignment:
+                                    AlignmentDirectional.centerStart,
                                 child: _ProductsCounterChip(
                                   productsCounter: selectedProducts.length,
                                 ),
@@ -295,7 +319,8 @@ class _CreateOfferScreenState extends State<CreateOfferScreen> {
                   ),
                   const SizedBox(height: 16),
                   BlocConsumer<ProfileBloc, ProfileState>(
-                    listenWhen: (p, c) => p.addOfferStatus != c.addOfferStatus,
+                    listenWhen: (p, c) =>
+                        p.addOfferStatus != c.addOfferStatus,
                     listener: (context, state) {
                       if (state.addOfferStatus == BlocStatus.failed) {
                         AppToast.showToast(
@@ -310,17 +335,19 @@ class _CreateOfferScreenState extends State<CreateOfferScreen> {
                           type: ToastificationType.success,
                         );
                         context.read<ProfileBloc>().add(
-                              GetOfferCodesEvent(
-                                isReload: true,
-                                params: GetOfferCodesParams(storeId: 1),
-                              ),
-                            );
+                          GetOfferCodesEvent(
+                            isReload: true,
+                            params: GetOfferCodesParams(storeId: 1),
+                          ),
+                        );
                         context.pop();
                       }
                     },
                     builder: (context, state) {
                       if (state.addOfferStatus == BlocStatus.loading) {
-                        return const Center(child: CircularProgressIndicator());
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
                       }
                       return Row(
                         children: [
@@ -366,17 +393,17 @@ class _CreateOfferScreenState extends State<CreateOfferScreen> {
     if (!_validate()) return;
 
     blocContext.read<ProfileBloc>().add(
-          AddOfferEvent(
-            params: AddOfferParams(
-              storeId: 1,
-              offer: offer,
-              selectedProducts: selectedProducts
-                  .map((product) => product.id)
-                  .whereType<int>()
-                  .toList(),
-            ),
-          ),
-        );
+      AddOfferEvent(
+        params: AddOfferParams(
+          storeId: 1,
+          offer: offer,
+          selectedProducts: selectedProducts
+              .map((product) => product.id)
+              .whereType<int>()
+              .toList(),
+        ),
+      ),
+    );
   }
 
   bool _validate() {
@@ -396,8 +423,12 @@ class _CreateOfferScreenState extends State<CreateOfferScreen> {
       }
     }
 
-    if (_startsAt == null) return _error('يرجى تحديد تاريخ ووقت بداية العرض');
-    if (_endsAt == null) return _error('يرجى تحديد تاريخ ووقت نهاية العرض');
+    if (_startsAt == null) {
+      return _error('يرجى تحديد تاريخ ووقت بداية العرض');
+    }
+    if (_endsAt == null) {
+      return _error('يرجى تحديد تاريخ ووقت نهاية العرض');
+    }
     if (!_endsAt!.isAfter(_startsAt!)) {
       return _error('وقت نهاية العرض يجب أن يكون بعد وقت البداية');
     }
@@ -450,7 +481,10 @@ class OfferDateTimeField extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           child: Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 15),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: 15,
+            ),
             decoration: BoxDecoration(
               color: const Color(0xFFF9FAFB),
               borderRadius: BorderRadius.circular(16),
@@ -458,19 +492,31 @@ class OfferDateTimeField extends StatelessWidget {
             ),
             child: Row(
               children: [
-                const Icon(Icons.calendar_month_outlined, size: 19, color: Color(0xFF6B7280)),
+                const Icon(
+                  Icons.calendar_month_outlined,
+                  size: 19,
+                  color: Color(0xFF6B7280),
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: AppText(
-                    value == null ? 'اختر التاريخ والوقت' : _format(value!),
+                    value == null
+                        ? 'اختر التاريخ والوقت'
+                        : _format(value!),
                     style: TextStyle(
-                      color: value == null ? const Color(0xFF9CA3AF) : const Color(0xFF111827),
+                      color: value == null
+                          ? const Color(0xFF9CA3AF)
+                          : const Color(0xFF111827),
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),
-                const Icon(Icons.access_time_rounded, size: 19, color: Color(0xFF6B7280)),
+                const Icon(
+                  Icons.access_time_rounded,
+                  size: 19,
+                  color: Color(0xFF6B7280),
+                ),
               ],
             ),
           ),
@@ -481,7 +527,14 @@ class OfferDateTimeField extends StatelessWidget {
 
   Future<void> _pick(BuildContext context) async {
     final now = DateTime.now();
-    final minimum = minimumDateTime ?? now;
+    final nowAtMinute = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      now.hour,
+      now.minute,
+    );
+    final minimum = minimumDateTime ?? nowAtMinute;
     final initial = value ?? (minimum.isAfter(now) ? minimum : now);
     final firstDate = DateTime(minimum.year, minimum.month, minimum.day);
     final selectedDate = await showDatePicker(
@@ -506,11 +559,13 @@ class OfferDateTimeField extends StatelessWidget {
       selectedTime.minute,
     );
 
-    if (minimumDateTime != null && result.isBefore(minimumDateTime!)) {
+    if (result.isBefore(minimum)) {
       if (!context.mounted) return;
       AppToast.showToast(
         context: context,
-        message: 'يجب اختيار وقت بعد بداية العرض',
+        message: minimumDateTime == null
+            ? 'وقت بداية العرض لا يمكن أن يكون في الماضي'
+            : 'يجب اختيار وقت بعد بداية العرض',
         type: ToastificationType.error,
       );
       return;
@@ -523,7 +578,8 @@ class OfferDateTimeField extends StatelessWidget {
     final m = date.month.toString().padLeft(2, '0');
     final h = date.hour.toString().padLeft(2, '0');
     final min = date.minute.toString().padLeft(2, '0');
-    return '$d/${date.year.toString().padLeft(4, '0')}/$m - $h:$min';
+    final year = date.year.toString().padLeft(4, '0');
+    return '$d/$m/$year - $h:$min';
   }
 }
 
@@ -572,7 +628,11 @@ class _DiscountChooserState extends State<DiscountChooser> {
 }
 
 class _DiscountChip extends StatelessWidget {
-  const _DiscountChip({required this.label, required this.selected, required this.onTap});
+  const _DiscountChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
 
   final String label;
   final bool selected;
@@ -596,7 +656,9 @@ class _DiscountChip extends StatelessWidget {
         child: AppText(
           label,
           style: TextStyle(
-            color: selected ? AppColors.white : const Color(0xFF4B5563),
+            color: selected
+                ? AppColors.white
+                : const Color(0xFF4B5563),
             fontSize: 14,
             fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
           ),
@@ -670,7 +732,9 @@ class OfferCheckbox extends StatelessWidget {
           Checkbox(
             value: selected,
             onChanged: (value) => onChanged(value ?? false),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(6),
+            ),
           ),
         ],
       ),
