@@ -250,12 +250,15 @@ class GetNewOrdersModelLinks {
 
 class GetNewOrdersModelDataItem {
   int? id;
+  int? deliveryOrderId;
   int? customerId;
   int? storeId;
   dynamic couponId;
   int? cancellationPolicyId;
   String? orderNumber;
   String? status;
+  String? fulfillmentType;
+  String? fulfillmentTypeLabel;
   String? pickupMode;
   dynamic pickupScheduledFor;
   dynamic readyForPickupAt;
@@ -277,12 +280,15 @@ class GetNewOrdersModelDataItem {
 
   GetNewOrdersModelDataItem({
     this.id,
+    this.deliveryOrderId,
     this.customerId,
     this.storeId,
     this.couponId,
     this.cancellationPolicyId,
     this.orderNumber,
     this.status,
+    this.fulfillmentType,
+    this.fulfillmentTypeLabel,
     this.pickupMode,
     this.pickupScheduledFor,
     this.readyForPickupAt,
@@ -304,14 +310,21 @@ class GetNewOrdersModelDataItem {
   });
 
   factory GetNewOrdersModelDataItem.fromJson(Map<String, dynamic> json) {
+    final deliveryOrderId = _asInt(json['deliveryOrderId']);
+    final fulfillmentType = _asString(json['fulfillmentType']) ??
+        (deliveryOrderId != null ? 'delivery' : 'pickup');
     return GetNewOrdersModelDataItem(
       id: _asInt(json['id']),
+      deliveryOrderId: deliveryOrderId,
       customerId: _asInt(json['customerId']),
       storeId: _asInt(json['storeId']),
       couponId: _asDynamic(json['couponId']),
       cancellationPolicyId: _asInt(json['cancellationPolicyId']),
       orderNumber: _asString(json['orderNumber']),
       status: _asString(json['status']),
+      fulfillmentType: fulfillmentType,
+      fulfillmentTypeLabel: _asString(json['fulfillmentTypeLabel']) ??
+          (fulfillmentType == 'delivery' ? 'توصيل' : 'استلام من المتجر'),
       pickupMode: _asString(json['pickupMode']),
       pickupScheduledFor: _asDynamic(json['pickupScheduledFor']),
       readyForPickupAt: _asDynamic(json['readyForPickupAt']),
@@ -330,16 +343,16 @@ class GetNewOrdersModelDataItem {
       cancellationReason: _asDynamic(json['cancellationReason']),
       createdAt: _asString(json['createdAt']),
       updatedAt: _asString(json['updatedAt']),
-      items: json["items"] is! List
+      items: json['items'] is! List
           ? []
-          : (json["items"] as List)
-                .map<String>((element) => element["productName"])
+          : (json['items'] as List)
+                .map<String>((element) => element['productName'])
                 .toList(),
-      availableItems: json["items"] is! List
+      availableItems: json['items'] is! List
           ? []
-          : (json["items"] as List)
+          : (json['items'] as List)
                 .map<bool>(
-                  (element) => _asBool(element["isAvailableInStock"]) ?? false,
+                  (element) => _asBool(element['isAvailableInStock']) ?? false,
                 )
                 .toList(),
     );
@@ -348,12 +361,15 @@ class GetNewOrdersModelDataItem {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'deliveryOrderId': deliveryOrderId,
       'customerId': customerId,
       'storeId': storeId,
       'couponId': couponId,
       'cancellationPolicyId': cancellationPolicyId,
       'orderNumber': orderNumber,
       'status': status,
+      'fulfillmentType': fulfillmentType,
+      'fulfillmentTypeLabel': fulfillmentTypeLabel,
       'pickupMode': pickupMode,
       'pickupScheduledFor': pickupScheduledFor,
       'readyForPickupAt': readyForPickupAt,
