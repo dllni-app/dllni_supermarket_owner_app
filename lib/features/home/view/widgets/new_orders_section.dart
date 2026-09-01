@@ -38,7 +38,9 @@ class NewOrderCard extends StatelessWidget {
   }
 
   IconData get fulfillmentIcon =>
-      order.fulfillmentType == 'delivery' ? Icons.delivery_dining_rounded : Icons.storefront_rounded;
+      order.fulfillmentType == 'delivery'
+          ? Icons.delivery_dining_rounded
+          : Icons.storefront_rounded;
 
   @override
   Widget build(BuildContext context) {
@@ -69,14 +71,17 @@ class NewOrderCard extends StatelessWidget {
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFFEF4444),
                     borderRadius: BorderRadius.circular(999),
                   ),
-                  child: const AppText(
+                  child: AppText(
                     'طلب جديد',
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 11,
                       fontWeight: FontWeight.w800,
@@ -85,7 +90,10 @@ class NewOrderCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFF1E2A78),
                     borderRadius: BorderRadius.circular(999),
@@ -130,9 +138,9 @@ class NewOrderCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const AppText(
+                      AppText(
                         'عميل السوبرماركت',
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Color(0xE52F2B3D),
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
@@ -153,7 +161,10 @@ class NewOrderCard extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 7),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 9,
+                    vertical: 7,
+                  ),
                   decoration: const BoxDecoration(
                     borderRadius: BorderRadius.all(Radius.circular(8)),
                     color: AppColors.accent,
@@ -170,9 +181,9 @@ class NewOrderCard extends StatelessWidget {
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                      const AppText(
+                      AppText(
                         'نقدي',
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: AppColors.white,
                           fontSize: 10,
                           fontWeight: FontWeight.w500,
@@ -315,9 +326,9 @@ class NewOrderCardOld extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const AppText(
+                    AppText(
                       'عميل السوبرماركت',
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Color(0xE52F2B3D),
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
@@ -352,14 +363,17 @@ class NewOrderCardOld extends StatelessWidget {
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: context.primaryContainer,
                       borderRadius: const BorderRadius.all(Radius.circular(4)),
                     ),
-                    child: const AppText(
+                    child: AppText(
                       'نقدي',
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: AppColors.white,
                         fontSize: 10,
                         fontWeight: FontWeight.w500,
@@ -450,9 +464,9 @@ class NewOrdersSection extends StatelessWidget {
       children: [
         Row(
           children: [
-            const AppText(
+            AppText(
               'طلبات جديدة',
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
                 color: Color(0xFF111827),
@@ -506,9 +520,9 @@ class NewOrdersSection extends StatelessWidget {
                                       ),
                                     );
                                   },
-                                  child: const AppText(
+                                  child: AppText(
                                     'عرض الكل',
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       fontSize: 12,
                                       color: Color(0xB22F2B3D),
                                       fontWeight: FontWeight.w700,
@@ -532,8 +546,8 @@ class NewOrdersSection extends StatelessWidget {
           builder: (context, state) {
             return state.newOrders!.builder(
               loadingWidget: const NewOrdersLoading(),
-              emptyWidget: const Padding(
-                padding: EdgeInsets.symmetric(vertical: 12),
+              emptyWidget: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
                 child: Center(
                   child: AppText.labelMedium('لا يوجد طلبات للعرض'),
                 ),
