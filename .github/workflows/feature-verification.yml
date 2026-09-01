@@ -31,7 +31,7 @@ jobs:
         run: >-
           flutter analyze
           lib/features/home/data/models/get_new_orders_model.dart
-          lib/features/home/view/new_orders_section.dart
+          lib/features/home/view/widgets/new_orders_section.dart
           lib/features/products/domain/usecases/import_products_file_use_case.dart
           lib/features/products/view/screens/add_product_menu_screen.dart
           lib/features/profile/view/screens/create_offer_screen.dart
