@@ -17,21 +17,6 @@ int? _asInt(dynamic value) {
   return null;
 }
 
-double? _asDouble(dynamic value) {
-  if (value == null) return null;
-  if (value is double) return value;
-  if (value is num) return value.toDouble();
-  if (value is String) return double.tryParse(value);
-  return null;
-}
-
-num? _asNum(dynamic value) {
-  if (value == null) return null;
-  if (value is num) return value;
-  if (value is String) return num.tryParse(value);
-  return null;
-}
-
 bool? _asBool(dynamic value) {
   if (value == null) return null;
   if (value is bool) return value;
@@ -45,11 +30,6 @@ bool? _asBool(dynamic value) {
     if (normalized == 'false' || normalized == '0') return false;
   }
   return null;
-}
-
-List<dynamic>? _asDynamicList(dynamic value) {
-  if (value is! List) return null;
-  return value.map(_asDynamic).toList();
 }
 
 dynamic _asDynamic(dynamic value) {
