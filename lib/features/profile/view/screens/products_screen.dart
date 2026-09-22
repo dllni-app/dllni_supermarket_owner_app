@@ -5,14 +5,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/widgets/app_app_bars.dart';
+import '../../../products/view/widgets/loadings/products_list_loading.dart';
 import '../../data/models/get_products_model.dart';
 import '../../domain/usecases/get_products_use_case.dart';
 import '../manager/bloc/profile_bloc.dart';
 import 'create_offer_screen.dart';
 
-class ProductsScreen extends StatelessWidget {
+class ProductsScreen extends StatefulWidget {
   const ProductsScreen({super.key, required this.selectedProducts});
   final List<GetProductsModelDataItem> selectedProducts;
+
+  @override
+  State<ProductsScreen> createState() => _ProductsScreenState();
+}
+
+class _ProductsScreenState extends State<ProductsScreen> {
+  bool _isSelected(GetProductsModelDataItem product) {
+    return widget.selectedProducts.any((item) => item.id == product.id);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,7 +36,7 @@ class ProductsScreen extends StatelessWidget {
                   previous.products != current.products,
               builder: (context, state) {
                 return state.products!.builder(
-                  loadingWidget: OfferLoading(),
+                  loadingWidget: const ProductsLoading(),
                   emptyWidget: AppText.labelMedium(
                     'لا يوجد منتجات',
                     fontWeight: FontWeight.w400,
@@ -49,20 +60,27 @@ class ProductsScreen extends StatelessWidget {
                               ),
                             );
                           }
-                          return OfferLoading();
+                          return const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 16),
+                            child: Center(
+                              child: CircularProgressIndicator.adaptive(),
+                            ),
+                          );
                         }
+                        final product = state.products!.list[index];
                         return OfferCheckbox(
-                          product: state.products!.list[index],
+                          product: product,
+                          selected: _isSelected(product),
                           onChanged: (value) {
-                            if (value) {
-                              selectedProducts.add(state.products!.list[index]);
-                            } else {
-                              selectedProducts.removeWhere(
-                                (element) =>
-                                    element.id ==
-                                    state.products!.list[index].id,
-                              );
-                            }
+                            setState(() {
+                              if (value && !_isSelected(product)) {
+                                widget.selectedProducts.add(product);
+                              } else if (!value) {
+                                widget.selectedProducts.removeWhere(
+                                  (element) => element.id == product.id,
+                                );
+                              }
+                            });
                           },
                         );
                       },

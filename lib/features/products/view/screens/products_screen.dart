@@ -1,4 +1,4 @@
-import 'dart:developer';
+import 'dart:async';
 
 import 'package:common_package/common_package.dart';
 import 'package:dllni_supermarket_owner_app/core/widgets/failure_widget.dart';
@@ -36,6 +36,25 @@ class ProductsScreen extends StatefulWidget {
 class _ProductsScreenState extends State<ProductsScreen> {
   int? selectedCategoryId;
   String? search;
+  Timer? _searchDebounce;
+
+  void _getProducts(
+    BuildContext context, {
+    required bool isReload,
+    int page = 1,
+  }) {
+    context.read<ProductsBloc>().add(
+      GetProductsEvent(
+        isReload: isReload,
+        params: GetProductsParams(
+          page: page,
+          categoryId: selectedCategoryId,
+          search: search,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -78,307 +97,291 @@ class _ProductsScreenState extends State<ProductsScreen> {
           }
         },
         child: Scaffold(
-        body: Column(
-          children: [
-            Builder(
-              builder: (context) {
-                return AppSimpleAppBarWithSearch(
-                  title: "المنتجات",
-                  onSearchChanged: (value) {
-                    search = value;
-                    context.read<ProductsBloc>().add(
-                      GetProductsEvent(
-                        isReload: true,
-                        params: GetProductsParams(
-                          page: 1,
-                          categoryId: selectedCategoryId,
-                          search: search,
+          body: Column(
+            children: [
+              Builder(
+                builder: (context) {
+                  return AppSimpleAppBarWithSearch(
+                    title: "المنتجات",
+                    onSearchChanged: (value) {
+                      search = value.trim();
+                      _searchDebounce?.cancel();
+                      _searchDebounce = Timer(
+                        const Duration(milliseconds: 300),
+                        () {
+                          if (context.mounted) {
+                            _getProducts(context, isReload: true);
+                          }
+                        },
+                      );
+                    },
+                  );
+                },
+              ),
+              Expanded(
+                child: Column(
+                  children: [
+                    SizedBox(
+                      width: context.width,
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(20, 16, 20, 0),
+                        child: BigButtonWithIcon(
+                          icon: AppImage.asset(AppSvgs.add, size: 22),
+                          title: "إضافة منتج جديد",
+                          onPressed: () {
+                            context.pushRoute("/products/new_product");
+                          },
                         ),
                       ),
-                    );
-                  },
-                );
-              },
-            ),
-            Expanded(
-              child: Column(
-                children: [
-                  SizedBox(
-                    width: context.width,
-                    child: Padding(
+                    ),
+                    Padding(
                       padding: EdgeInsets.fromLTRB(20, 16, 20, 0),
-                      child: BigButtonWithIcon(
-                        icon: AppImage.asset(AppSvgs.add, size: 22),
-                        title: "إضافة منتج جديد",
-                        onPressed: () {
-                          context.pushRoute("/products/new_product");
-                        },
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(20, 16, 20, 0),
-                    child: IntrinsicHeight(
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        spacing: 12,
-                        children: [
-                          Expanded(
-                            child: BlocBuilder<ProductsBloc, ProductsState>(
-                              buildWhen: (previous, current) =>
-                                  previous.totalProductsCountStatus !=
-                                  current.totalProductsCountStatus,
-                              builder: (context, state) {
-                                switch (state.totalProductsCountStatus) {
-                                  case BlocStatus.loading:
-                                    return StatePointerLoading();
-                                  case BlocStatus.success:
-                                    return StatePointer(
-                                      title: "إجمالي المنتجات النشطة",
-                                      value: state.totalProductsCount?.count ?? 0,
-                                    );
-                                  default:
-                                    return SizedBox();
-                                }
-                              },
-                            ),
-                          ),
-                          Expanded(
-                            child: BlocBuilder<ProductsBloc, ProductsState>(
-                              buildWhen: (previous, current) =>
-                                  previous.lowStockStatus != current.lowStockStatus,
-                              builder: (context, state) {
-                                switch (state.lowStockStatus) {
-                                  case BlocStatus.loading:
-                                    return StatePointerLoading();
-                                  case BlocStatus.success:
-                                    return StatePointer(
-
-                                      title: "منخفض المخزون",
-                                      value: state.lowStock?.data?.total ?? 0,
-                                    );
-                                  case BlocStatus.failed:
-                                    return FailureWidget(
-                                      message:
-                                          state.errorMessage ?? "Unknown Error",
-                                      onRetry: () {
-                                        context.read<ProductsBloc>().add(
-                                          GetLowStockEvent(
-                                            params: GetLowStockParams(),
-                                          ),
-                                        );
-                                      },
-                                    );
-                                  default:
-                                    return SizedBox();
-                                }
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  BlocBuilder<ProductsBloc, ProductsState>(
-                    builder: (context, state) {
-                      switch (state.categories) {
-                        case null:
-                          return ProductsTabBarLoading();
-                        default:
-                          return ProductsTabBar(
-                            items: [
-                              ProductsTabBarItem(
-                                title: "الكل",
-                                count:
-                                    state.categories?.data?.fold<int>(
-                                      0,
-                                      (previousValue, element) =>
-                                          previousValue +
-                                          (element.productsCount ?? 0),
-                                    ) ??
-                                    0,
+                      child: IntrinsicHeight(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          spacing: 12,
+                          children: [
+                            Expanded(
+                              child: BlocBuilder<ProductsBloc, ProductsState>(
+                                buildWhen: (previous, current) =>
+                                    previous.totalProductsCountStatus !=
+                                    current.totalProductsCountStatus,
+                                builder: (context, state) {
+                                  switch (state.totalProductsCountStatus) {
+                                    case BlocStatus.loading:
+                                      return StatePointerLoading();
+                                    case BlocStatus.success:
+                                      return StatePointer(
+                                        title: "إجمالي المنتجات النشطة",
+                                        value:
+                                            state.totalProductsCount?.count ??
+                                            0,
+                                      );
+                                    default:
+                                      return SizedBox();
+                                  }
+                                },
                               ),
-                              ...state.categories!.data?.map(
-                                    (category) => ProductsTabBarItem(
-                                      title: category.name.toString(),
-                                      count: category.productsCount ?? 0,
-                                    ),
-                                  ) ??
-                                  [],
-                              // ProductsTabBarItem(title: "دجاج", count: 34),
-                              // ProductsTabBarItem(title: "لحم", count: 34),
-                              // ProductsTabBarItem(title: "المقبلات", count: 50),
-                            ],
-                            onChanged: (index) {
-                              if (index == 0) {
-                                selectedCategoryId = null;
-                              } else {
-                                selectedCategoryId =
-                                    state.categories?.data?[index - 1].id;
-                              }
-                              context.read<ProductsBloc>().add(
-                                GetProductsEvent(
-                                  isReload: true,
-                                  params: GetProductsParams(
-                                    page: 1,
-                                    categoryId: selectedCategoryId,
-                                    search: search,
-                                  ),
-                                ),
-                              );
-                            },
-                          );
-                        // case !null when state.categoriesStatus == BlocStatus.failed:
-                        //   return ;
-                        // default:
-                        //   print("else");
-                        //   return SizedBox();
-                      }
-                    },
-                  ),
-                  Expanded(
-                    child: BlocBuilder<ProductsBloc, ProductsState>(
-                      buildWhen: (previous, current) =>
-                          previous.products != current.products,
+                            ),
+                            Expanded(
+                              child: BlocBuilder<ProductsBloc, ProductsState>(
+                                buildWhen: (previous, current) =>
+                                    previous.lowStockStatus !=
+                                    current.lowStockStatus,
+                                builder: (context, state) {
+                                  switch (state.lowStockStatus) {
+                                    case BlocStatus.loading:
+                                      return StatePointerLoading();
+                                    case BlocStatus.success:
+                                      return StatePointer(
+                                        title: "منخفض المخزون",
+                                        value: state.lowStock?.data?.total ?? 0,
+                                      );
+                                    case BlocStatus.failed:
+                                      return FailureWidget(
+                                        message:
+                                            state.errorMessage ??
+                                            "Unknown Error",
+                                        onRetry: () {
+                                          context.read<ProductsBloc>().add(
+                                            GetLowStockEvent(
+                                              params: GetLowStockParams(),
+                                            ),
+                                          );
+                                        },
+                                      );
+                                    default:
+                                      return SizedBox();
+                                  }
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    BlocBuilder<ProductsBloc, ProductsState>(
                       builder: (context, state) {
-                        return state.products!.builder(
-                          loadingWidget: ProductsLoading(),
-                          emptyWidget: AppText.labelMedium(
-                            'لا يوجد منتجات',
-                            fontWeight: FontWeight.w400,
-                          ),
-                          successWidget: () {
-                            return ListView.separated(
-                              padding: EdgeInsetsDirectional.symmetric(
-                                horizontal: 24,
-                              ),
-                              itemBuilder: (context, index) {
-                                if (state.products!.length <= index) {
-                                  log(index.toString());
-                                  if (state.products!.length == index) {
-                                    context.read<ProductsBloc>().add(
-                                      GetProductsEvent(
+                        switch (state.categories) {
+                          case null:
+                            return ProductsTabBarLoading();
+                          default:
+                            return ProductsTabBar(
+                              items: [
+                                ProductsTabBarItem(
+                                  title: "الكل",
+                                  count:
+                                      state.categories?.data?.fold<int>(
+                                        0,
+                                        (previousValue, element) =>
+                                            previousValue +
+                                            (element.productsCount ?? 0),
+                                      ) ??
+                                      0,
+                                ),
+                                ...state.categories!.data?.map(
+                                      (category) => ProductsTabBarItem(
+                                        title: category.name.toString(),
+                                        count: category.productsCount ?? 0,
+                                      ),
+                                    ) ??
+                                    [],
+                                // ProductsTabBarItem(title: "دجاج", count: 34),
+                                // ProductsTabBarItem(title: "لحم", count: 34),
+                                // ProductsTabBarItem(title: "المقبلات", count: 50),
+                              ],
+                              onChanged: (index) {
+                                if (index == 0) {
+                                  selectedCategoryId = null;
+                                } else {
+                                  selectedCategoryId =
+                                      state.categories?.data?[index - 1].id;
+                                }
+                                _getProducts(context, isReload: true);
+                              },
+                            );
+                          // case !null when state.categoriesStatus == BlocStatus.failed:
+                          //   return ;
+                          // default:
+                          //   print("else");
+                          //   return SizedBox();
+                        }
+                      },
+                    ),
+                    Expanded(
+                      child: BlocBuilder<ProductsBloc, ProductsState>(
+                        buildWhen: (previous, current) =>
+                            previous.products != current.products,
+                        builder: (context, state) {
+                          return state.products!.builder(
+                            loadingWidget: ProductsLoading(),
+                            emptyWidget: AppText.labelMedium(
+                              'لا يوجد منتجات',
+                              fontWeight: FontWeight.w400,
+                            ),
+                            successWidget: () {
+                              return ListView.separated(
+                                padding: EdgeInsetsDirectional.symmetric(
+                                  horizontal: 24,
+                                ),
+                                itemBuilder: (context, index) {
+                                  if (state.products!.length <= index) {
+                                    if (state.products!.length == index) {
+                                      _getProducts(
+                                        context,
                                         isReload: false,
-                                        params: GetProductsParams(
-                                          page: state.products!.pageNumber,
-                                        ),
+                                        page: state.products!.pageNumber,
+                                      );
+                                    }
+                                    return SizedBox(
+                                      width: 30,
+                                      height: 30,
+                                      child: FittedBox(
+                                        child:
+                                            CircularProgressIndicator.adaptive(
+                                              strokeWidth: 3,
+                                            ),
                                       ),
                                     );
                                   }
-                                  return SizedBox(
-                                    width: 30,
-                                    height: 30,
-                                    child: FittedBox(
-                                      child: CircularProgressIndicator.adaptive(
-                                        strokeWidth: 3,
-                                      ),
-                                    ),
-                                  );
-                                }
-                                return ProductCard(
-                                  product: state.products!.list[index],
-                                  onEdit: (p) async {
-                                    final result = await context.pushRoute(
-                                      "/products/new_product/details",
-                                      arguments: AddProductDetailsParams.fromProduct(
-                                        p,
-                                      ),
-                                    );
-                                    if (result == true && context.mounted) {
-                                      context.read<ProductsBloc>().add(
-                                        GetProductsEvent(
-                                          isReload: true,
-                                          params: GetProductsParams(
-                                            page: 1,
-                                            categoryId: selectedCategoryId,
-                                            search: search,
-                                          ),
-                                        ),
-                                      );
-                                    }
-                                  },
-                                  onDelete: (p) {
-                                    showDialog<void>(
-                                      context: context,
-                                      builder: (ctx) {
-                                        return AlertDialog(
-                                          title: Text("تأكيد الحذف"),
-                                          content: Text(
-                                            "هل تريد حذف \"${p.name ?? ""}\"؟",
-                                          ),
-                                          actions: [
-                                            TextButton(
-                                              onPressed: () =>
-                                                  Navigator.of(ctx).pop(),
-                                              child: Text("إلغاء"),
+                                  return ProductCard(
+                                    product: state.products!.list[index],
+                                    onEdit: (p) async {
+                                      final result = await context.pushRoute(
+                                        "/products/new_product/details",
+                                        arguments:
+                                            AddProductDetailsParams.fromProduct(
+                                              p,
                                             ),
-                                            TextButton(
-                                              onPressed: () {
-                                                Navigator.of(ctx).pop();
-                                                final id = p.id;
-                                                if (id == null) return;
-                                                context.read<ProductsBloc>().add(
-                                                  DeleteProductEvent(
-                                                    params: DeleteProductParams(
-                                                      productId: id,
-                                                    ),
+                                      );
+                                      if (result == true && context.mounted) {
+                                        context.read<ProductsBloc>().add(
+                                          GetProductsEvent(
+                                            isReload: true,
+                                            params: GetProductsParams(
+                                              page: 1,
+                                              categoryId: selectedCategoryId,
+                                              search: search,
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                    },
+                                    onDelete: (p) {
+                                      showDialog<void>(
+                                        context: context,
+                                        builder: (ctx) {
+                                          return AlertDialog(
+                                            title: Text("تأكيد الحذف"),
+                                            content: Text(
+                                              "هل تريد حذف \"${p.name ?? ""}\"؟",
+                                            ),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () =>
+                                                    Navigator.of(ctx).pop(),
+                                                child: Text("إلغاء"),
+                                              ),
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.of(ctx).pop();
+                                                  final id = p.id;
+                                                  if (id == null) return;
+                                                  context
+                                                      .read<ProductsBloc>()
+                                                      .add(
+                                                        DeleteProductEvent(
+                                                          params:
+                                                              DeleteProductParams(
+                                                                productId: id,
+                                                              ),
+                                                        ),
+                                                      );
+                                                },
+                                                child: Text(
+                                                  "حذف",
+                                                  style: TextStyle(
+                                                    color: Color(0xFFEF4444),
                                                   ),
-                                                );
-                                              },
-                                              child: Text(
-                                                "حذف",
-                                                style: TextStyle(
-                                                  color: Color(0xFFEF4444),
                                                 ),
                                               ),
-                                            ),
-                                          ],
-                                        );
-                                      },
-                                    );
-                                  },
-                                );
-                              },
-                              separatorBuilder: (context, index) =>
-                                  SizedBox(height: 16),
-                              itemCount: state.products!.listLength(1),
-                            );
-                          },
-                          failedWidget: Center(
-                            child: FailureWidget(
-                              message: state.errorMessage.toString(),
-                              onRetry: () {
-                                context.read<ProductsBloc>().add(
-                                  GetProductsEvent(
-                                    params: GetProductsParams(
-                                      categoryId: selectedCategoryId,
-                                      search: search,
-                                    ),
-                                    isReload: true,
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                          onTapRetry: () {
-                            context.read<ProductsBloc>().add(
-                              GetProductsEvent(
-                                params: GetProductsParams(page: 1),
-                                isReload: true,
+                                            ],
+                                          );
+                                        },
+                                      );
+                                    },
+                                  );
+                                },
+                                separatorBuilder: (context, index) =>
+                                    SizedBox(height: 16),
+                                itemCount: state.products!.listLength(1),
+                              );
+                            },
+                            failedWidget: Center(
+                              child: FailureWidget(
+                                message: state.products!.errorMessage.isNotEmpty
+                                    ? state.products!.errorMessage
+                                    : state.errorMessage ??
+                                          'تعذر تحميل المنتجات',
+                                onRetry: () {
+                                  _getProducts(context, isReload: true);
+                                },
                               ),
-                            );
-                          },
-                        );
-                      },
+                            ),
+                            onTapRetry: () {
+                              _getProducts(context, isReload: true);
+                            },
+                          );
+                        },
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-    ),
     );
   }
 
@@ -391,6 +394,12 @@ class _ProductsScreenState extends State<ProductsScreen> {
       ),
     );
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _searchDebounce?.cancel();
+    super.dispose();
   }
 }
 
