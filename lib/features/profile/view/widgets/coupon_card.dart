@@ -15,8 +15,17 @@ class _CouponStatus {
 }
 
 class CouponCard extends StatelessWidget {
-  const CouponCard({super.key, required this.coupon});
+  const CouponCard({
+    super.key,
+    required this.coupon,
+    this.onEdit,
+    this.onToggle,
+    this.onDelete,
+  });
   final GetCouponCodesModelDataItem coupon;
+  final Future<void> Function()? onEdit;
+  final Future<void> Function()? onToggle;
+  final Future<void> Function()? onDelete;
   static const List<_CouponStatus> statuses = [
     _CouponStatus(label: "نشط", color: Color(0xff10B981)),
     _CouponStatus(label: "معطل", color: Color(0xffF59E0B)),
@@ -153,6 +162,41 @@ class CouponCard extends StatelessWidget {
                     ],
                   ),
                 ),
+                if (onEdit != null || onToggle != null || onDelete != null)
+                  PopupMenuButton<String>(
+                    tooltip: 'إدارة الكوبون',
+                    onSelected: (value) async {
+                      if (value == 'edit' && onEdit != null) {
+                        await onEdit!();
+                      } else if (value == 'toggle' && onToggle != null) {
+                        await onToggle!();
+                      } else if (value == 'delete' && onDelete != null) {
+                        await onDelete!();
+                      }
+                    },
+                    itemBuilder: (_) => [
+                      if (onEdit != null)
+                        const PopupMenuItem(
+                          value: 'edit',
+                          child: Text('تعديل'),
+                        ),
+                      if (onToggle != null && status.label != 'منتهي')
+                        PopupMenuItem(
+                          value: 'toggle',
+                          child: Text(
+                            coupon.isActive == true ? 'تعطيل' : 'تفعيل',
+                          ),
+                        ),
+                      if (onDelete != null)
+                        const PopupMenuItem(
+                          value: 'delete',
+                          child: Text(
+                            'حذف',
+                            style: TextStyle(color: Colors.red),
+                          ),
+                        ),
+                    ],
+                  ),
               ],
             ),
             SizedBox(height: 12),
