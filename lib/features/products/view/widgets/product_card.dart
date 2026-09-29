@@ -18,12 +18,14 @@ class ProductCard extends StatefulWidget {
   final GetProductsModelDataItem product;
   final Future<void> Function(GetProductsModelDataItem product)? onEdit;
   final void Function(GetProductsModelDataItem product)? onDelete;
+  final Future<void> Function(GetProductsModelDataItem product)? onOptions;
 
   const ProductCard({
     super.key,
     required this.product,
     this.onEdit,
     this.onDelete,
+    this.onOptions,
   });
 
   @override
@@ -41,7 +43,7 @@ class _ProductCardState extends State<ProductCard> {
         (widget.product.stockQuantity ?? 0) <=
             (widget.product.lowStockThreshold ?? 0) &&
         widget.product.stockQuantity != 0;
-    final bool available = !unavailable && !limited;
+    final bool available = enabled && !unavailable;
     return BlocProvider(
       create: (context) => getIt<ProductsBloc>(),
       child: Stack(
@@ -155,7 +157,8 @@ class _ProductCardState extends State<ProductCard> {
                                   ),
                                 ),
                                 if (widget.onEdit != null ||
-                                    widget.onDelete != null)
+                                    widget.onDelete != null ||
+                                    widget.onOptions != null)
                                   Theme(
                                     data: Theme.of(context).copyWith(
                                       splashColor: Colors.transparent,
@@ -173,6 +176,9 @@ class _ProductCardState extends State<ProductCard> {
                                           await widget.onEdit!(
                                             widget.product,
                                           );
+                                        } else if (value == 'options' &&
+                                            widget.onOptions != null) {
+                                          await widget.onOptions!(widget.product);
                                         } else if (value == 'delete' &&
                                             widget.onDelete != null) {
                                           widget.onDelete!(widget.product);
@@ -190,6 +196,11 @@ class _ProductCardState extends State<ProductCard> {
                                                 fontWeight: FontWeight.w500,
                                               ),
                                             ),
+                                          ),
+                                        if (widget.onOptions != null)
+                                          const PopupMenuItem(
+                                            value: 'options',
+                                            child: Text('خيارات المنتج'),
                                           ),
                                         if (widget.onDelete != null)
                                           PopupMenuItem(
