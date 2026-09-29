@@ -6,8 +6,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:toastification/toastification.dart';
+import 'package:common_package/helpers/dio_network.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/services/store_owner_operations_service.dart';
 import '../../../../core/themes/app_colors.dart';
 import '../../../../core/themes/app_shadows.dart';
 import '../../../../core/utils/app_svgs.dart';
@@ -53,6 +56,46 @@ class EmployeeManagementScreen extends StatefulWidget {
 
 class _EmployeeManagementScreenState extends State<EmployeeManagementScreen> {
   String? search;
+
+  StoreOwnerOperationsService get _operations =>
+      StoreOwnerOperationsService(getIt<DioNetwork>());
+
+  Future<void> _changeStatus(
+    BuildContext context,
+    GetStoreEmployeesModelDataEmployeesItem employee,
+  ) async {
+    final staffId = employee.id;
+    if (staffId == null) return;
+    final nextStatus = !(employee.isActive ?? false);
+
+    try {
+      await _operations.updateEmployeeStatus(
+        staffId: staffId,
+        isActive: nextStatus,
+      );
+      if (!context.mounted) return;
+      AppToast.showToast(
+        context: context,
+        message: nextStatus ? 'تم تفعيل الموظف' : 'تم تعطيل الموظف',
+        type: ToastificationType.success,
+      );
+      context.read<ProfileBloc>().add(
+        GetStoreEmployeesEvent(
+          params: GetStoreEmployeesParams(
+            storeId: 1,
+            search: search,
+          ),
+        ),
+      );
+    } on StoreOwnerOperationException catch (error) {
+      if (!context.mounted) return;
+      AppToast.showToast(
+        context: context,
+        message: error.message,
+        type: ToastificationType.error,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -164,8 +207,11 @@ class _EmployeeManagementScreenState extends State<EmployeeManagementScreen> {
                     return ListView.separated(
                       padding: const EdgeInsets.all(16),
                       itemCount: employees.length,
-                      itemBuilder: (context, index) =>
-                          _EmployeeCard(employee: employees[index]),
+                      itemBuilder: (context, index) => _EmployeeCard(
+                        employee: employees[index],
+                        onStatusChanged: () =>
+                            _changeStatus(context, employees[index]),
+                      ),
                       separatorBuilder: (_, _) => const SizedBox(height: 13),
                     );
                   }
@@ -182,8 +228,12 @@ class _EmployeeManagementScreenState extends State<EmployeeManagementScreen> {
 
 class _EmployeeCard extends StatelessWidget {
   final GetStoreEmployeesModelDataEmployeesItem employee;
+  final Future<void> Function()? onStatusChanged;
 
-  const _EmployeeCard({required this.employee});
+  const _EmployeeCard({
+    required this.employee,
+    this.onStatusChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -260,7 +310,40 @@ class _EmployeeCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              const Icon(Icons.more_vert, color: Color(0xFF4B5563), size: 18),
+              PopupMenuButton<String>(
+                tooltip: 'إجراءات الموظف',
+                icon: const Icon(
+                  Icons.more_vert,
+                  color: Color(0xFF4B5563),
+                  size: 18,
+                ),
+                onSelected: (value) async {
+                  if (value == 'status' && onStatusChanged != null) {
+                    await onStatusChanged!();
+                  }
+                },
+                itemBuilder: (_) => [
+                  PopupMenuItem(
+                    value: 'status',
+                    child: Row(
+                      children: [
+                        Icon(
+                          employee.isActive == true
+                              ? Icons.person_off_outlined
+                              : Icons.person_outline,
+                          size: 18,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          employee.isActive == true
+                              ? 'تعطيل الموظف'
+                              : 'تفعيل الموظف',
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
           const SizedBox(height: 12),
