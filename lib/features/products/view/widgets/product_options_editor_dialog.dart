@@ -1,4 +1,4 @@
-import 'package:common_package/helpers/dio_network.dart';
+﻿import 'package:common_package/common_package.dart';
 import 'package:flutter/material.dart';
 import 'package:toastification/toastification.dart';
 
@@ -43,7 +43,7 @@ class _ProductOptionsEditorDialogState
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('خيارات المنتج'),
+          const Text('Ø®ÙŠØ§Ø±Ø§Øª Ø§Ù„Ù…Ù†ØªØ¬'),
           const SizedBox(height: 4),
           Text(
             widget.product.name ?? '',
@@ -60,7 +60,7 @@ class _ProductOptionsEditorDialogState
               child: _options.isEmpty
                   ? const Center(
                       child: Text(
-                        'لا توجد مجموعات خيارات. أضف مجموعة مثل الحجم أو النكهة.',
+                        'Ù„Ø§ ØªÙˆØ¬Ø¯ Ù…Ø¬Ù…ÙˆØ¹Ø§Øª Ø®ÙŠØ§Ø±Ø§Øª. Ø£Ø¶Ù Ù…Ø¬Ù…ÙˆØ¹Ø© Ù…Ø«Ù„ Ø§Ù„Ø­Ø¬Ù… Ø£Ùˆ Ø§Ù„Ù†ÙƒÙ‡Ø©.',
                         textAlign: TextAlign.center,
                       ),
                     )
@@ -95,7 +95,7 @@ class _ProductOptionsEditorDialogState
                       });
                     },
               icon: const Icon(Icons.add),
-              label: const Text('إضافة مجموعة خيارات'),
+              label: const Text('Ø¥Ø¶Ø§ÙØ© Ù…Ø¬Ù…ÙˆØ¹Ø© Ø®ÙŠØ§Ø±Ø§Øª'),
             ),
           ],
         ),
@@ -103,7 +103,7 @@ class _ProductOptionsEditorDialogState
       actions: [
         TextButton(
           onPressed: _saving ? null : () => Navigator.pop(context, false),
-          child: const Text('إلغاء'),
+          child: const Text('Ø¥Ù„ØºØ§Ø¡'),
         ),
         FilledButton.icon(
           onPressed: _saving ? null : _save,
@@ -117,7 +117,7 @@ class _ProductOptionsEditorDialogState
                   ),
                 )
               : const Icon(Icons.save_outlined),
-          label: const Text('حفظ الخيارات'),
+          label: const Text('Ø­ÙØ¸ Ø§Ù„Ø®ÙŠØ§Ø±Ø§Øª'),
         ),
       ],
     );
@@ -129,7 +129,7 @@ class _ProductOptionsEditorDialogState
 
     for (final option in _options) {
       if (option.name.trim().isEmpty) {
-        setState(() => _error = 'اسم مجموعة الخيارات مطلوب');
+        setState(() => _error = 'Ø§Ø³Ù… Ù…Ø¬Ù…ÙˆØ¹Ø© Ø§Ù„Ø®ÙŠØ§Ø±Ø§Øª Ù…Ø·Ù„ÙˆØ¨');
         return;
       }
       if (option.minSelections < 0 ||
@@ -137,12 +137,12 @@ class _ProductOptionsEditorDialogState
           option.maxSelections < 1) {
         setState(
           () => _error =
-              'تحقق من الحد الأدنى والأقصى للاختيارات في كل مجموعة',
+              'ØªØ­Ù‚Ù‚ Ù…Ù† Ø§Ù„Ø­Ø¯ Ø§Ù„Ø£Ø¯Ù†Ù‰ ÙˆØ§Ù„Ø£Ù‚ØµÙ‰ Ù„Ù„Ø§Ø®ØªÙŠØ§Ø±Ø§Øª ÙÙŠ ÙƒÙ„ Ù…Ø¬Ù…ÙˆØ¹Ø©',
         );
         return;
       }
       if (option.modifiers.any((item) => item.name.trim().isEmpty)) {
-        setState(() => _error = 'اسم كل خيار مطلوب');
+        setState(() => _error = 'Ø§Ø³Ù… ÙƒÙ„ Ø®ÙŠØ§Ø± Ù…Ø·Ù„ÙˆØ¨');
         return;
       }
     }
@@ -160,7 +160,7 @@ class _ProductOptionsEditorDialogState
       if (!mounted) return;
       AppToast.showToast(
         context: context,
-        message: 'تم تحديث خيارات المنتج',
+        message: 'ØªÙ… ØªØ­Ø¯ÙŠØ« Ø®ÙŠØ§Ø±Ø§Øª Ø§Ù„Ù…Ù†ØªØ¬',
         type: ToastificationType.success,
       );
       Navigator.pop(context, true);
@@ -199,14 +199,14 @@ class _OptionCard extends StatelessWidget {
                   child: TextFormField(
                     initialValue: draft.name,
                     decoration: const InputDecoration(
-                      labelText: 'اسم المجموعة',
-                      hintText: 'مثال: الحجم',
+                      labelText: 'Ø§Ø³Ù… Ø§Ù„Ù…Ø¬Ù…ÙˆØ¹Ø©',
+                      hintText: 'Ù…Ø«Ø§Ù„: Ø§Ù„Ø­Ø¬Ù…',
                     ),
                     onChanged: (value) => draft.name = value,
                   ),
                 ),
                 IconButton(
-                  tooltip: 'حذف المجموعة',
+                  tooltip: 'Ø­Ø°Ù Ø§Ù„Ù…Ø¬Ù…ÙˆØ¹Ø©',
                   onPressed: onDelete,
                   icon: const Icon(Icons.delete_outline, color: Colors.red),
                 ),
@@ -215,7 +215,7 @@ class _OptionCard extends StatelessWidget {
             const SizedBox(height: 8),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('الاختيار إلزامي'),
+              title: const Text('Ø§Ù„Ø§Ø®ØªÙŠØ§Ø± Ø¥Ù„Ø²Ø§Ù…ÙŠ'),
               value: draft.isRequired,
               onChanged: (value) {
                 draft.isRequired = value;
@@ -224,7 +224,7 @@ class _OptionCard extends StatelessWidget {
             ),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('المجموعة مفعلة'),
+              title: const Text('Ø§Ù„Ù…Ø¬Ù…ÙˆØ¹Ø© Ù…ÙØ¹Ù„Ø©'),
               value: draft.isActive,
               onChanged: (value) {
                 draft.isActive = value;
@@ -238,7 +238,7 @@ class _OptionCard extends StatelessWidget {
                     initialValue: '${draft.minSelections}',
                     keyboardType: TextInputType.number,
                     decoration: const InputDecoration(
-                      labelText: 'أقل عدد اختيارات',
+                      labelText: 'Ø£Ù‚Ù„ Ø¹Ø¯Ø¯ Ø§Ø®ØªÙŠØ§Ø±Ø§Øª',
                     ),
                     onChanged: (value) {
                       draft.minSelections = int.tryParse(value) ?? 0;
@@ -251,7 +251,7 @@ class _OptionCard extends StatelessWidget {
                     initialValue: '${draft.maxSelections}',
                     keyboardType: TextInputType.number,
                     decoration: const InputDecoration(
-                      labelText: 'أعلى عدد اختيارات',
+                      labelText: 'Ø£Ø¹Ù„Ù‰ Ø¹Ø¯Ø¯ Ø§Ø®ØªÙŠØ§Ø±Ø§Øª',
                     ),
                     onChanged: (value) {
                       draft.maxSelections = int.tryParse(value) ?? 1;
@@ -265,7 +265,7 @@ class _OptionCard extends StatelessWidget {
               children: [
                 const Expanded(
                   child: Text(
-                    'الخيارات',
+                    'Ø§Ù„Ø®ÙŠØ§Ø±Ø§Øª',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -275,14 +275,14 @@ class _OptionCard extends StatelessWidget {
                     onChanged();
                   },
                   icon: const Icon(Icons.add, size: 18),
-                  label: const Text('إضافة خيار'),
+                  label: const Text('Ø¥Ø¶Ø§ÙØ© Ø®ÙŠØ§Ø±'),
                 ),
               ],
             ),
             if (draft.modifiers.isEmpty)
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 8),
-                child: Text('لا توجد خيارات داخل هذه المجموعة'),
+                child: Text('Ù„Ø§ ØªÙˆØ¬Ø¯ Ø®ÙŠØ§Ø±Ø§Øª Ø¯Ø§Ø®Ù„ Ù‡Ø°Ù‡ Ø§Ù„Ù…Ø¬Ù…ÙˆØ¹Ø©'),
               ),
             for (var index = 0; index < draft.modifiers.length; index++)
               _ModifierRow(
@@ -323,7 +323,7 @@ class _ModifierRow extends StatelessWidget {
             flex: 3,
             child: TextFormField(
               initialValue: draft.name,
-              decoration: const InputDecoration(labelText: 'اسم الخيار'),
+              decoration: const InputDecoration(labelText: 'Ø§Ø³Ù… Ø§Ù„Ø®ÙŠØ§Ø±'),
               onChanged: (value) => draft.name = value,
             ),
           ),
@@ -335,14 +335,14 @@ class _ModifierRow extends StatelessWidget {
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
-              decoration: const InputDecoration(labelText: 'السعر الإضافي'),
+              decoration: const InputDecoration(labelText: 'Ø§Ù„Ø³Ø¹Ø± Ø§Ù„Ø¥Ø¶Ø§ÙÙŠ'),
               onChanged: (value) {
                 draft.price = num.tryParse(value) ?? 0;
               },
             ),
           ),
           IconButton(
-            tooltip: draft.isAvailable ? 'متاح' : 'غير متاح',
+            tooltip: draft.isAvailable ? 'Ù…ØªØ§Ø­' : 'ØºÙŠØ± Ù…ØªØ§Ø­',
             onPressed: () {
               draft.isAvailable = !draft.isAvailable;
               onChanged();
@@ -355,7 +355,7 @@ class _ModifierRow extends StatelessWidget {
             ),
           ),
           IconButton(
-            tooltip: 'حذف الخيار',
+            tooltip: 'Ø­Ø°Ù Ø§Ù„Ø®ÙŠØ§Ø±',
             onPressed: onDelete,
             icon: const Icon(Icons.delete_outline, color: Colors.red),
           ),
@@ -463,3 +463,4 @@ class _ModifierDraft {
     'isAvailable': isAvailable,
   };
 }
+
