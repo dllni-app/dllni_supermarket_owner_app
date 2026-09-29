@@ -111,6 +111,6 @@ class UpdateProductParams with Params {
     if (fullUpdate != null) {
       return fullUpdate!.toMap();
     }
-    return {"isActive": isActive!};
+    return {"isAvailable": isActive!};
   }
 }
