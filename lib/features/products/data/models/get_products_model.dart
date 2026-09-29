@@ -259,6 +259,7 @@ class GetProductsModelDataItem {
   dynamic expiresAt;
   bool? isAvailable;
   List<String?>? imageUrls;
+  List<GetProductsModelDataOption>? options;
   String? createdAt;
   String? updatedAt;
 
@@ -277,6 +278,7 @@ class GetProductsModelDataItem {
     this.lowStockThreshold,
     this.expiresAt,
     this.imageUrls,
+    this.options,
     this.isAvailable,
     this.createdAt,
     this.updatedAt,
@@ -302,6 +304,16 @@ class GetProductsModelDataItem {
       imageUrls: json['imageUrls'] is List
           ? (json['imageUrls'] as List).map((item) => _asString(item)).toList()
           : null,
+      options: json['options'] is List
+          ? (json['options'] as List)
+                .whereType<Map>()
+                .map(
+                  (item) => GetProductsModelDataOption.fromJson(
+                    Map<String, dynamic>.from(item),
+                  ),
+                )
+                .toList()
+          : null,
       updatedAt: _asString(json['updatedAt']),
     );
   }
@@ -322,8 +334,103 @@ class GetProductsModelDataItem {
       'lowStockThreshold': lowStockThreshold,
       'expiresAt': expiresAt,
       'isAvailable': isAvailable,
+      'options': options?.map((item) => item.toJson()).toList(),
       'createdAt': createdAt,
       'updatedAt': updatedAt,
     };
   }
+}
+
+
+class GetProductsModelDataOption {
+  int? id;
+  String? name;
+  bool? isRequired;
+  int? minSelections;
+  int? maxSelections;
+  int? sortOrder;
+  bool? isActive;
+  List<GetProductsModelDataModifier>? modifiers;
+
+  GetProductsModelDataOption({
+    this.id,
+    this.name,
+    this.isRequired,
+    this.minSelections,
+    this.maxSelections,
+    this.sortOrder,
+    this.isActive,
+    this.modifiers,
+  });
+
+  factory GetProductsModelDataOption.fromJson(Map<String, dynamic> json) {
+    return GetProductsModelDataOption(
+      id: _asInt(json['id']),
+      name: _asString(json['name']),
+      isRequired: _asBool(json['isRequired']),
+      minSelections: _asInt(json['minSelections']),
+      maxSelections: _asInt(json['maxSelections']),
+      sortOrder: _asInt(json['sortOrder']),
+      isActive: _asBool(json['isActive']),
+      modifiers: json['modifiers'] is List
+          ? (json['modifiers'] as List)
+                .whereType<Map>()
+                .map(
+                  (item) => GetProductsModelDataModifier.fromJson(
+                    Map<String, dynamic>.from(item),
+                  ),
+                )
+                .toList()
+          : null,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'name': name,
+    'isRequired': isRequired,
+    'minSelections': minSelections,
+    'maxSelections': maxSelections,
+    'sortOrder': sortOrder,
+    'isActive': isActive,
+    'modifiers': modifiers?.map((item) => item.toJson()).toList(),
+  };
+}
+
+class GetProductsModelDataModifier {
+  int? id;
+  int? modifierGroupId;
+  String? name;
+  num? price;
+  int? sortOrder;
+  bool? isAvailable;
+
+  GetProductsModelDataModifier({
+    this.id,
+    this.modifierGroupId,
+    this.name,
+    this.price,
+    this.sortOrder,
+    this.isAvailable,
+  });
+
+  factory GetProductsModelDataModifier.fromJson(Map<String, dynamic> json) {
+    return GetProductsModelDataModifier(
+      id: _asInt(json['id']),
+      modifierGroupId: _asInt(json['modifierGroupId']),
+      name: _asString(json['name']),
+      price: _asNum(json['price']),
+      sortOrder: _asInt(json['sortOrder']),
+      isAvailable: _asBool(json['isAvailable']),
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'modifierGroupId': modifierGroupId,
+    'name': name,
+    'price': price,
+    'sortOrder': sortOrder,
+    'isAvailable': isAvailable,
+  };
 }
