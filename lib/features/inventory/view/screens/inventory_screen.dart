@@ -6,8 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:toastification/toastification.dart';
+import 'package:common_package/helpers/dio_network.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/services/store_owner_operations_service.dart';
 import '../../../../core/themes/app_colors.dart';
 import '../../../../core/widgets/app_app_bars.dart';
 import '../../../../core/widgets/failure_widget.dart';
@@ -63,6 +66,8 @@ class InventoryCard extends StatelessWidget {
   final String unit;
   final void Function()? onIncreaseTap;
   final void Function()? onDecreaseTap;
+  final void Function()? onAuditTap;
+  final void Function()? onExpirationTap;
 
   const InventoryCard({
     super.key,
@@ -74,6 +79,8 @@ class InventoryCard extends StatelessWidget {
     required this.unit,
     this.onIncreaseTap,
     this.onDecreaseTap,
+    this.onAuditTap,
+    this.onExpirationTap,
   });
 
   @override
@@ -214,7 +221,33 @@ class InventoryCard extends StatelessWidget {
               SizedBox(width: 8),
             ],
           ),
-          SizedBox(height: 10),
+          if (onAuditTap != null || onExpirationTap != null) ...[
+            Row(
+              children: [
+                if (onAuditTap != null)
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: onAuditTap,
+                      icon: const Icon(Icons.fact_check_outlined, size: 18),
+                      label: const Text('تدقيق المخزون'),
+                    ),
+                  ),
+                if (onAuditTap != null && onExpirationTap != null)
+                  const SizedBox(width: 8),
+                if (onExpirationTap != null)
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: onExpirationTap,
+                      icon: const Icon(Icons.event_outlined, size: 18),
+                      label: const Text('الصلاحية'),
+                    ),
+                  ),
+                const SizedBox(width: 8),
+              ],
+            ),
+            const SizedBox(height: 10),
+          ] else
+            const SizedBox(height: 10),
         ],
       ),
     );
@@ -427,6 +460,15 @@ class _InventoryScreenState extends State<InventoryScreen> {
                 children: [
                   SizedBox(height: 16),
                   LowStockAlertsSection(),
+                  SizedBox(height: 12),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: OutlinedButton.icon(
+                      onPressed: () => _showLostOpportunities(context),
+                      icon: const Icon(Icons.trending_down_rounded),
+                      label: const Text('تقرير الفرص الضائعة بسبب نفاد المخزون'),
+                    ),
+                  ),
                   SizedBox(height: 16),
                   Container(
                     margin: EdgeInsets.symmetric(horizontal: 16),
@@ -716,6 +758,10 @@ class _InventoryScreenState extends State<InventoryScreen> {
                                             return;
                                           }
                                         },
+                                        onAuditTap: () =>
+                                            _auditProduct(context, item),
+                                        onExpirationTap: () =>
+                                            _updateExpiration(context, item),
                                       );
                                     },
                                     separatorBuilder: (context, index) =>
@@ -745,6 +791,238 @@ class _InventoryScreenState extends State<InventoryScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  StoreOwnerOperationsService get _operations =>
+      StoreOwnerOperationsService(getIt<DioNetwork>());
+
+  Future<void> _auditProduct(
+    BuildContext context,
+    GetProductsModelDataItem product,
+  ) async {
+    final controller = TextEditingController(
+      text: '${product.stockQuantity ?? 0}',
+    );
+    String? error;
+
+    final actualStock = await showDialog<int>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: Text('تدقيق ${product.name ?? 'المنتج'}'),
+          content: TextField(
+            controller: controller,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(
+              labelText: 'الكمية الفعلية',
+              helperText:
+                  'الكمية المسجلة: ${product.stockQuantity ?? 0}',
+              errorText: error,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('إلغاء'),
+            ),
+            FilledButton(
+              onPressed: () {
+                final value = int.tryParse(controller.text.trim());
+                if (value == null || value < 0) {
+                  setDialogState(
+                    () => error = 'أدخل كمية صحيحة لا تقل عن صفر',
+                  );
+                  return;
+                }
+                Navigator.pop(dialogContext, value);
+              },
+              child: const Text('اعتماد الجرد'),
+            ),
+          ],
+        ),
+      ),
+    );
+    controller.dispose();
+
+    if (actualStock == null || product.id == null || !context.mounted) return;
+
+    try {
+      final response = await _operations.auditInventory(
+        products: [
+          {
+            'product_id': product.id,
+            'actual_stock': actualStock,
+          },
+        ],
+      );
+      if (!context.mounted) return;
+      final data = response['data'];
+      final corrected = data is Map ? data['total_corrected'] : null;
+      AppToast.showToast(
+        context: context,
+        message: corrected == 0
+            ? 'تم التدقيق ولا يوجد فرق في المخزون'
+            : 'تم تصحيح المخزون حسب الجرد الفعلي',
+        type: ToastificationType.success,
+      );
+      _reloadInventoryData(context);
+    } on StoreOwnerOperationException catch (error) {
+      if (!context.mounted) return;
+      AppToast.showToast(
+        context: context,
+        message: error.message,
+        type: ToastificationType.error,
+      );
+    }
+  }
+
+  Future<void> _updateExpiration(
+    BuildContext context,
+    GetProductsModelDataItem product,
+  ) async {
+    final now = DateTime.now();
+    final current = DateTime.tryParse('${product.expiresAt ?? ''}');
+    final initialDate =
+        current != null && current.isAfter(now) ? current : now.add(const Duration(days: 1));
+
+    final selected = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: now.add(const Duration(days: 1)),
+      lastDate: DateTime(now.year + 10),
+      helpText: 'تاريخ انتهاء الصلاحية',
+    );
+
+    if (selected == null || product.id == null || !context.mounted) return;
+
+    try {
+      final response = await _operations.updateExpiration(
+        productId: product.id!,
+        expiresAt: selected,
+      );
+      if (!context.mounted) return;
+      final data = response['data'];
+      String message = 'تم تحديث تاريخ الصلاحية';
+      if (data is Map && data['is_expiring_soon'] == true) {
+        final suggestion = data['suggested_discount'];
+        if (suggestion is Map) {
+          message =
+              'المنتج قريب من الانتهاء. الخصم المقترح: ${suggestion['discount_percentage']}%';
+        }
+      }
+      AppToast.showToast(
+        context: context,
+        message: message,
+        type: ToastificationType.success,
+      );
+      _reloadProducts(context);
+    } on StoreOwnerOperationException catch (error) {
+      if (!context.mounted) return;
+      AppToast.showToast(
+        context: context,
+        message: error.message,
+        type: ToastificationType.error,
+      );
+    }
+  }
+
+  Future<void> _showLostOpportunities(BuildContext context) async {
+    try {
+      final response = await _operations.getLostOpportunities();
+      if (!context.mounted) return;
+      final data = response['data'];
+      final map = data is Map ? Map<String, dynamic>.from(data) : <String, dynamic>{};
+      final products = map['by_product'] is List
+          ? List<dynamic>.from(map['by_product'] as List)
+          : const <dynamic>[];
+
+      await showModalBottomSheet<void>(
+        context: context,
+        isScrollControlled: true,
+        builder: (sheetContext) => SafeArea(
+          child: SizedBox(
+            height: MediaQuery.sizeOf(sheetContext).height * .68,
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      const Expanded(
+                        child: Text(
+                          'الفرص الضائعة',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        'الإجمالي: ${map['total_lost_opportunities'] ?? 0}',
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(height: 1),
+                Expanded(
+                  child: products.isEmpty
+                      ? const Center(
+                          child: Text('لا توجد فرص ضائعة مسجلة'),
+                        )
+                      : ListView.separated(
+                          padding: const EdgeInsets.all(16),
+                          itemCount: products.length,
+                          separatorBuilder: (_, _) => const Divider(),
+                          itemBuilder: (_, index) {
+                            final item = products[index] is Map
+                                ? Map<String, dynamic>.from(
+                                    products[index] as Map,
+                                  )
+                                : <String, dynamic>{};
+                            return ListTile(
+                              leading: const Icon(Icons.inventory_2_outlined),
+                              title: Text(
+                                '${item['product_name'] ?? 'منتج'}',
+                              ),
+                              subtitle: Text(
+                                'الكمية المطلوبة المفقودة: '
+                                '${item['total_attempted_quantity'] ?? 0}',
+                              ),
+                              trailing: Text(
+                                '${item['total_attempts'] ?? 0} محاولة',
+                              ),
+                            );
+                          },
+                        ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    } on StoreOwnerOperationException catch (error) {
+      if (!context.mounted) return;
+      AppToast.showToast(
+        context: context,
+        message: error.message,
+        type: ToastificationType.error,
+      );
+    }
+  }
+
+  void _reloadInventoryData(BuildContext context) {
+    _reloadProducts(context);
+    context.read<InventoryBloc>().add(
+      GetInventorySummaryEvent(
+        params: GetInventorySummaryParams(storeId: 1),
+      ),
+    );
+    context.read<InventoryBloc>().add(
+      GetInvetoryCountsEvent(params: GetInvetoryCountsParams()),
+    );
+    context.read<InventoryBloc>().add(
+      GetLowStockEvent(params: GetLowStockParams()),
     );
   }
 
