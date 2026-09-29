@@ -463,4 +463,3 @@ class _ModifierDraft {
     'isAvailable': isAvailable,
   };
 }
-
