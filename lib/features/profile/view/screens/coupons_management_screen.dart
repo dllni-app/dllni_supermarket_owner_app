@@ -2,8 +2,11 @@ import 'package:common_package/common_package.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:toastification/toastification.dart';
+import 'package:common_package/helpers/dio_network.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/services/store_owner_operations_service.dart';
 import '../../../../core/widgets/app_app_bars.dart';
 import '../../../../core/widgets/failure_widget.dart';
 import '../../data/models/get_coupon_codes_model.dart';
@@ -11,6 +14,7 @@ import '../../domain/usecases/get_coupon_codes_use_case.dart';
 import '../../domain/usecases/get_coupon_week_analysis_use_case.dart';
 import '../manager/bloc/profile_bloc.dart';
 import '../widgets/coupon_card.dart';
+import '../widgets/promotion_edit_dialogs.dart';
 import '../widgets/coupon_statistics.dart';
 import '../widgets/coupons_filter_card.dart';
 import 'create_coupon_screen.dart';
@@ -28,6 +32,122 @@ class _CouponsManagementScreenState extends State<CouponsManagementScreen> {
   String search = "";
   String? sort;
   int selectedTab = 0;
+
+  StoreOwnerOperationsService get _operations =>
+      StoreOwnerOperationsService(getIt<DioNetwork>());
+
+  void _reloadCoupons(BuildContext context) {
+    context.read<ProfileBloc>().add(
+      GetCouponCodesEvent(
+        isReload: true,
+        params: GetCouponCodesParams(
+          storeId: 1,
+          search: search,
+          sort: sort,
+          isActive: selectedTab == 1
+              ? true
+              : selectedTab == 2
+              ? false
+              : null,
+        ),
+      ),
+    );
+    context.read<ProfileBloc>().add(
+      GetCouponWeekAnalysisEvent(
+        params: GetCouponWeekAnalysisParams(storeId: 1),
+      ),
+    );
+  }
+
+  Future<void> _editCoupon(
+    BuildContext context,
+    GetCouponCodesModelDataItem coupon,
+  ) async {
+    final id = coupon.id;
+    if (id == null) return;
+    final body = await showCouponEditDialog(context, coupon);
+    if (body == null || !context.mounted) return;
+    await _runCouponAction(
+      context,
+      () => _operations.updateCoupon(couponId: id, body: body),
+      'تم تحديث الكوبون',
+    );
+  }
+
+  Future<void> _toggleCoupon(
+    BuildContext context,
+    GetCouponCodesModelDataItem coupon,
+  ) async {
+    final id = coupon.id;
+    if (id == null) return;
+    final active = !(coupon.isActive ?? false);
+    await _runCouponAction(
+      context,
+      () => _operations.updateCoupon(
+        couponId: id,
+        body: {'isActive': active},
+      ),
+      active ? 'تم تفعيل الكوبون' : 'تم تعطيل الكوبون',
+    );
+  }
+
+  Future<void> _deleteCoupon(
+    BuildContext context,
+    GetCouponCodesModelDataItem coupon,
+  ) async {
+    final id = coupon.id;
+    if (id == null) return;
+    final confirmed = await showDialog<bool>(
+          context: context,
+          builder: (dialogContext) => AlertDialog(
+            title: const Text('حذف الكوبون'),
+            content: Text(
+              'هل تريد حذف الكوبون «${coupon.code ?? ''}» نهائيًا؟',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, false),
+                child: const Text('إلغاء'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(dialogContext, true),
+                child: const Text('حذف'),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+    if (!confirmed || !context.mounted) return;
+    await _runCouponAction(
+      context,
+      () => _operations.deleteCoupon(id),
+      'تم حذف الكوبون',
+    );
+  }
+
+  Future<void> _runCouponAction(
+    BuildContext context,
+    Future<Map<String, dynamic>> Function() action,
+    String successMessage,
+  ) async {
+    try {
+      await action();
+      if (!context.mounted) return;
+      AppToast.showToast(
+        context: context,
+        message: successMessage,
+        type: ToastificationType.success,
+      );
+      _reloadCoupons(context);
+    } on StoreOwnerOperationException catch (error) {
+      if (!context.mounted) return;
+      AppToast.showToast(
+        context: context,
+        message: error.message,
+        type: ToastificationType.error,
+      );
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -231,7 +351,13 @@ class _CouponsManagementScreenState extends State<CouponsManagementScreen> {
                                   0) {
                             return SizedBox();
                           }
-                          return CouponCard(coupon: state.couponCodes![index]);
+                          final coupon = state.couponCodes![index];
+                          return CouponCard(
+                            coupon: coupon,
+                            onEdit: () => _editCoupon(context, coupon),
+                            onToggle: () => _toggleCoupon(context, coupon),
+                            onDelete: () => _deleteCoupon(context, coupon),
+                          );
                         },
                         separatorBuilder: (context, index) {
                           // a expired coupon
