@@ -135,6 +135,9 @@ class GetOrderDetailsModel {
 
 class GetOrderDetailsModelData {
   int? id;
+  int? deliveryOrderId;
+  String? fulfillmentType;
+  String? fulfillmentTypeLabel;
   int? customerId;
   GetOrderDetailsModelDataCustomer? customer;
   int? storeId;
@@ -152,12 +155,14 @@ class GetOrderDetailsModelData {
   String? subtotal;
   String? discountAmount;
   String? serviceFee;
+  String? deliveryFee;
   String? totalAmount;
   dynamic cancellationFeeAmount;
   dynamic cancellationPolicySnapshot;
   dynamic specialInstructions;
   dynamic cancelledAt;
   dynamic cancellationReason;
+  dynamic deliverySummary;
   OrderDetails? orderDetails;
   List<GetOrderDetailsModelDataItemsItem>? items;
   List<dynamic>? statusLogs;
@@ -167,6 +172,9 @@ class GetOrderDetailsModelData {
 
   GetOrderDetailsModelData({
     this.id,
+    this.deliveryOrderId,
+    this.fulfillmentType,
+    this.fulfillmentTypeLabel,
     this.customerId,
     this.customer,
     this.storeId,
@@ -184,12 +192,14 @@ class GetOrderDetailsModelData {
     this.subtotal,
     this.discountAmount,
     this.serviceFee,
+    this.deliveryFee,
     this.totalAmount,
     this.cancellationFeeAmount,
     this.cancellationPolicySnapshot,
     this.specialInstructions,
     this.cancelledAt,
     this.cancellationReason,
+    this.deliverySummary,
     this.items,
     this.statusLogs,
     this.disputes,
@@ -201,6 +211,9 @@ class GetOrderDetailsModelData {
   factory GetOrderDetailsModelData.fromJson(Map<String, dynamic> json) {
     return GetOrderDetailsModelData(
       id: _asInt(json['id']),
+      deliveryOrderId: _asInt(json['deliveryOrderId']),
+      fulfillmentType: _asString(json['fulfillmentType']),
+      fulfillmentTypeLabel: _asString(json['fulfillmentTypeLabel']),
       customerId: _asInt(json['customerId']),
       customer: json['customer'] is Map
           ? GetOrderDetailsModelDataCustomer.fromJson(
@@ -226,6 +239,7 @@ class GetOrderDetailsModelData {
       subtotal: _asString(json['subtotal']),
       discountAmount: _asString(json['discountAmount']),
       serviceFee: _asString(json['serviceFee']),
+      deliveryFee: _asString(json['deliveryFee']),
       totalAmount: _asString(json['totalAmount']),
       cancellationFeeAmount: _asDynamic(json['cancellationFeeAmount']),
       cancellationPolicySnapshot: _asDynamic(
@@ -234,6 +248,7 @@ class GetOrderDetailsModelData {
       specialInstructions: _asDynamic(json['specialInstructions']),
       cancelledAt: _asDynamic(json['cancelledAt']),
       cancellationReason: _asDynamic(json['cancellationReason']),
+      deliverySummary: _asDynamic(json['deliverySummary']),
       items: json['items'] is List
           ? (json['items'] as List)
                 .whereType<Map>()
@@ -259,6 +274,9 @@ class GetOrderDetailsModelData {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'deliveryOrderId': deliveryOrderId,
+      'fulfillmentType': fulfillmentType,
+      'fulfillmentTypeLabel': fulfillmentTypeLabel,
       'customerId': customerId,
       'customer': customer?.toJson(),
       'storeId': storeId,
@@ -276,12 +294,14 @@ class GetOrderDetailsModelData {
       'subtotal': subtotal,
       'discountAmount': discountAmount,
       'serviceFee': serviceFee,
+      'deliveryFee': deliveryFee,
       'totalAmount': totalAmount,
       'cancellationFeeAmount': cancellationFeeAmount,
       'cancellationPolicySnapshot': cancellationPolicySnapshot,
       'specialInstructions': specialInstructions,
       'cancelledAt': cancelledAt,
       'cancellationReason': cancellationReason,
+      'deliverySummary': deliverySummary,
       'items': items?.map((item) => item.toJson()).toList(),
       'statusLogs': statusLogs,
       'disputes': disputes,
@@ -348,6 +368,11 @@ class GetOrderDetailsModelDataItemsItem {
   String? unitPrice;
   String? totalPrice;
   String? productName;
+  List<dynamic>? modifierSnapshot;
+  int? substituteProductId;
+  GetOrderDetailsModelDataItemsItemProduct? substituteProduct;
+  String? note;
+  bool? isAvailableInStock;
   String? createdAt;
   String? updatedAt;
 
@@ -360,6 +385,11 @@ class GetOrderDetailsModelDataItemsItem {
     this.unitPrice,
     this.totalPrice,
     this.productName,
+    this.modifierSnapshot,
+    this.substituteProductId,
+    this.substituteProduct,
+    this.note,
+    this.isAvailableInStock,
     this.createdAt,
     this.updatedAt,
   });
@@ -380,6 +410,15 @@ class GetOrderDetailsModelDataItemsItem {
       unitPrice: _asString(json['unitPrice']),
       totalPrice: _asString(json['totalPrice']),
       productName: _asString(json['productName']),
+      modifierSnapshot: _asDynamicList(json['modifierSnapshot']),
+      substituteProductId: _asInt(json['substituteProductId']),
+      substituteProduct: json['substituteProduct'] is Map
+          ? GetOrderDetailsModelDataItemsItemProduct.fromJson(
+              Map<String, dynamic>.from(json['substituteProduct'] as Map),
+            )
+          : null,
+      note: _asString(json['note']),
+      isAvailableInStock: _asBool(json['isAvailableInStock']),
       createdAt: _asString(json['createdAt']),
       updatedAt: _asString(json['updatedAt']),
     );
@@ -395,6 +434,11 @@ class GetOrderDetailsModelDataItemsItem {
       'unitPrice': unitPrice,
       'totalPrice': totalPrice,
       'productName': productName,
+      'modifierSnapshot': modifierSnapshot,
+      'substituteProductId': substituteProductId,
+      'substituteProduct': substituteProduct?.toJson(),
+      'note': note,
+      'isAvailableInStock': isAvailableInStock,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
     };
@@ -628,7 +672,7 @@ class OrderDetails {
       expectedDeliveryAt: _asString(json['expected_delivery_at']),
       expectedDeliveryTime: _asString(json['expected_delivery_time']),
       deliveredAt: _asString(json['delivered_at']),
-      deliveredTime: _asString(json['delivery_duration_minutes']),
+      deliveredTime: _asString(json['delivered_time']),
       deliveryDurationMinutes: _asInt(json['delivery_duration_minutes']),
       deliveryDurationText: _asString(json['delivery_duration_text']),
     );
