@@ -86,6 +86,8 @@ class OrdersRemoteDataSource with HandlingApiManager {
         '/api/v1/store-owner/orders/${params.orderId}/ready-for-pickup',
       OrderLifecycleAction.courierHandover =>
         '/api/v1/store-owner/orders/${params.orderId}/courier-handover',
+      OrderLifecycleAction.completeCustomerPickup =>
+        '/api/v1/store-owner/orders/${params.orderId}/customer-pickup-complete',
     };
 
     return wrapHandlingApi(
