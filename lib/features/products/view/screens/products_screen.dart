@@ -21,6 +21,7 @@ import '../widgets/loadings/products_list_loading.dart';
 import '../widgets/loadings/products_tab_bar_loading.dart';
 import '../widgets/loadings/state_pointer_loading.dart';
 import '../widgets/product_card.dart';
+import '../widgets/product_options_editor_dialog.dart';
 import '../widgets/products_tab_bar.dart';
 import '../widgets/state_pointer.dart';
 import 'add_product_details_screen.dart';
@@ -304,6 +305,21 @@ class _ProductsScreenState extends State<ProductsScreen> {
                                               search: search,
                                             ),
                                           ),
+                                        );
+                                      }
+                                    },
+                                    onOptions: (p) async {
+                                      final changed = await showDialog<bool>(
+                                        context: context,
+                                        builder: (_) =>
+                                            ProductOptionsEditorDialog(
+                                              product: p,
+                                            ),
+                                      );
+                                      if (changed == true && context.mounted) {
+                                        _getProducts(
+                                          context,
+                                          isReload: true,
                                         );
                                       }
                                     },
