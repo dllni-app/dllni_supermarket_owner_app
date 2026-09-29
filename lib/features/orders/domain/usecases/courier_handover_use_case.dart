@@ -21,6 +21,7 @@ enum OrderLifecycleAction {
   markPreparing,
   markReadyForPickup,
   courierHandover,
+  completeCustomerPickup,
 }
 
 class CourierHandoverParams with Params {
