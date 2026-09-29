@@ -19,18 +19,28 @@ class OrderDetailsAppBar extends StatelessWidget {
   final String title;
   final String productId;
 
-  OrderLifecycleAction _lifecycleActionForStatus(String? status) {
+  OrderLifecycleAction _lifecycleActionForStatus(
+    String? status,
+    String? fulfillmentType,
+  ) {
     return switch (status) {
       'accepted' => OrderLifecycleAction.markPreparing,
       'preparing' => OrderLifecycleAction.markReadyForPickup,
+      'ready_for_pickup' when fulfillmentType == 'pickup' =>
+        OrderLifecycleAction.completeCustomerPickup,
       _ => OrderLifecycleAction.courierHandover,
     };
   }
 
-  String? _actionTitleForStatus(String? status) {
+  String? _actionTitleForStatus(
+    String? status,
+    String? fulfillmentType,
+  ) {
     return switch (status) {
       'accepted' => 'بدء التحضير',
       'preparing' => 'جاهز للاستلام',
+      'ready_for_pickup' when fulfillmentType == 'pickup' =>
+        'تسليم الطلب للعميل',
       'ready_for_pickup' => 'تسليم للمندوب',
       _ => null,
     };
@@ -93,8 +103,10 @@ class OrderDetailsAppBar extends StatelessWidget {
           previous.courierHandoverLoadingOrderId !=
               current.courierHandoverLoadingOrderId,
       builder: (context, state) {
-        final status = state.orderDetails?.data?.status;
-        final actionTitle = _actionTitleForStatus(status);
+        final data = state.orderDetails?.data;
+        final status = data?.status;
+        final fulfillmentType = data?.fulfillmentType;
+        final actionTitle = _actionTitleForStatus(status, fulfillmentType);
         final canEditEstimate =
             orderId != null && _canEditPreparationEstimate(status);
         final canChangeStatus = orderId != null &&
@@ -207,7 +219,10 @@ class OrderDetailsAppBar extends StatelessWidget {
                                   CourierHandoverEvent(
                                     params: CourierHandoverParams(
                                       orderId: orderId!,
-                                      action: _lifecycleActionForStatus(status),
+                                      action: _lifecycleActionForStatus(
+                                        status,
+                                        fulfillmentType,
+                                      ),
                                     ),
                                   ),
                                 );
