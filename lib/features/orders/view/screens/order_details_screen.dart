@@ -9,6 +9,8 @@ import 'package:toastification/toastification.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/services/store_owner_operations_service.dart';
+import 'package:common_package/helpers/dio_network.dart';
 import '../../../../core/themes/app_colors.dart';
 import '../../../../core/themes/app_shadows.dart';
 import '../../data/models/get_order_details_model.dart';
@@ -28,6 +30,19 @@ String _formatMoney(String? value) {
   if (amount == null) return _safeText(value, fallback: '0');
   if (amount == amount.roundToDouble()) return amount.toStringAsFixed(0);
   return amount.toStringAsFixed(2);
+}
+
+String _modifierLabel(dynamic modifier) {
+  if (modifier is Map) {
+    final group = _safeText(modifier['groupName'], fallback: '');
+    final name = _safeText(modifier['name'], fallback: '');
+    final price = double.tryParse('${modifier['price'] ?? ''}') ?? 0;
+    final title = group.isEmpty ? name : '$group: $name';
+    return price > 0
+        ? '$title (+${_formatMoney('$price')} ل.س)'
+        : title;
+  }
+  return 'خيار #${_safeText(modifier)}';
 }
 
 String _formatTime(String? value) {
@@ -154,10 +169,21 @@ class OrderDetailsScreen extends StatelessWidget {
                       return Column(
                         children: [
                           _OrderStatusCard(data: data),
+                          _OrderManagementActions(
+                            orderId: orderId,
+                            data: data,
+                          ),
                           const SizedBox(height: 13),
                           _OrderInfoCard(data: data),
                           const SizedBox(height: 13),
-                          _CustomerCard(customer: data.customer),
+                          _CustomerCard(
+                            customer: data.customer,
+                            fulfillmentLabel:
+                                data.fulfillmentTypeLabel ??
+                                (data.fulfillmentType == 'pickup'
+                                    ? 'استلام من المتجر'
+                                    : 'توصيل'),
+                          ),
                           if (data.store != null) ...[
                             const SizedBox(height: 13),
                             _StoreCard(store: data.store!),
@@ -169,6 +195,7 @@ class OrderDetailsScreen extends StatelessWidget {
                             price: data.subtotal,
                             discount: data.discountAmount,
                             fees: data.serviceFee,
+                            deliveryFee: data.deliveryFee,
                             totalPrice: data.totalAmount,
                           ),
                         ],
@@ -191,12 +218,14 @@ class _BillCard extends StatelessWidget {
   final String? price;
   final String? discount;
   final String? fees;
+  final String? deliveryFee;
   final String? totalPrice;
 
   const _BillCard({
     required this.price,
     required this.discount,
     required this.fees,
+    required this.deliveryFee,
     required this.totalPrice,
   });
 
@@ -228,6 +257,12 @@ class _BillCard extends StatelessWidget {
             label: 'تكلفة الخدمة',
             value: '+ ${_formatMoney(fees)} ل.س',
             valueColor: const Color(0xFFEF4444),
+          ),
+          const SizedBox(height: 10),
+          _PaymentRow(
+            label: 'رسوم التوصيل',
+            value: '+ ${_formatMoney(deliveryFee)} ل.س',
+            valueColor: const Color(0xFF2563EB),
           ),
           const SizedBox(height: 12),
           Container(
@@ -263,7 +298,7 @@ class _BillCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: AppText(
-                    'نقداً عند الاستلام',
+                    'طريقة الدفع غير متوفرة في بيانات الطلب',
                     textAlign: TextAlign.start,
                     style: const TextStyle(
                       color: Color(0xFF111827),
@@ -283,8 +318,12 @@ class _BillCard extends StatelessWidget {
 
 class _CustomerCard extends StatelessWidget {
   final GetOrderDetailsModelDataCustomer? customer;
+  final String fulfillmentLabel;
 
-  const _CustomerCard({required this.customer});
+  const _CustomerCard({
+    required this.customer,
+    required this.fulfillmentLabel,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -295,10 +334,10 @@ class _CustomerCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const _SectionTitle(
+          _SectionTitle(
             title: 'معلومات الزبون',
             icon: Icons.person_rounded,
-            trailing: 'توصيل',
+            trailing: fulfillmentLabel,
           ),
           const SizedBox(height: 16),
           Row(
@@ -645,7 +684,7 @@ class _OrderInfoCard extends StatelessWidget {
                 flex: 3,
                 child: _InfoTile(
                   title: 'نوع الاستلام',
-                  value: _pickupModeLabel(data.pickupMode),
+                  value: data.fulfillmentTypeLabel ?? _pickupModeLabel(data.fulfillmentType ?? data.pickupMode),
                   icon: Icons.delivery_dining_rounded,
                 ),
               ),
@@ -952,6 +991,34 @@ class _ProductDetails extends StatelessWidget {
                     _MiniBadge(label: '$unitPrice ل.س للقطعة'),
                   ],
                 ),
+                if (orderItem.modifierSnapshot?.isNotEmpty ?? false) ...[
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: orderItem.modifierSnapshot!
+                        .map(
+                          (modifier) =>
+                              _MiniBadge(label: _modifierLabel(modifier)),
+                        )
+                        .toList(growable: false),
+                  ),
+                ],
+                if (orderItem.substituteProduct != null) ...[
+                  const SizedBox(height: 8),
+                  _InlineInfo(
+                    icon: Icons.swap_horiz_rounded,
+                    value:
+                        'البديل المقبول: ${_safeText(orderItem.substituteProduct?.name)}',
+                  ),
+                ],
+                if ((orderItem.note ?? '').trim().isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  _InlineInfo(
+                    icon: Icons.sticky_note_2_outlined,
+                    value: 'ملاحظة المنتج: ${orderItem.note!.trim()}',
+                  ),
+                ],
               ],
             ),
           ),
@@ -968,6 +1035,316 @@ class _ProductDetails extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class _OrderManagementActions extends StatefulWidget {
+  final int orderId;
+  final GetOrderDetailsModelData data;
+
+  const _OrderManagementActions({
+    required this.orderId,
+    required this.data,
+  });
+
+  @override
+  State<_OrderManagementActions> createState() =>
+      _OrderManagementActionsState();
+}
+
+class _OrderManagementActionsState extends State<_OrderManagementActions> {
+  bool _busy = false;
+
+  StoreOwnerOperationsService get _operations =>
+      StoreOwnerOperationsService(getIt<DioNetwork>());
+
+  @override
+  Widget build(BuildContext context) {
+    final status =
+        widget.data.orderDetails?.currentStatus ?? widget.data.status ?? '';
+    final canCancel = const {
+      'accepted',
+      'preparing',
+      'ready_for_pickup',
+    }.contains(status);
+    final canReturn = const {'completed', 'delivered'}.contains(status);
+
+    if (!canCancel && !canReturn) {
+      return const SizedBox.shrink();
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 13),
+      child: _SectionCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const _SectionTitle(
+              title: 'إجراءات الطلب',
+              icon: Icons.rule_rounded,
+            ),
+            const SizedBox(height: 12),
+            if (_busy)
+              const Center(child: CircularProgressIndicator.adaptive())
+            else
+              Row(
+                children: [
+                  if (canCancel)
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: _cancelOrder,
+                        icon: const Icon(Icons.cancel_outlined),
+                        label: const Text('إلغاء الطلب'),
+                      ),
+                    ),
+                  if (canCancel && canReturn) const SizedBox(width: 8),
+                  if (canReturn)
+                    Expanded(
+                      child: FilledButton.icon(
+                        onPressed: _returnOrder,
+                        icon: const Icon(Icons.assignment_return_rounded),
+                        label: const Text('إرجاع منتجات'),
+                      ),
+                    ),
+                ],
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _cancelOrder() async {
+    final reason = await _promptReason(
+      title: 'إلغاء الطلب',
+      hint: 'اكتب سبب الإلغاء بوضوح',
+    );
+    if (reason == null || !mounted) return;
+
+    await _run(
+      () => _operations.cancelOrder(
+        orderId: widget.orderId,
+        reason: reason,
+      ),
+      successMessage: 'تم إلغاء الطلب',
+    );
+  }
+
+  Future<void> _returnOrder() async {
+    final payload = await _promptReturn();
+    if (payload == null || !mounted) return;
+
+    await _run(
+      () => _operations.returnOrder(
+        orderId: widget.orderId,
+        items: List<Map<String, dynamic>>.from(payload['items'] as List),
+        reason: payload['reason'] as String,
+      ),
+      successMessage: 'تم تسجيل الإرجاع وتحديث المخزون',
+    );
+  }
+
+  Future<void> _run(
+    Future<Map<String, dynamic>> Function() action, {
+    required String successMessage,
+  }) async {
+    setState(() => _busy = true);
+    try {
+      await action();
+      if (!mounted) return;
+      AppToast.showToast(
+        context: context,
+        message: successMessage,
+        type: ToastificationType.success,
+      );
+      context.read<OrdersBloc>().add(
+        GetOrderDetailsEvent(
+          params: GetOrderDetailsParams(orderId: widget.orderId),
+        ),
+      );
+    } on StoreOwnerOperationException catch (error) {
+      if (!mounted) return;
+      AppToast.showToast(
+        context: context,
+        message: error.message,
+        type: ToastificationType.error,
+      );
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<String?> _promptReason({
+    required String title,
+    required String hint,
+  }) async {
+    final controller = TextEditingController();
+    String? error;
+
+    final result = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: Text(title),
+          content: TextField(
+            controller: controller,
+            minLines: 2,
+            maxLines: 4,
+            decoration: InputDecoration(
+              hintText: hint,
+              errorText: error,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('تراجع'),
+            ),
+            FilledButton(
+              onPressed: () {
+                final value = controller.text.trim();
+                if (value.length < 5) {
+                  setDialogState(
+                    () => error = 'السبب يجب أن يكون 5 أحرف على الأقل',
+                  );
+                  return;
+                }
+                Navigator.pop(dialogContext, value);
+              },
+              child: const Text('تأكيد'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    controller.dispose();
+    return result;
+  }
+
+  Future<Map<String, dynamic>?> _promptReturn() async {
+    final items = widget.data.items ?? const [];
+    if (items.isEmpty) return null;
+
+    final quantityControllers = <int, TextEditingController>{};
+    for (final item in items) {
+      if (item.id != null) {
+        quantityControllers[item.id!] = TextEditingController(text: '0');
+      }
+    }
+    final reasonController = TextEditingController();
+    String? error;
+
+    final result = await showDialog<Map<String, dynamic>>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('إرجاع منتجات'),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: ListView(
+              shrinkWrap: true,
+              children: [
+                const Text(
+                  'حدد الكمية المراد إرجاعها من كل منتج. اترك 0 للمنتجات غير المرجعة.',
+                ),
+                const SizedBox(height: 12),
+                for (final item in items)
+                  if (item.id != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: TextField(
+                        controller: quantityControllers[item.id],
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          labelText:
+                              '${item.productName ?? item.product?.name ?? 'منتج'} (الحد: ${item.quantity ?? 0})',
+                        ),
+                      ),
+                    ),
+                TextField(
+                  controller: reasonController,
+                  minLines: 2,
+                  maxLines: 4,
+                  decoration: const InputDecoration(
+                    labelText: 'سبب الإرجاع',
+                  ),
+                ),
+                if (error != null) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    error!,
+                    style: const TextStyle(color: Colors.red),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('تراجع'),
+            ),
+            FilledButton(
+              onPressed: () {
+                final selected = <Map<String, dynamic>>[];
+                var invalidQuantity = false;
+
+                for (final item in items) {
+                  final id = item.id;
+                  if (id == null) continue;
+                  final quantity =
+                      int.tryParse(quantityControllers[id]?.text.trim() ?? '') ??
+                      0;
+                  if (quantity < 0 || quantity > (item.quantity ?? 0)) {
+                    invalidQuantity = true;
+                    break;
+                  }
+                  if (quantity > 0) {
+                    selected.add({
+                      'order_item_id': id,
+                      'quantity': quantity,
+                    });
+                  }
+                }
+
+                final reason = reasonController.text.trim();
+                if (invalidQuantity) {
+                  setDialogState(
+                    () => error = 'إحدى الكميات أكبر من الكمية المطلوبة',
+                  );
+                  return;
+                }
+                if (selected.isEmpty) {
+                  setDialogState(
+                    () => error = 'حدد منتجًا واحدًا على الأقل للإرجاع',
+                  );
+                  return;
+                }
+                if (reason.length < 5) {
+                  setDialogState(
+                    () => error = 'سبب الإرجاع يجب أن يكون 5 أحرف على الأقل',
+                  );
+                  return;
+                }
+
+                Navigator.pop(dialogContext, {
+                  'items': selected,
+                  'reason': reason,
+                });
+              },
+              child: const Text('تأكيد الإرجاع'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    for (final controller in quantityControllers.values) {
+      controller.dispose();
+    }
+    reasonController.dispose();
+    return result;
   }
 }
 
