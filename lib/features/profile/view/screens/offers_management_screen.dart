@@ -4,14 +4,18 @@ import 'package:dllni_supermarket_owner_app/features/profile/domain/usecases/get
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:toastification/toastification.dart';
+import 'package:common_package/helpers/dio_network.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/services/store_owner_operations_service.dart';
 import '../../../../core/widgets/app_app_bars.dart';
 import '../../../../core/widgets/failure_widget.dart';
 import '../../domain/usecases/get_offer_codes_use_case.dart';
 import '../manager/bloc/profile_bloc.dart';
 import '../widgets/coupons_filter_card.dart';
 import '../widgets/offer_card.dart';
+import '../widgets/promotion_edit_dialogs.dart';
 import '../widgets/offers_statistics_grid.dart';
 import 'create_offer_screen.dart';
 
@@ -27,6 +31,131 @@ class _OffersManagementScreenState extends State<OffersManagementScreen> {
   String? search, sort;
   int selectedTab = 0;
   List<int> selectedProductIds = [];
+
+  StoreOwnerOperationsService get _operations =>
+      StoreOwnerOperationsService(getIt<DioNetwork>());
+
+  void _reloadOffers(BuildContext context) {
+    context.read<ProfileBloc>().add(
+      GetOfferCodesEvent(
+        isReload: true,
+        params: GetOfferCodesParams(
+          storeId: 1,
+          search: search,
+          isActive: selectedTab == 1
+              ? true
+              : selectedTab == 2
+              ? false
+              : null,
+        ),
+      ),
+    );
+    context.read<ProfileBloc>().add(
+      GetOffersWeeklySummaryEvent(
+        params: GetOffersWeeklySummaryParams(storeId: 1),
+      ),
+    );
+  }
+
+  Future<void> _editOffer(
+    BuildContext context,
+    GetOfferCodesModelDataItem offer,
+  ) async {
+    final id = offer.id;
+    if (id == null) return;
+    final body = await showOfferEditDialog(context, offer);
+    if (body == null || !context.mounted) return;
+    await _runOfferAction(
+      context,
+      () => _operations.updateOffer(offerId: id, body: body),
+      'تم تحديث العرض',
+    );
+  }
+
+  Future<void> _toggleOffer(
+    BuildContext context,
+    GetOfferCodesModelDataItem offer,
+  ) async {
+    final id = offer.id;
+    if (id == null) return;
+    final active = !(offer.isActive ?? false);
+    await _runOfferAction(
+      context,
+      () => _operations.updateOffer(
+        offerId: id,
+        body: {'isActive': active},
+      ),
+      active ? 'تم تفعيل العرض' : 'تم تعطيل العرض',
+    );
+  }
+
+  Future<void> _deleteOffer(
+    BuildContext context,
+    GetOfferCodesModelDataItem offer,
+  ) async {
+    final id = offer.id;
+    if (id == null) return;
+    final confirmed = await _confirmDelete(
+      context,
+      'حذف العرض',
+      'هل تريد حذف العرض «${offer.name ?? ''}» نهائيًا؟',
+    );
+    if (!confirmed || !context.mounted) return;
+    await _runOfferAction(
+      context,
+      () => _operations.deleteOffer(id),
+      'تم حذف العرض',
+    );
+  }
+
+  Future<void> _runOfferAction(
+    BuildContext context,
+    Future<Map<String, dynamic>> Function() action,
+    String successMessage,
+  ) async {
+    try {
+      await action();
+      if (!context.mounted) return;
+      AppToast.showToast(
+        context: context,
+        message: successMessage,
+        type: ToastificationType.success,
+      );
+      _reloadOffers(context);
+    } on StoreOwnerOperationException catch (error) {
+      if (!context.mounted) return;
+      AppToast.showToast(
+        context: context,
+        message: error.message,
+        type: ToastificationType.error,
+      );
+    }
+  }
+
+  Future<bool> _confirmDelete(
+    BuildContext context,
+    String title,
+    String message,
+  ) async {
+    return await showDialog<bool>(
+          context: context,
+          builder: (dialogContext) => AlertDialog(
+            title: Text(title),
+            content: Text(message),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, false),
+                child: const Text('إلغاء'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(dialogContext, true),
+                child: const Text('حذف'),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -212,7 +341,13 @@ class _OffersManagementScreenState extends State<OffersManagementScreen> {
                                   0) {
                             return SizedBox();
                           }
-                          return OfferCard(offer: state.offerCodes![index]);
+                          final offer = state.offerCodes![index];
+                          return OfferCard(
+                            offer: offer,
+                            onEdit: () => _editOffer(context, offer),
+                            onToggle: () => _toggleOffer(context, offer),
+                            onDelete: () => _deleteOffer(context, offer),
+                          );
                         },
                         separatorBuilder: (context, index) {
                           // a expired coupon
