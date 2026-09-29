@@ -17,57 +17,11 @@ int? _asInt(dynamic value) {
   return null;
 }
 
-double? _asDouble(dynamic value) {
-  if (value == null) return null;
-  if (value is double) return value;
-  if (value is num) return value.toDouble();
-  if (value is String) return double.tryParse(value);
-  return null;
-}
-
 num? _asNum(dynamic value) {
   if (value == null) return null;
   if (value is num) return value;
   if (value is String) return num.tryParse(value);
   return null;
-}
-
-bool? _asBool(dynamic value) {
-  if (value == null) return null;
-  if (value is bool) return value;
-  if (value is num) {
-    if (value == 1) return true;
-    if (value == 0) return false;
-  }
-  if (value is String) {
-    final normalized = value.trim().toLowerCase();
-    if (normalized == 'true' || normalized == '1') return true;
-    if (normalized == 'false' || normalized == '0') return false;
-  }
-  return null;
-}
-
-List<dynamic>? _asDynamicList(dynamic value) {
-  if (value is! List) return null;
-  return value.map(_asDynamic).toList();
-}
-
-dynamic _asDynamic(dynamic value) {
-  if (value == null) return null;
-  if (value is List) {
-    return value.map(_asDynamic).toList();
-  }
-  if (value is Map) {
-    final map = <String, dynamic>{};
-    value.forEach((key, nestedValue) {
-      map['$key'] = _asDynamic(nestedValue);
-    });
-    return map;
-  }
-  if (value is String || value is num || value is bool) {
-    return value;
-  }
-  return value.toString();
 }
 
 GetDashboardOverviewModel getDashboardOverviewModelFromJson(str) =>
@@ -112,6 +66,11 @@ class GetDashboardOverviewModelData {
   int? pendingOrders;
   int? totalSales;
   int? salesPercentageChange;
+  num? merchantGrossSales;
+  num? merchantNetSales;
+  num? platformCommission;
+  num? merchantCouponFunding;
+  int? unsnapshottedOrders;
 
   GetDashboardOverviewModelData({
     this.totalOrders,
@@ -120,6 +79,11 @@ class GetDashboardOverviewModelData {
     this.pendingOrders,
     this.totalSales,
     this.salesPercentageChange,
+    this.merchantGrossSales,
+    this.merchantNetSales,
+    this.platformCommission,
+    this.merchantCouponFunding,
+    this.unsnapshottedOrders,
   });
 
   factory GetDashboardOverviewModelData.fromJson(Map<String, dynamic> json) {
@@ -130,6 +94,11 @@ class GetDashboardOverviewModelData {
       pendingOrders: _asInt(json['pendingOrders']),
       totalSales: _asInt(json['totalSales']),
       salesPercentageChange: _asInt(json['salesPercentageChange']),
+      merchantGrossSales: _asNum(json['merchantGrossSales']),
+      merchantNetSales: _asNum(json['merchantNetSales']),
+      platformCommission: _asNum(json['platformCommission']),
+      merchantCouponFunding: _asNum(json['merchantCouponFunding']),
+      unsnapshottedOrders: _asInt(json['unsnapshottedOrders']),
     );
   }
 
@@ -141,6 +110,11 @@ class GetDashboardOverviewModelData {
       'pendingOrders': pendingOrders,
       'totalSales': totalSales,
       'salesPercentageChange': salesPercentageChange,
+      'merchantGrossSales': merchantGrossSales,
+      'merchantNetSales': merchantNetSales,
+      'platformCommission': platformCommission,
+      'merchantCouponFunding': merchantCouponFunding,
+      'unsnapshottedOrders': unsnapshottedOrders,
     };
   }
 }

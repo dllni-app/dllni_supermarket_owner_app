@@ -154,6 +154,29 @@ class OverviewSection extends StatelessWidget {
                                   ),
                                 ],
                               ),
+                              const SizedBox(height: 8),
+                              AppText(
+                                "صافي مستحق المتجر: ${state.dashboardOverview?.data?.merchantNetSales?.formatWithComma() ?? '-'} ل.س",
+                                style: const TextStyle(
+                                  color: Color(0xFFFFEEFF),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              AppText(
+                                "عمولة المنصة: ${state.dashboardOverview?.data?.platformCommission?.formatWithComma() ?? '-'} ل.س",
+                                style: const TextStyle(
+                                  color: Color(0xB3FFEEFF),
+                                  fontSize: 11,
+                                ),
+                              ),
+                              AppText(
+                                "تحمل المتجر من كوبونات المنصة: ${state.dashboardOverview?.data?.merchantCouponFunding?.formatWithComma() ?? '-'} ل.س",
+                                style: const TextStyle(
+                                  color: Color(0xB3FFEEFF),
+                                  fontSize: 11,
+                                ),
+                              ),
                             ],
                           ),
                         ),
