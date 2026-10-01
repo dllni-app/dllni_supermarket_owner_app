@@ -613,7 +613,6 @@ UpdateStoreProductBody buildUpdateStoreProductBody(
     image = null;
   }
   final images = <dynamic>[
-    ...params.existingAdditionalImageUrls,
     if (params.additionalImagesPath != null)
       for (final path in params.additionalImagesPath!) File(path),
   ];
