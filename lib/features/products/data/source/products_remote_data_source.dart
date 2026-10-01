@@ -116,12 +116,19 @@ class ProductsRemoteDataSource with HandlingApiManager {
   }
 
   Future<UpdateProductModel> updateProduct(UpdateProductParams params) {
+    final body = params.getBody();
     return wrapHandlingApi(
-      tryCall: () => dioNetwork.putData(
-        endPoint: '/api/v1/store-owner/products/${params.productId}',
-        data: params.getBody(),
-        params: params.getParams(),
-      ),
+      tryCall: () => params.requiresMultipartMethodOverride
+          ? dioNetwork.postData(
+              endPoint: '/api/v1/store-owner/products/${params.productId}',
+              data: <String, dynamic>{...body, '_method': 'PUT'},
+              params: params.getParams(),
+            )
+          : dioNetwork.putData(
+              endPoint: '/api/v1/store-owner/products/${params.productId}',
+              data: body,
+              params: params.getParams(),
+            ),
       jsonConvert: updateProductModelFromJson,
     );
   }

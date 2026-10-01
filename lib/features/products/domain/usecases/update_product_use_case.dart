@@ -55,6 +55,9 @@ class UpdateStoreProductBody {
     this.images,
   });
 
+  bool get hasFileUpload =>
+      image is File || (images?.any((item) => item is File) ?? false);
+
   Map<String, dynamic> toMap() {
     final imgs = images;
     return {
@@ -105,6 +108,9 @@ class UpdateProductParams with Params {
     this.isActive,
     this.fullUpdate,
   });
+
+  bool get requiresMultipartMethodOverride =>
+      fullUpdate?.hasFileUpload ?? false;
 
   @override
   BodyMap getBody() {

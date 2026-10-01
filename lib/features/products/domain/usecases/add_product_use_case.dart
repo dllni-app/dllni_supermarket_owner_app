@@ -39,5 +39,10 @@ class AddProductParams with Params {
     if (params.expiredAt != null) "expiresAt": params.expiredAt,
     "isAvailable": 1,
     "image": File(params.mainImagePath!),
+    if (params.additionalImagesPath != null &&
+        params.additionalImagesPath!.isNotEmpty)
+      "images": params.additionalImagesPath!
+          .map((path) => File(path))
+          .toList(),
   };
 }
