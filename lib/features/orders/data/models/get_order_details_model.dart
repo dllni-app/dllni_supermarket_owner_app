@@ -147,6 +147,7 @@ class GetOrderDetailsModelData {
   String? pickupMode;
   String? fulfillmentType;
   int? deliveryOrderId;
+  int? deliveryDriverId;
   dynamic pickupScheduledFor;
   String? readyForPickupAt;
   dynamic pickedUpAt;
@@ -181,6 +182,7 @@ class GetOrderDetailsModelData {
     this.pickupMode,
     this.fulfillmentType,
     this.deliveryOrderId,
+    this.deliveryDriverId,
     this.pickupScheduledFor,
     this.readyForPickupAt,
     this.pickedUpAt,
@@ -225,6 +227,7 @@ class GetOrderDetailsModelData {
       pickupMode: _asString(json['pickupMode']),
       fulfillmentType: _asString(json['fulfillmentType']),
       deliveryOrderId: _asInt(json['deliveryOrderId']),
+      deliveryDriverId: _asInt(json['deliveryDriverId']),
       pickupScheduledFor: _asDynamic(json['pickupScheduledFor']),
       readyForPickupAt: _asString(json['readyForPickupAt']),
       pickedUpAt: _asDynamic(json['pickedUpAt']),
@@ -277,6 +280,7 @@ class GetOrderDetailsModelData {
       'pickupMode': pickupMode,
       'fulfillmentType': fulfillmentType,
       'deliveryOrderId': deliveryOrderId,
+      'deliveryDriverId': deliveryDriverId,
       'pickupScheduledFor': pickupScheduledFor,
       'readyForPickupAt': readyForPickupAt,
       'pickedUpAt': pickedUpAt,

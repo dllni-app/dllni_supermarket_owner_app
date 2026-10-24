@@ -23,6 +23,7 @@ void main() {
       'fulfillmentType': 'delivery',
       'deliveryOrderId': 27,
       'pickupMode': 'immediate_pickup',
+      'deliveryDriverId': 81,
     };
     final detail = GetOrderDetailsModelData.fromJson(json);
     final listed = GetOrdersModelDataItem.fromJson(json);
@@ -32,5 +33,6 @@ void main() {
     );
     expect(listed.fulfillmentType, 'delivery');
     expect(listed.deliveryOrderId, 27);
+    expect(detail.deliveryDriverId, 81);
   });
 }

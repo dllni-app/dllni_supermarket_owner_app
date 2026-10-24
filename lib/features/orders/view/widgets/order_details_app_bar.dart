@@ -106,7 +106,13 @@ class OrderDetailsAppBar extends StatelessWidget {
           state.orderDetails?.data?.fulfillmentType,
           state.orderDetails?.data?.deliveryOrderId,
         );
-        final actionTitle = _actionTitleForStatus(status, isDelivery);
+        final waitingForCourier =
+            status == 'ready_for_pickup' &&
+            isDelivery &&
+            state.orderDetails?.data?.deliveryDriverId == null;
+        final actionTitle = waitingForCourier
+            ? 'بانتظار تعيين المندوب'
+            : _actionTitleForStatus(status, isDelivery);
         final canEditEstimate =
             orderId != null && _canEditPreparationEstimate(status);
         final canChangeStatus =
@@ -212,7 +218,7 @@ class OrderDetailsAppBar extends StatelessWidget {
                     title: actionTitle!,
                     color: _actionColorForStatus(status),
                     isLoading: isLoading,
-                    onTap: isLoading
+                    onTap: isLoading || waitingForCourier
                         ? null
                         : () {
                             context.read<OrdersBloc>().add(
