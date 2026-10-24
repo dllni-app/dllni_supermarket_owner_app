@@ -1,6 +1,7 @@
 import 'package:common_package/common_package.dart';
 import 'package:dllni_supermarket_owner_app/core/widgets/failure_widget.dart';
 import 'package:flutter/material.dart';
+import '../../data/models/supermarket_fulfillment.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -645,7 +646,11 @@ class _OrderInfoCard extends StatelessWidget {
                 flex: 3,
                 child: _InfoTile(
                   title: 'نوع الاستلام',
-                  value: _pickupModeLabel(data.pickupMode),
+                  value: supermarketFulfillmentLabel(
+                    data.fulfillmentType,
+                    data.deliveryOrderId,
+                    data.pickupMode,
+                  ),
                   icon: Icons.delivery_dining_rounded,
                 ),
               ),
@@ -695,15 +700,6 @@ class _OrderInfoCard extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  String _pickupModeLabel(String? value) {
-    return switch (value) {
-      'delivery' => 'توصيل',
-      'pickup' => 'استلام من المتجر',
-      "immediate_pickup" => 'استلام فوري من المتجر',
-      _ => _safeText(value, fallback: 'توصيل'),
-    };
   }
 }
 

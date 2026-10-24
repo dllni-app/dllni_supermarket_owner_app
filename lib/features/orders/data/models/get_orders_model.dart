@@ -74,43 +74,59 @@ GetOrdersModel getOrdersModelFromJson(str) => GetOrdersModel.fromJson(str);
 
 String getOrdersModelToJson(GetOrdersModel data) => json.encode(data.toJson());
 
+GetOrdersModelMeta getOrdersModelMetaFromJson(str) =>
+    GetOrdersModelMeta.fromJson(str);
 
-GetOrdersModelMeta getOrdersModelMetaFromJson(str) => GetOrdersModelMeta.fromJson(str);
+String getOrdersModelMetaToJson(GetOrdersModelMeta data) =>
+    json.encode(data.toJson());
 
-String getOrdersModelMetaToJson(GetOrdersModelMeta data) => json.encode(data.toJson());
+GetOrdersModelMetaLinksItem getOrdersModelMetaLinksItemFromJson(str) =>
+    GetOrdersModelMetaLinksItem.fromJson(str);
 
+String getOrdersModelMetaLinksItemToJson(GetOrdersModelMetaLinksItem data) =>
+    json.encode(data.toJson());
 
-GetOrdersModelMetaLinksItem getOrdersModelMetaLinksItemFromJson(str) => GetOrdersModelMetaLinksItem.fromJson(str);
+GetOrdersModelLinks getOrdersModelLinksFromJson(str) =>
+    GetOrdersModelLinks.fromJson(str);
 
-String getOrdersModelMetaLinksItemToJson(GetOrdersModelMetaLinksItem data) => json.encode(data.toJson());
+String getOrdersModelLinksToJson(GetOrdersModelLinks data) =>
+    json.encode(data.toJson());
 
+GetOrdersModelDataItem getOrdersModelDataItemFromJson(str) =>
+    GetOrdersModelDataItem.fromJson(str);
 
-GetOrdersModelLinks getOrdersModelLinksFromJson(str) => GetOrdersModelLinks.fromJson(str);
-
-String getOrdersModelLinksToJson(GetOrdersModelLinks data) => json.encode(data.toJson());
-
-
-GetOrdersModelDataItem getOrdersModelDataItemFromJson(str) => GetOrdersModelDataItem.fromJson(str);
-
-String getOrdersModelDataItemToJson(GetOrdersModelDataItem data) => json.encode(data.toJson());
-
+String getOrdersModelDataItemToJson(GetOrdersModelDataItem data) =>
+    json.encode(data.toJson());
 
 class GetOrdersModel {
   List<GetOrdersModelDataItem>? data;
   GetOrdersModelLinks? links;
   GetOrdersModelMeta? meta;
 
-  GetOrdersModel({
-    this.data,
-    this.links,
-    this.meta,
-  });
+  GetOrdersModel({this.data, this.links, this.meta});
 
   factory GetOrdersModel.fromJson(Map<String, dynamic> json) {
     return GetOrdersModel(
-      data: json['data'] is List ? (json['data'] as List).whereType<Map>().map((item) => GetOrdersModelDataItem.fromJson(Map<String, dynamic>.from(item))).toList() : null,
-      links: json['links'] is Map ? GetOrdersModelLinks.fromJson(Map<String, dynamic>.from(json['links'] as Map)) : null,
-      meta: json['meta'] is Map ? GetOrdersModelMeta.fromJson(Map<String, dynamic>.from(json['meta'] as Map)) : null,
+      data: json['data'] is List
+          ? (json['data'] as List)
+                .whereType<Map>()
+                .map(
+                  (item) => GetOrdersModelDataItem.fromJson(
+                    Map<String, dynamic>.from(item),
+                  ),
+                )
+                .toList()
+          : null,
+      links: json['links'] is Map
+          ? GetOrdersModelLinks.fromJson(
+              Map<String, dynamic>.from(json['links'] as Map),
+            )
+          : null,
+      meta: json['meta'] is Map
+          ? GetOrdersModelMeta.fromJson(
+              Map<String, dynamic>.from(json['meta'] as Map),
+            )
+          : null,
     );
   }
 
@@ -149,7 +165,16 @@ class GetOrdersModelMeta {
       currentPage: _asInt(json['current_page']),
       from: _asInt(json['from']),
       lastPage: _asInt(json['last_page']),
-      links: json['links'] is List ? (json['links'] as List).whereType<Map>().map((item) => GetOrdersModelMetaLinksItem.fromJson(Map<String, dynamic>.from(item))).toList() : null,
+      links: json['links'] is List
+          ? (json['links'] as List)
+                .whereType<Map>()
+                .map(
+                  (item) => GetOrdersModelMetaLinksItem.fromJson(
+                    Map<String, dynamic>.from(item),
+                  ),
+                )
+                .toList()
+          : null,
       path: _asString(json['path']),
       perPage: _asInt(json['per_page']),
       to: _asInt(json['to']),
@@ -177,12 +202,7 @@ class GetOrdersModelMetaLinksItem {
   int? page;
   bool? active;
 
-  GetOrdersModelMetaLinksItem({
-    this.url,
-    this.label,
-    this.page,
-    this.active,
-  });
+  GetOrdersModelMetaLinksItem({this.url, this.label, this.page, this.active});
 
   factory GetOrdersModelMetaLinksItem.fromJson(Map<String, dynamic> json) {
     return GetOrdersModelMetaLinksItem(
@@ -194,12 +214,7 @@ class GetOrdersModelMetaLinksItem {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'url': url,
-      'label': label,
-      'page': page,
-      'active': active,
-    };
+    return {'url': url, 'label': label, 'page': page, 'active': active};
   }
 }
 
@@ -209,12 +224,7 @@ class GetOrdersModelLinks {
   dynamic prev;
   dynamic next;
 
-  GetOrdersModelLinks({
-    this.first,
-    this.last,
-    this.prev,
-    this.next,
-  });
+  GetOrdersModelLinks({this.first, this.last, this.prev, this.next});
 
   factory GetOrdersModelLinks.fromJson(Map<String, dynamic> json) {
     return GetOrdersModelLinks(
@@ -226,12 +236,7 @@ class GetOrdersModelLinks {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'first': first,
-      'last': last,
-      'prev': prev,
-      'next': next,
-    };
+    return {'first': first, 'last': last, 'prev': prev, 'next': next};
   }
 }
 
@@ -244,6 +249,8 @@ class GetOrdersModelDataItem {
   String? orderNumber;
   String? status;
   String? pickupMode;
+  String? fulfillmentType;
+  int? deliveryOrderId;
   dynamic pickupScheduledFor;
   String? readyForPickupAt;
   dynamic pickedUpAt;
@@ -271,6 +278,8 @@ class GetOrdersModelDataItem {
     this.orderNumber,
     this.status,
     this.pickupMode,
+    this.fulfillmentType,
+    this.deliveryOrderId,
     this.pickupScheduledFor,
     this.readyForPickupAt,
     this.pickedUpAt,
@@ -300,6 +309,8 @@ class GetOrdersModelDataItem {
       orderNumber: _asString(json['orderNumber']),
       status: _asString(json['status']),
       pickupMode: _asString(json['pickupMode']),
+      fulfillmentType: _asString(json['fulfillmentType']),
+      deliveryOrderId: _asInt(json['deliveryOrderId']),
       pickupScheduledFor: _asDynamic(json['pickupScheduledFor']),
       readyForPickupAt: _asString(json['readyForPickupAt']),
       pickedUpAt: _asDynamic(json['pickedUpAt']),
@@ -309,7 +320,9 @@ class GetOrdersModelDataItem {
       serviceFee: _asString(json['serviceFee']),
       totalAmount: _asString(json['totalAmount']),
       cancellationFeeAmount: _asDynamic(json['cancellationFeeAmount']),
-      cancellationPolicySnapshot: _asDynamic(json['cancellationPolicySnapshot']),
+      cancellationPolicySnapshot: _asDynamic(
+        json['cancellationPolicySnapshot'],
+      ),
       specialInstructions: _asString(json['specialInstructions']),
       cancelledAt: _asDynamic(json['cancelledAt']),
       cancellationReason: _asDynamic(json['cancellationReason']),
@@ -323,7 +336,9 @@ class GetOrdersModelDataItem {
       availableItems: json["items"] is! List
           ? []
           : (json["items"] as List)
-                .map<bool>((element) => _asBool(element["isAvailableInStock"]) ?? false)
+                .map<bool>(
+                  (element) => _asBool(element["isAvailableInStock"]) ?? false,
+                )
                 .toList(),
     );
   }
@@ -338,6 +353,8 @@ class GetOrdersModelDataItem {
       'orderNumber': orderNumber,
       'status': status,
       'pickupMode': pickupMode,
+      'fulfillmentType': fulfillmentType,
+      'deliveryOrderId': deliveryOrderId,
       'pickupScheduledFor': pickupScheduledFor,
       'readyForPickupAt': readyForPickupAt,
       'pickedUpAt': pickedUpAt,

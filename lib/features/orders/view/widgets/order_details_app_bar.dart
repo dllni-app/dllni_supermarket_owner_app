@@ -6,6 +6,7 @@ import 'package:toastification/toastification.dart';
 import '../../../../core/themes/app_colors.dart';
 import '../../../products/view/widgets/arrow_back_button.dart';
 import '../../domain/usecases/courier_handover_use_case.dart';
+import '../../data/models/supermarket_fulfillment.dart';
 import '../../domain/usecases/get_order_details_use_case.dart';
 import '../manager/bloc/orders_bloc.dart';
 import 'edit_preparation_estimate_dialog.dart';
@@ -19,19 +20,26 @@ class OrderDetailsAppBar extends StatelessWidget {
   final String title;
   final String productId;
 
-  OrderLifecycleAction _lifecycleActionForStatus(String? status) {
+  OrderLifecycleAction _lifecycleActionForStatus(
+    String? status,
+    bool isDelivery,
+  ) {
     return switch (status) {
       'accepted' => OrderLifecycleAction.markPreparing,
       'preparing' => OrderLifecycleAction.markReadyForPickup,
-      _ => OrderLifecycleAction.courierHandover,
+      _ =>
+        isDelivery
+            ? OrderLifecycleAction.courierHandover
+            : OrderLifecycleAction.customerPickupComplete,
     };
   }
 
-  String? _actionTitleForStatus(String? status) {
+  String? _actionTitleForStatus(String? status, bool isDelivery) {
     return switch (status) {
       'accepted' => 'بدء التحضير',
       'preparing' => 'جاهز للاستلام',
-      'ready_for_pickup' => 'تسليم للمندوب',
+      'ready_for_pickup' =>
+        isDelivery ? 'تأكيد التسليم للمندوب' : 'تأكيد استلام العميل',
       _ => null,
     };
   }
@@ -80,10 +88,10 @@ class OrderDetailsAppBar extends StatelessWidget {
             type: ToastificationType.success,
           );
           context.read<OrdersBloc>().add(
-                GetOrderDetailsEvent(
-                  params: GetOrderDetailsParams(orderId: orderId),
-                ),
-              );
+            GetOrderDetailsEvent(
+              params: GetOrderDetailsParams(orderId: orderId),
+            ),
+          );
         }
       },
       buildWhen: (previous, current) =>
@@ -94,13 +102,17 @@ class OrderDetailsAppBar extends StatelessWidget {
               current.courierHandoverLoadingOrderId,
       builder: (context, state) {
         final status = state.orderDetails?.data?.status;
-        final actionTitle = _actionTitleForStatus(status);
+        final isDelivery = isSupermarketDelivery(
+          state.orderDetails?.data?.fulfillmentType,
+          state.orderDetails?.data?.deliveryOrderId,
+        );
+        final actionTitle = _actionTitleForStatus(status, isDelivery);
         final canEditEstimate =
             orderId != null && _canEditPreparationEstimate(status);
-        final canChangeStatus = orderId != null &&
-            actionTitle != null &&
-            _canChangeStatus(status);
-        final isLoading = orderId != null &&
+        final canChangeStatus =
+            orderId != null && actionTitle != null && _canChangeStatus(status);
+        final isLoading =
+            orderId != null &&
             state.courierHandoverStatus == BlocStatus.loading &&
             state.courierHandoverLoadingOrderId == orderId;
 
@@ -169,18 +181,18 @@ class OrderDetailsAppBar extends StatelessWidget {
                       onPressed: isLoading
                           ? null
                           : () => showEditPreparationEstimateDialog(
-                                context: context,
-                                orderId: orderId!,
-                                onUpdated: () {
-                                  context.read<OrdersBloc>().add(
-                                        GetOrderDetailsEvent(
-                                          params: GetOrderDetailsParams(
-                                            orderId: orderId,
-                                          ),
-                                        ),
-                                      );
-                                },
-                              ),
+                              context: context,
+                              orderId: orderId!,
+                              onUpdated: () {
+                                context.read<OrdersBloc>().add(
+                                  GetOrderDetailsEvent(
+                                    params: GetOrderDetailsParams(
+                                      orderId: orderId,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.white,
                         side: const BorderSide(color: AppColors.white),
@@ -204,13 +216,16 @@ class OrderDetailsAppBar extends StatelessWidget {
                         ? null
                         : () {
                             context.read<OrdersBloc>().add(
-                                  CourierHandoverEvent(
-                                    params: CourierHandoverParams(
-                                      orderId: orderId!,
-                                      action: _lifecycleActionForStatus(status),
-                                    ),
+                              CourierHandoverEvent(
+                                params: CourierHandoverParams(
+                                  orderId: orderId!,
+                                  action: _lifecycleActionForStatus(
+                                    status,
+                                    isDelivery,
                                   ),
-                                );
+                                ),
+                              ),
+                            );
                           },
                   ),
               ],

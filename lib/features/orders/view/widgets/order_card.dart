@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/themes/app_colors.dart';
 import '../../../../core/widgets/app_buttons.dart';
 import '../../data/models/get_orders_model.dart';
+import '../../data/models/supermarket_fulfillment.dart';
 
 class OrderCard extends StatelessWidget {
   final OrderStatus status;
@@ -47,8 +48,14 @@ class OrderCard extends StatelessWidget {
     OrderStatus.pending => 'بانتظار قبول الطلب من المتجر',
     OrderStatus.accepted => 'تم قبول الطلب - بانتظار بدء التحضير',
     OrderStatus.preparing => 'يتم تجهيز المنتجات',
-    OrderStatus.readyForPickup => 'الطلب جاهز وبانتظار المندوب',
-    OrderStatus.pickedUp => 'استلم المندوب الطلب',
+    OrderStatus.readyForPickup =>
+      isSupermarketDelivery(order.fulfillmentType, order.deliveryOrderId)
+          ? 'الطلب جاهز وبانتظار المندوب'
+          : 'جاهز لاستلام العميل من المتجر',
+    OrderStatus.pickedUp =>
+      isSupermarketDelivery(order.fulfillmentType, order.deliveryOrderId)
+          ? 'استلم المندوب الطلب'
+          : 'استلم العميل الطلب',
     OrderStatus.completed => 'تم تسليم الطلب',
     OrderStatus.rejected => 'تم رفض الطلب',
     OrderStatus.cancelled => 'تم إلغاء الطلب',
