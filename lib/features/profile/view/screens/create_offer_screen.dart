@@ -384,7 +384,6 @@ class _CreateOfferScreenState extends State<CreateOfferScreen> {
     setState(() {
       selectedProducts.removeWhere((item) => item.id == product.id);
       if (selected) selectedProducts.add(product);
-      product.isSelected = selected;
     });
   }
 
