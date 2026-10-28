@@ -40,6 +40,40 @@ void main() {
       expect(params.requiresMultipartMethodOverride, isFalse);
     });
 
+
+    test('manual create sends base price without hidden discount', () {
+      final params = AddProductParams(
+        params: AddProductDetailsParams(
+          title: 'منتج جديد',
+          categoryId: 1,
+          masterProductId: 2,
+          mainImagePath: '/tmp/main.jpg',
+          quantity: 10,
+          lowStockQuantity: 2,
+          price: 1000,
+          discountedPrice: 800, // legacy/catalog value must not be resent
+        ),
+      );
+      final body = params.getBody();
+      expect(body['price'], 1000);
+      expect(body.containsKey('discountedPrice'), isFalse);
+    });
+
+    test('manual edit preserves existing discount without resending it', () {
+      final form = AddProductDetailsParams(
+        title: 'منتج حالي',
+        categoryId: 1,
+        masterProductId: 2,
+        price: 1500,
+        discountedPrice: 800, // existing discount not editable in this form
+        quantity: 10,
+        lowStockQuantity: 2,
+      );
+      final body = buildUpdateStoreProductBody(form).toMap();
+      expect(body['price'], 1500);
+      expect(body.containsKey('discountedPrice'), isFalse);
+    });
+
     test('create request includes additional image files', () {
       final params = AddProductParams(
         params: AddProductDetailsParams(

@@ -33,7 +33,6 @@ class AddProductParams with Params {
     if (params.description != null) "description": params.description,
     "sourceType": "manual",
     "price": params.price,
-    "discountedPrice": params.discountedPrice,
     "stockQuantity": params.quantity,
     "lowStockThreshold": params.lowStockQuantity,
     if (params.expiredAt != null) "expiresAt": params.expiredAt,
