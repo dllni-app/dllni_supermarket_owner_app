@@ -44,7 +44,6 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
   late final TextEditingController _quantityController;
   late final TextEditingController _lowStockController;
   late final TextEditingController _priceController;
-  late final TextEditingController _discountedController;
   late final TextEditingController _categoryController;
   late final TextEditingController _masterProductController;
 
@@ -71,9 +70,6 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
     );
     _priceController = TextEditingController(
       text: params.price == null ? '' : '${params.price}',
-    );
-    _discountedController = TextEditingController(
-      text: params.discountedPrice == null ? '' : '${params.discountedPrice}',
     );
     _categoryController = TextEditingController();
     _masterProductController = TextEditingController();
@@ -105,7 +101,6 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
     _quantityController.dispose();
     _lowStockController.dispose();
     _priceController.dispose();
-    _discountedController.dispose();
     _categoryController.dispose();
     _masterProductController.dispose();
     super.dispose();
@@ -117,8 +112,6 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
     params.quantity = int.tryParse(_quantityController.text.trim());
     params.lowStockQuantity = int.tryParse(_lowStockController.text.trim());
     params.price = num.tryParse(_priceController.text.trim());
-    final d = _discountedController.text.trim();
-    params.discountedPrice = d.isEmpty ? null : num.tryParse(d);
   }
 
   List<GetCategoriesModelDataItem> _categorySuggestions(
@@ -454,32 +447,6 @@ class _AddProductDetailsScreenState extends State<AddProductDetailsScreen> {
                               ),
                               keyboardType: TextInputType.number,
                             ),
-                            const SizedBox(height: 20),
-                            AppTextField(
-                              title: "السعر بعد الحسم",
-                              hintText: "0.00",
-                              isRequired: !isEdit,
-                              controller: _discountedController,
-                              onChanged: (value) {
-                                if (value.isEmpty) {
-                                  params.discountedPrice = null;
-                                  return;
-                                }
-                                if (num.tryParse(value) == null) return;
-                                params.discountedPrice = num.parse(value);
-                              },
-                              suffixIcon: const Padding(
-                                padding: EdgeInsets.only(top: 12),
-                                child: Text(
-                                  "ل.س",
-                                  style: TextStyle(
-                                    color: Color(0xFF9CA3AF),
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ),
-                              keyboardType: TextInputType.number,
-                            ),
                           ],
                         ),
                       ),
@@ -629,7 +596,6 @@ UpdateStoreProductBody buildUpdateStoreProductBody(
         ? null
         : params.description,
     price: params.price!,
-    discountedPrice: params.discountedPrice,
     stockQuantity: params.quantity!,
     lowStockThreshold: params.lowStockQuantity!,
     expiresAt: expiresAtStr,
@@ -730,17 +696,6 @@ bool validateProductFields(
       type: ToastificationType.error,
     );
     return false;
-  }
-
-  if (params.discountedPrice != null) {
-    if (params.discountedPrice! >= params.price!) {
-      AppToast.showToast(
-        context: context,
-        message: "سعر الخصم يجب أن يكون أقل من السعر الأساسي",
-        type: ToastificationType.error,
-      );
-      return false;
-    }
   }
 
   return true;
