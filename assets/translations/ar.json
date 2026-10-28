@@ -29,7 +29,7 @@
     "success": "نجاح",
     "badRequestError": "طلب غير صحيح",
     "noContent": "لا يوجد محتوى",
-    "forbiddenError": "ممنوع",
+    "forbiddenError": "ليس لديك صلاحية للوصول إلى هذا القسم. يرجى التواصل مع مدير المتجر لمنحك الصلاحية اللازمة.",
     "unauthorizedError": "غير مسجل يرجى التسجيل أولا",
     "notFoundError": "الحساب غير موجود، تحقق منه أو أنشئ حساباً",
     "conflictError": "تعارض",

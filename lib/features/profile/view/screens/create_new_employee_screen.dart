@@ -771,12 +771,19 @@ class _PermissionChooser extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final fallbackDetails = getPermissionDetails(name);
-    final resolvedTitle = title?.trim().isNotEmpty == true
-        ? title!.trim()
-        : fallbackDetails.title;
-    final resolvedDescription = description?.trim().isNotEmpty == true
-        ? description!.trim()
-        : fallbackDetails.description;
+    // Known permission codes always display our localized Arabic labels,
+    // never technical slugs returned by the server.
+    final isKnownPermission = fallbackDetails.title != 'صلاحية إضافية';
+    bool containsArabic(String? value) => value != null &&
+        value.runes.any((code) => code >= 0x0600 && code <= 0x06FF);
+    final resolvedTitle = isKnownPermission
+        ? fallbackDetails.title
+        : (containsArabic(title) ? title!.trim() : fallbackDetails.title);
+    final resolvedDescription = isKnownPermission
+        ? fallbackDetails.description
+        : (containsArabic(description)
+            ? description!.trim()
+            : fallbackDetails.description);
 
     return Container(
       padding: EdgeInsets.all(12),
@@ -1255,8 +1262,8 @@ PermissionDetails getPermissionDetails(String permission) {
 
     default:
       return PermissionDetails(
-        permission,
-        permission,
+        'صلاحية إضافية',
+        'صلاحية مخصصة من إدارة المتجر',
         FontAwesomeIcons.question.data,
         Colors.grey,
       );
