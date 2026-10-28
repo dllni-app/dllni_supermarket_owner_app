@@ -68,7 +68,7 @@ class AppRouter {
                 const Icon(Icons.lock_outline, size: 48),
                 const SizedBox(height: 16),
                 const Text(
-                  'ليس لديك صلاحية للوصول إلى هذه الصفحة.',
+                  'ليس لديك صلاحية للوصول إلى هذه الصفحة. يرجى التواصل مع مدير المتجر لمنحك الصلاحية اللازمة.',
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 24),
